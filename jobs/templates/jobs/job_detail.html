@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>{{ job.title }}</h2>
+<p><strong>Location:</strong> {{ job.location }}</p>
+<p><strong>Type:</strong> {{ job.get_job_type_display }}</p>
+<p><strong>Salary:</strong> {{ job.salary }}</p>
+<h3>Description</h3>
+<p>{{ job.description|linebreaks }}</p>
+<h3>Requirements</h3>
+<p>{{ job.requirements|linebreaks }}</p>
+
+{% if user.is_authenticated and user.user_type == 'APP' %}
+  <form method="post" action="/jobs/{{ job.id }}/apply/" enctype="multipart/form-data">
+    {% csrf_token %}
+    <label>Cover letter</label>
+    <textarea name="cover_letter"></textarea>
+    <label>Resume</label>
+    <input type="file" name="resume" />
+    <button type="submit">Apply</button>
+  </form>
+{% endif %}
+{% endblock %}

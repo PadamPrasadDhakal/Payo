@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Welcome to Payo</h1>
+<p>Find your next opportunity or post a job.</p>
+<p>
+    <a href="/jobs/">Browse Jobs</a>
+    {% if user.is_authenticated and user.user_type == 'ORG' %}
+        | <a href="/jobs/post/">Post a Job</a>
+    {% endif %}
+</p>
+{% endblock %}
