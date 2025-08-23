@@ -11,8 +11,15 @@ class UserLoginView(LoginView):
     authentication_form = LoginForm
 
 
-class UserLogoutView(LogoutView):
-    next_page = "home"
+
+from django.contrib.auth import logout
+from django.views import View
+from django.http import HttpResponseRedirect
+
+class UserLogoutView(View):
+    def get(self, request, *args, **kwargs):
+        logout(request)
+        return render(request, "logout.html")
 
 
 def signup_select(request):

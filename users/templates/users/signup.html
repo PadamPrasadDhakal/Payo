@@ -1,7 +1,13 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>Choose account type</h2>
-<ul>
-  <li><a href="/users/signup/applicant/">Sign up as Job Applier</a></li>
-  <li><a href="/users/signup/organization/">Sign up as Organization</a></li>
+<div class="grid md:grid-cols-2 gap-6">
+  <a href="/users/signup/applicant/" class="group block bg-white rounded-xl shadow p-8 hover:shadow-md hover:-translate-y-0.5 transition">
+    <h3 class="text-xl font-bold mb-2 group-hover:text-primary">I’m a Job Seeker</h3>
+    <p class="text-gray-600">Create a profile, upload your resume, and apply with a swipe.</p>
+  </a>
+  <a href="/users/signup/organization/" class="group block bg-white rounded-xl shadow p-8 hover:shadow-md hover:-translate-y-0.5 transition">
+    <h3 class="text-xl font-bold mb-2 group-hover:text-primary">I’m an Organization</h3>
+    <p class="text-gray-600">Post jobs, review candidates, and hire faster.</p>
+  </a>
+</div>
 {% endblock %}
