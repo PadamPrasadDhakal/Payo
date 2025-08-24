@@ -41,16 +41,20 @@ class JobCreateView(LoginRequiredMixin, CreateView):
 @login_required
 def apply_job(request, pk):
     job = get_object_or_404(Job, pk=pk)
+    error = None
     if request.method == "POST":
-        cover_letter = request.POST.get("cover_letter", "")
+        cover_letter = request.POST.get("cover_letter", "").strip()
         resume = request.FILES.get("resume")
-        Application.objects.get_or_create(
-            job=job,
-            applicant=request.user,
-            defaults={"cover_letter": cover_letter, "resume": resume},
-        )
-        return redirect("jobs:detail", pk=pk)
-    return render(request, "jobs/apply_job.html", {"job": job})
+        if not cover_letter or not resume:
+            error = "All fields are required."
+        else:
+            Application.objects.get_or_create(
+                job=job,
+                applicant=request.user,
+                defaults={"cover_letter": cover_letter, "resume": resume},
+            )
+            return redirect("jobs:detail", pk=pk)
+    return render(request, "jobs/apply_job.html", {"job": job, "error": error})
 
 from django.shortcuts import render
 
