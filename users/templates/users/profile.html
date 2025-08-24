@@ -25,6 +25,7 @@
       <p><span class="text-gray-500">Speciality:</span> {{ user.speciality|default:'—' }}</p>
       <p><span class="text-gray-500">Hobby:</span> {{ user.hobby|default:'—' }}</p>
       <p><span class="text-gray-500">Experience:</span> {{ user.experience|default:'—' }}</p>
+      <a href="{% url 'users:profile_edit' %}" class="inline-block mt-4 px-4 py-2 rounded-md bg-secondary text-white hover:bg-green-600 transition">Edit Profile</a>
     {% endif %}
   </div>
 </div>

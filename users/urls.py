@@ -6,6 +6,7 @@ from .views import (
     signup_applicant,
     signup_organization,
     profile,
+    profile_edit,
 )
 
 
@@ -16,6 +17,7 @@ urlpatterns = [
     path("signup/applicant/", signup_applicant, name="signup_applicant"),
     path("signup/organization/", signup_organization, name="signup_organization"),
     path("profile/", profile, name="profile"),
+    path("profile/edit/", profile_edit, name="profile_edit"),
 ]
 
 
