@@ -31,3 +31,8 @@ def organizations(request):
     # Example: pass an empty list or your actual organizations queryset
     organizations = []
     return render(request, "users/organizations.html", {"organizations": organizations}) 
+
+def internships(request):
+    # Example: pass an empty list or your actual organizations queryset
+    internships = []
+    return render(request, "users/internships.html", {"internships": internships}) 
