@@ -3,9 +3,9 @@
 <section class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary to-purple-500 text-white p-10 shadow-lg">
   <div class="relative z-10">
     <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">Swipe. Match. Get Hired.</h1>
-    <p class="text-white/90 text-lg md:text-xl max-w-2xl mb-8">Payo makes job search fast and fun. Organizations post jobs. Applicants swipe and apply in seconds.</p>
+    <p class="text-white/90 text-lg md:text-xl max-w-2xl mb-8">JobsHaru makes job search fast and fun. Organizations post jobs. Applicants swipe and apply in seconds.</p>
     <div class="flex flex-wrap gap-3">
-      <a class="px-5 py-3 rounded-lg bg-white text-primary font-semibold shadow hover:shadow-md hover:-translate-y-0.5 transition" href="/jobs/">Browse Jobs</a>
+      <a class="px-5 py-3 rounded-lg bg-white text-primary font-semibold shadow hover:shadow-md hover:-translate-y-0.5 transition" href="/users/dash_jobs/">Browse Jobs</a>
       {% if user.is_authenticated and user.user_type == 'ORG' %}
         <a class="px-5 py-3 rounded-lg bg-black/20 backdrop-blur font-semibold hover:bg-black/30 transition" href="/jobs/post/">Post a Job</a>
       {% else %}
