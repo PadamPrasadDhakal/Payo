@@ -36,3 +36,15 @@ def internships(request):
     # Example: pass an empty list or your actual organizations queryset
     internships = []
     return render(request, "users/internships.html", {"internships": internships}) 
+
+def assessments(request):
+    # Example: pass an empty list or your actual assessments queryset
+    assessments = []
+    return render(request, "users/assessments.html", {"assessments": assessments}) 
+def profile(request):
+    # Example: pass an empty list or your actual assessments queryset
+    profile = []
+    return render(request, "users/profile.html", {"profile": profile}) 
+# def logouts(request):
+#     logouts = []
+#     return render(request, "users/logout.html", {"logouts": logouts})
