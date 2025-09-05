@@ -5,6 +5,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{% block title %}JobsHaru{% endblock %}</title>
+     
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="#">
 
     <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -100,7 +103,7 @@
                         Help and Support
                     </a>
                     
-                    <form method="post" action="/base.html/">
+                    <form method="post" action="logout/">
                         {% csrf_token %}
                         <button type="submit" class="w-full text-left flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50">
                             Logout

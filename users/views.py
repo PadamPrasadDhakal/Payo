@@ -35,7 +35,7 @@ class UserLogoutView(View):
 
 
 def signup_select(request):
-    return render(request, "users/signup.html")
+    return render(request, "users/signup2.html")
 
 
 def signup_applicant(request):

@@ -18,6 +18,10 @@ urlpatterns = [
     path('logout/',logout_view,name='logout'),
     path('organizations/', organizations, name='organizations'),
     path('internships/',internships, name='internships'),
+    path('assessments/',assessments, name='assessments'),
+    path('profile/',profile, name='profile'),
+    # path('logouts/',logouts,name='logouts'),
+    
 # path('Organizations/', organizations),  # optional, not recommended
 ]
 
