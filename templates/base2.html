@@ -56,7 +56,51 @@
                         <a href="/plans/" class="px-3 py-1.5 rounded-lg bg-primary text-white hover:bg-gray-600 transition font-medium shadow-sm">
                             Plans
                         </a>
-                        <a href="/logout/" class="px-3 py-1.5 rounded-lg bg-yellow-500 border border-gray-300 hover:bg-gray-100 transition font-medium">Logout</a>
+                        <a href="/" class="px-3 py-1.5 rounded-lg bg-yellow-500 border border-gray-300 hover:bg-gray-100 transition font-medium gap-49">Logout</a>
+    <!-- Settings Dropdown -->
+    <div class="ml-50px">
+        <details class="relative">
+            <summary class="list-none cursor-pointer flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition">
+                <!-- Cog icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-700" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
+                        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.58-.91 3.395.905 2.485 2.485a1.724 1.724 0 0 0 1.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 0 0-1.066 2.573c.91 1.58-.905 3.395-2.485 2.485a1.724 1.724 0 0 0-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 0 0-2.573-1.066c-1.58.91-3.395-.905-2.485-2.485a1.724 1.724 0 0 0-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 0 0 1.066-2.573c-.91-1.58.905-3.395 2.485-2.485.98.565 2.205.21 2.573-1.066z" />
+                    <circle cx="12" cy="12" r="3.25" stroke-width="1.75" />
+                </svg>
+            </summary>
+
+            <div class="absolute right-0 mt-2 w-56 rounded-xl border border-gray-200 bg-white shadow-lg overflow-hidden z-50">
+                <div class="py-1">
+                    <a href="/profile/" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                        View profile
+                    </a>
+                    <a href="/profile/" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                        Edit profile
+                    </a>
+                    <a href="#home" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                        Change password
+                    </a>
+                    <a href="#home" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                        Pending mails
+                    </a>
+                    <a href="#home" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                        Accepted mails
+                    </a>
+                    <a href="#home" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                        Help and Support
+                    </a>
+                    
+                    <form method="post" action="/base.html/">
+                        {% csrf_token %}
+                        <button type="submit" class="w-full text-left flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                            Logout
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </details>
+    </div>
+</div>
                     {% else %}
                         <a href="/users/login/" class="px-3 py-1.5 rounded-lg border border-gray-300 hover:bg-gray-100 transition font-medium">
                             Login
