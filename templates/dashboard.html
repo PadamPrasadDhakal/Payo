@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary to-purple-500 text-white p-10 shadow-lg">
+  <div class="relative z-10">
+    <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">Welcome back, {{ user.get_full_name|default:user.username }}!</h1>
+    <p class="text-white/90 text-lg md:text-xl max-w-2xl mb-8">Here’s your dashboard. You can browse jobs, manage your profile, or post a job if you’re an organization.</p>
+    <div class="flex flex-wrap gap-3">
+      <a class="px-5 py-3 rounded-lg bg-white text-primary font-semibold shadow hover:shadow-md hover:-translate-y-0.5 transition" href="/jobs/">Browse Jobs</a>
+      {% if user.user_type == 'ORG' %}
+        <a class="px-5 py-3 rounded-lg bg-black/20 backdrop-blur font-semibold hover:bg-black/30 transition" href="/jobs/post/">Post a Job</a>
+      {% else %}
+        <a class="px-5 py-3 rounded-lg bg-black/20 backdrop-blur font-semibold hover:bg-black/30 transition" href="/users/profile/">My Profile</a>
+      {% endif %}
+    </div>
+  </div>
+  <div class="absolute -right-10 -bottom-10 w-72 h-72 bg-white/20 rounded-full blur-2xl animate-pulse"></div>
+  <div class="absolute -left-10 -top-10 w-72 h-72 bg-black/10 rounded-full blur-2xl animate-ping"></div>
+</section>
+
+<section class="grid md:grid-cols-2 gap-6 mt-10">
+  <div class="p-6 bg-white rounded-xl shadow hover:shadow-md transition">
+    <h3 class="font-bold text-lg mb-2">Your Activity</h3>
+    <ul class="text-gray-600 list-disc ml-5">
+      <li>View and manage your applications</li>
+      <li>Update your profile information</li>
+      <li>See recommended jobs</li>
+    </ul>
+  </div>
+  <div class="p-6 bg-white rounded-xl shadow hover:shadow-md transition">
+    <h3 class="font-bold text-lg mb-2">Quick Links</h3>
+    <ul class="text-gray-600 list-disc ml-5">
+      <li><a class="text-primary hover:underline" href="/jobs/">Browse Jobs</a></li>
+      {% if user.user_type == 'ORG' %}
+        <li><a class="text-primary hover:underline" href="/jobs/post/">Post a Job</a></li>
+      {% endif %}
+      <li><a class="text-primary hover:underline" href="/users/profile/">My Profile</a></li>
+    </ul>
+  </div>
+</section>
+{% endblock %}

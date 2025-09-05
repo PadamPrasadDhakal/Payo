@@ -1,0 +1,20 @@
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+
+from jobs.models import Job, Application
+
+def home_view(request):
+    if request.user.is_authenticated:
+        if hasattr(request.user, 'user_type') and request.user.user_type == 'ORG':
+            # Organization dashboard context
+            jobs = Job.objects.filter(posted_by=request.user)
+            job_count = jobs.count()
+            applications_by_job = {job: job.applications.count() for job in jobs}
+            return render(request, "org_dashboard.html", {
+                "job_count": job_count,
+                "jobs": jobs,
+                "applications_by_job": applications_by_job,
+            })
+        else:
+            return render(request, "dashboard.html")
+    return render(request, "home.html")
