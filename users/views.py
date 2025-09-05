@@ -60,12 +60,12 @@ def profile(request):
 def profile_edit(request):
     user = request.user
     if user.user_type != user.UserType.APPLICANT:
-        return redirect("profile")
+        return redirect("users:profile")
     if request.method == "POST":
         form = ApplicantProfileEditForm(request.POST, request.FILES, instance=user)
         if form.is_valid():
             form.save()
-            return redirect("profile")
+            return redirect("users:profile")
     else:
         form = ApplicantProfileEditForm(instance=user)
     return render(request, "users/profile_edit.html", {"form": form})

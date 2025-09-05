@@ -30,6 +30,7 @@ class ApplicantSignUpForm(UserCreationForm):
     education_cgpa_scale = forms.ChoiceField(choices=[("4", "4"), ("10", "10")], required=False)
     speciality = forms.CharField(required=False)
     hobby = forms.CharField(required=False)
+    internship = forms.CharField(required=False)
 
     class Meta:
         model = User
@@ -47,6 +48,7 @@ class ApplicantSignUpForm(UserCreationForm):
             "education_cgpa_scale",
             "speciality",
             "hobby",
+            "internship",
             "experience",
             "resume",
         )
@@ -62,6 +64,7 @@ class ApplicantSignUpForm(UserCreationForm):
         user.education_cgpa_scale = self.cleaned_data.get("education_cgpa_scale")
         user.speciality = self.cleaned_data.get("speciality")
         user.hobby = self.cleaned_data.get("hobby")
+        user.internship = self.cleaned_data.get("internship")
         if commit:
             user.save()
         return user
@@ -82,6 +85,7 @@ class ApplicantSignUpForm(UserCreationForm):
         self.fields["education_cgpa"].widget.attrs.update({"placeholder": "CGPA"})
         self.fields["speciality"].widget.attrs.update({"placeholder": "Speciality (optional)"})
         self.fields["hobby"].widget.attrs.update({"placeholder": "Hobby (optional)"})
+        self.fields["internship"].widget.attrs.update({"placeholder": "Internship experience (optional)"})
 
 
 class OrganizationSignUpForm(UserCreationForm):

@@ -15,7 +15,6 @@ class UserAdmin(DjangoUserAdmin):
                     "organization_website",
                     "resume",
                     "skills",
-                    "education",
                     "experience",
                 )
             },

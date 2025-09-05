@@ -1,5 +1,7 @@
+from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+# Create your models here.
 
 
 class User(AbstractUser):
@@ -17,6 +19,7 @@ class User(AbstractUser):
     # Organization-specific fields
     organization_name = models.CharField(max_length=255, blank=True)
     organization_website = models.URLField(blank=True)
+    organization_photo = models.ImageField(upload_to="organization_photos/", blank=True, null=True)
 
     # Applicant-specific fields
     profile_photo = models.ImageField(upload_to="profile_photos/", blank=True, null=True)
@@ -30,6 +33,7 @@ class User(AbstractUser):
     speciality = models.CharField(max_length=255, blank=True)
     hobby = models.CharField(max_length=255, blank=True)
     experience = models.TextField(blank=True)
+    internship = models.TextField(blank=True)
 
     def is_organization(self) -> bool:
         return self.user_type == self.UserType.ORGANIZATION
@@ -37,6 +41,4 @@ class User(AbstractUser):
     def is_applicant(self) -> bool:
         return self.user_type == self.UserType.APPLICANT
 
-from django.db import models
 
-# Create your models here.

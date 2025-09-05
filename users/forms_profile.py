@@ -21,6 +21,7 @@ class ApplicantProfileEditForm(forms.ModelForm):
     education_cgpa_scale = forms.ChoiceField(choices=[("4", "4"), ("10", "10")], required=False)
     speciality = forms.CharField(required=False)
     hobby = forms.CharField(required=False)
+    internship = forms.CharField(required=False)
 
     class Meta:
         model = User
@@ -34,6 +35,7 @@ class ApplicantProfileEditForm(forms.ModelForm):
             "education_cgpa_scale",
             "speciality",
             "hobby",
+            "internship",
             "experience",
             "resume",
         ]
@@ -50,3 +52,4 @@ class ApplicantProfileEditForm(forms.ModelForm):
         self.fields["education_cgpa"].widget.attrs.update({"placeholder": "CGPA"})
         self.fields["speciality"].widget.attrs.update({"placeholder": "Speciality (optional)"})
         self.fields["hobby"].widget.attrs.update({"placeholder": "Hobby (optional)"})
+        self.fields["internship"].widget.attrs.update({"placeholder": "Internship experience (optional)"})
