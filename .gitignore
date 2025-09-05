@@ -1,0 +1,10 @@
+virt/
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# VSCode / PyCharm
+.vscode/
+db.sqlite3
