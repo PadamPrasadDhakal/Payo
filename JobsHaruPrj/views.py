@@ -1,6 +1,8 @@
 from django.shortcuts import render
+from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
-
+from django.contrib.auth import logout
+from django.shortcuts import redirect
 from jobs.models import Job, Application
 
 def home_view(request):
@@ -18,3 +20,7 @@ def home_view(request):
         else:
             return render(request, "dashboard.html")
     return render(request, "home.html")
+
+def logout_view(request):
+    logout(request)
+    return redirect('home')

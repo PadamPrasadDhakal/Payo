@@ -3,7 +3,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
-from .views import home_view
+from .views import *
 from django.views.generic import TemplateView
 
 
@@ -14,6 +14,7 @@ urlpatterns = [
     path("contact/", TemplateView.as_view(template_name="contact.html"), name="contact"),
     path("users/", include(("users.urls", "users"), namespace="users")),
     path("jobs/", include(("jobs.urls", "jobs"), namespace="jobs")),
+    path('logout/',logout_view,name='logout'),
 ]
 
 if settings.DEBUG:
