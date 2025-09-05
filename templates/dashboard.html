@@ -1,40 +1,88 @@
-{% extends "base.html" %}
-{% block content %}
-<section class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary to-purple-500 text-white p-10 shadow-lg">
-  <div class="relative z-10">
-    <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">Welcome back, {{ user.get_full_name|default:user.username }}!</h1>
-    <p class="text-white/90 text-lg md:text-xl max-w-2xl mb-8">Here’s your dashboard. You can browse jobs, manage your profile, or post a job if you’re an organization.</p>
-    <div class="flex flex-wrap gap-3">
-      <a class="px-5 py-3 rounded-lg bg-white text-primary font-semibold shadow hover:shadow-md hover:-translate-y-0.5 transition" href="/jobs/">Browse Jobs</a>
-      {% if user.user_type == 'ORG' %}
-        <a class="px-5 py-3 rounded-lg bg-black/20 backdrop-blur font-semibold hover:bg-black/30 transition" href="/jobs/post/">Post a Job</a>
-      {% else %}
-        <a class="px-5 py-3 rounded-lg bg-black/20 backdrop-blur font-semibold hover:bg-black/30 transition" href="/users/profile/">My Profile</a>
-      {% endif %}
-    </div>
-  </div>
-  <div class="absolute -right-10 -bottom-10 w-72 h-72 bg-white/20 rounded-full blur-2xl animate-pulse"></div>
-  <div class="absolute -left-10 -top-10 w-72 h-72 bg-black/10 rounded-full blur-2xl animate-ping"></div>
-</section>
+{% extends "base2.html" %}
+{% load static %}
 
-<section class="grid md:grid-cols-2 gap-6 mt-10">
-  <div class="p-6 bg-white rounded-xl shadow hover:shadow-md transition">
-    <h3 class="font-bold text-lg mb-2">Your Activity</h3>
-    <ul class="text-gray-600 list-disc ml-5">
-      <li>View and manage your applications</li>
-      <li>Update your profile information</li>
-      <li>See recommended jobs</li>
-    </ul>
-  </div>
-  <div class="p-6 bg-white rounded-xl shadow hover:shadow-md transition">
-    <h3 class="font-bold text-lg mb-2">Quick Links</h3>
-    <ul class="text-gray-600 list-disc ml-5">
-      <li><a class="text-primary hover:underline" href="/jobs/">Browse Jobs</a></li>
-      {% if user.user_type == 'ORG' %}
-        <li><a class="text-primary hover:underline" href="/jobs/post/">Post a Job</a></li>
-      {% endif %}
-      <li><a class="text-primary hover:underline" href="/users/profile/">My Profile</a></li>
-    </ul>
-  </div>
-</section>
+{% block title %}Dashboard - JobsHaru{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <!-- Welcome Section -->
+    <div class="bg-gradient-to-r from-primary to-purple-600 rounded-2xl p-8 text-white mb-8">
+        <h1 class="text-3xl font-bold mb-2">Welcome back, {{ user.username }}!</h1>
+        <p class="text-purple-100">Ready to find your next opportunity?</p>
+    </div>
+
+    <!-- Quick Actions Grid -->
+    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <a href="/users/dash_jobs/" class="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow border border-gray-100">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="font-semibold text-gray-800">Browse Jobs</h3>
+                    <p class="text-sm text-gray-600 mt-1">Find your dream job</p>
+                </div>
+                <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                    <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2V6"></path>
+                    </svg>
+                </div>
+            </div>
+        </a>
+
+        <a href="/internships/" class="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow border border-gray-100">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="font-semibold text-gray-800">Internships</h3>
+                    <p class="text-sm text-gray-600 mt-1">Gain experience</p>
+                </div>
+                <div class="w-12 h-12 bg-secondary/10 rounded-lg flex items-center justify-center">
+                    <svg class="w-6 h-6 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                    </svg>
+                </div>
+            </div>
+        </a>
+
+        <a href="/users/profile/" class="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow border border-gray-100">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="font-semibold text-gray-800">View Profile</h3>
+                    <p class="text-sm text-gray-600 mt-1">Manage your profile</p>
+                </div>
+                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                </div>
+            </div>
+        </a>
+
+        <a href="/plans/" class="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow border border-gray-100">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="font-semibold text-gray-800">Plans</h3>
+                    <p class="text-sm text-gray-600 mt-1">Upgrade your account</p>
+                </div>
+                <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                    <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                    </svg>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <!-- Recent Activity Section -->
+    <div class="bg-white rounded-xl shadow-md border border-gray-100 p-6">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">Recent Activity</h2>
+        <div class="space-y-4">
+            <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                <div class="w-2 h-2 bg-primary rounded-full"></div>
+                <p class="text-gray-700">Welcome to JobsHaru! Start by updating your profile.</p>
+            </div>
+            <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                <div class="w-2 h-2 bg-secondary rounded-full"></div>
+                <p class="text-gray-700">Explore available jobs and internships.</p>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

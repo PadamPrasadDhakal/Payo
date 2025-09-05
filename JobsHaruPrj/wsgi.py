@@ -2,12 +2,12 @@ import os
 from django.core.wsgi import get_wsgi_application
 
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "payoPRJ.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "jobsharuPRJ.settings")
 
 application = get_wsgi_application()
 
 """
-WSGI config for payoPrj project.
+WSGI config for jobsharuPrj project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
@@ -19,6 +19,6 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'payoPrj.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'jobsharuPrj.settings')
 
 application = get_wsgi_application()
