@@ -1,3 +1,23 @@
+from django.http import JsonResponse
+from jobs.models import Job, Application
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
+
+@csrf_exempt
+@login_required
+def apply_job(request):
+    if request.method == "POST":
+        import json
+        data = json.loads(request.body)
+        job_id = data.get("job_id")
+        job = Job.objects.filter(id=job_id).first()
+        if job:
+            Application.objects.get_or_create(job=job, applicant=request.user)
+            # Count applications for this user
+            count = Application.objects.filter(applicant=request.user).count()
+            return JsonResponse({"success": True, "applied_count": count})
+        return JsonResponse({"success": False, "error": "Job not found"}, status=404)
+    return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
 from django.contrib.auth import login
 from django.contrib.auth.views import LoginView, LogoutView
 from django.shortcuts import render, redirect
@@ -82,5 +102,10 @@ def profile_edit(request):
     return render(request, "users/profile_edit.html", {"form": form})
 
 from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from jobs.models import Job
+
+@login_required
 def dash_jobs(request):
-    return render(request, "users/dash_jobs.html")
+    jobs = Job.objects.all()
+    return render(request, "users/dash_jobs.html", {"jobs": jobs})

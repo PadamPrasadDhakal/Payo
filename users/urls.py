@@ -9,6 +9,7 @@ from .views import (
     profile,
     profile_edit,
     dash_jobs,
+    apply_job,
 )
 
 
@@ -22,6 +23,11 @@ urlpatterns = [
     path("profile/", profile, name="profile"),
     path("profile/edit/", profile_edit, name="profile_edit"),
     path("dash_jobs/", dash_jobs, name="dash_jobs"),
+<<<<<<< HEAD
     ]
+=======
+    path("apply_job/", apply_job, name="apply_job"),
+]
+>>>>>>> c974fdc63c3f842a8b277651ad3a4b10a308003c
 
 
