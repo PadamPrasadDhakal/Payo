@@ -1,0 +1,80 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}JobsHaru{% endblock %}</title>
+
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: '#6d28d9',
+              secondary: '#22c55e',
+              tertiary: '#ffff00',
+            }
+          }
+        }
+      }
+    </script>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-white min-h-screen text-gray-800">
+
+    <!-- Navbar -->
+    <nav class="sticky top-0 z-50 bg-white/80 backdrop-blur-xl shadow-md">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex items-center justify-between h-16">
+                
+                <!-- Left Logo -->
+                <a href="/" class="text-xl font-extrabold tracking-tight text-primary hover:scale-105 transition-transform">
+                    JobsHaru
+                </a>
+                
+                <!-- Middle Menu -->
+                <div class="hidden md:flex items-center gap-8">
+                    <a href="/users/dash_jobs/" class="text-gray-700 hover:text-primary transition font-medium relative text-gray-700 hover:text-blue-600 font-medium transition-colors duration-300
+                 after:content-[''] after:absolute after:left-1/2 after:-bottom-1 after:w-0 after:h-[2px] 
+                 after:bg-blue-600 after:transition-all after:duration-300 after:ease-out 
+                 hover:after:w-full hover:after:left-0">Jobs</a>
+                    <a href="/internships/" class="text-gray-700 hover:text-primary transition font-medium relative text-gray-700 hover:text-blue-600 font-medium transition-colors duration-300
+                 after:content-[''] after:absolute after:left-1/2 after:-bottom-1 after:w-0 after:h-[2px] 
+                 after:bg-blue-600 after:transition-all after:duration-300 after:ease-out 
+                 hover:after:w-full hover:after:left-0">Internships</a>
+                </div>
+                
+                <!-- Right Actions -->
+                <div class="flex items-center gap-3">
+                    {% if user.is_authenticated %}
+                        <a href="/users/profile/" class="px-3 py-1.5 rounded-lg bg-primary text-white hover:bg-gray-700 transition font-medium shadow-sm">
+                            View Profile
+                        </a>
+                        <a href="/plans/" class="px-3 py-1.5 rounded-lg bg-primary text-white hover:bg-gray-600 transition font-medium shadow-sm">
+                            Plans
+                        </a>
+                        <a href="/logout/" class="px-3 py-1.5 rounded-lg bg-yellow-500 border border-gray-300 hover:bg-gray-100 transition font-medium">Logout</a>
+                    {% else %}
+                        <a href="/users/login/" class="px-3 py-1.5 rounded-lg border border-gray-300 hover:bg-gray-100 transition font-medium">
+                            Login
+                        </a>
+                        <a href="/users/signup/" class="px-3 py-1.5 rounded-lg bg-secondary text-white hover:bg-green-600 transition font-medium">
+                            Signup
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        {% block content %}{% endblock %}
+    </main>
+
+    <script src="{% static 'js/script.js' %}"></script>
+</body>
+</html>
