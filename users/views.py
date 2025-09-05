@@ -84,3 +84,5 @@ def profile_edit(request):
 from django.shortcuts import render
 def dash_jobs(request):
     return render(request, "users/dash_jobs.html")
+def organizations(request):
+    return render(request,"users/organizations.html")

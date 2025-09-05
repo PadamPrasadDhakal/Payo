@@ -4,6 +4,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 from .views import *
+# from .views import organizations
 from django.views.generic import TemplateView
 
 
@@ -15,6 +16,8 @@ urlpatterns = [
     path("users/", include(("users.urls", "users"), namespace="users")),
     path("jobs/", include(("jobs.urls", "jobs"), namespace="jobs")),
     path('logout/',logout_view,name='logout'),
+    path('organizations/', organizations, name='organizations'),
+# path('Organizations/', organizations),  # optional, not recommended
 ]
 
 if settings.DEBUG:

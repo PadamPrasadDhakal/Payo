@@ -1,0 +1,104 @@
+{% extends "base2.html" %}
+{% load static %}
+{% block title %}Organizations | JobsHaru{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-6 py-12">
+    <!-- Heading -->
+    <h1 class="text-3xl md:text-4xl font-extrabold text-center text-primary mb-12">
+        Follow Organizations You Love
+    </h1>
+
+    <!-- Organization Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-10 justify-items-center">
+        
+        <!-- Pathao -->
+        <div class="flex flex-col items-center text-center p-6 rounded-xl shadow-md bg-white hover:shadow-xl transition-shadow duration-300">
+            <div class="w-40 h-40 rounded-full overflow-hidden shadow-lg transform transition duration-300 ease-out hover:scale-110 hover:shadow-2xl">
+                <img src="{% static 'images/pathao.png' %}" alt="Pathao" class="w-full h-full object-cover">
+            </div>
+            <h3 class="mt-5 text-lg font-semibold text-gray-800">Pathao</h3>
+            <button class="follow-btn mt-4 px-6 py-2 rounded-full bg-secondary text-white hover:bg-green-600 transition-colors duration-300 text-sm font-medium"
+                    data-following="false">
+                Follow
+            </button>
+        </div>
+
+        <!-- Google -->
+        <div class="flex flex-col items-center text-center p-6 rounded-xl shadow-md bg-white hover:shadow-xl transition-shadow duration-300">
+            <div class="w-40 h-40 rounded-full overflow-hidden shadow-lg transform transition duration-300 ease-out hover:scale-110 hover:shadow-2xl">
+                <img src="{% static 'images/google1.png' %}" alt="Google" class="w-full h-full object-cover">
+            </div>
+            <h3 class="mt-5 text-lg font-semibold text-gray-800">Google</h3>
+            <button class="follow-btn mt-4 px-6 py-2 rounded-full bg-gray-200 text-gray-700 hover:bg-red-500 hover:text-white transition-colors duration-300 text-sm font-medium"
+                    data-following="true">
+                Unfollow
+            </button>
+        </div>
+
+        <!-- NTC -->
+        <div class="flex flex-col items-center text-center p-6 rounded-xl shadow-md bg-white hover:shadow-xl transition-shadow duration-300">
+            <div class="w-40 h-40 rounded-full overflow-hidden shadow-lg transform transition duration-300 ease-out hover:scale-110 hover:shadow-2xl">
+                <img src="{% static 'images/Ntc.png' %}" alt="NTC" class="w-full h-full object-cover">
+            </div>
+            <h3 class="mt-5 text-lg font-semibold text-gray-800">NTC</h3>
+            <button class="follow-btn mt-4 px-6 py-2 rounded-full bg-secondary text-white hover:bg-green-600 transition-colors duration-300 text-sm font-medium"
+                    data-following="false">
+                Follow
+            </button>
+        </div>
+
+        <!-- Ncell -->
+        <div class="flex flex-col items-center text-center p-6 rounded-xl shadow-md bg-white hover:shadow-xl transition-shadow duration-300">
+            <div class="w-40 h-40 rounded-full overflow-hidden shadow-lg transform transition duration-300 ease-out hover:scale-110 hover:shadow-2xl">
+                <img src="{% static 'images/ncelll.png' %}" alt="Ncell" class="w-full h-full object-cover">
+            </div>
+            <h3 class="mt-5 text-lg font-semibold text-gray-800">Ncell</h3>
+            <button class="follow-btn mt-4 px-6 py-2 rounded-full bg-gray-200 text-gray-700 hover:bg-red-500 hover:text-white transition-colors duration-300 text-sm font-medium"
+                    data-following="true">
+                Unfollow
+            </button>
+        </div>
+
+        <!-- Leapfrog -->
+        <div class="flex flex-col items-center text-center p-6 rounded-xl shadow-md bg-white hover:shadow-xl transition-shadow duration-300">
+            <div class="w-40 h-40 rounded-full overflow-hidden shadow-lg transform transition duration-300 ease-out hover:scale-110 hover:shadow-2xl">
+                <img src="{% static 'images/leapfrog.png' %}" alt="Leapfrog" class="w-full h-full object-cover">
+            </div>
+            <h3 class="mt-5 text-lg font-semibold text-gray-800">Leapfrog</h3>
+            <button class="follow-btn mt-4 px-6 py-2 rounded-full bg-secondary text-white hover:bg-green-600 transition-colors duration-300 text-sm font-medium"
+                    data-following="false">
+                Follow
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<!-- JS for Button Toggle -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const buttons = document.querySelectorAll(".follow-btn");
+
+    buttons.forEach(button => {
+        button.addEventListener("click", () => {
+            const isFollowing = button.getAttribute("data-following") === "true";
+
+            if (isFollowing) {
+                // Switch to Follow
+                button.textContent = "Follow";
+                button.setAttribute("data-following", "false");
+                button.classList.remove("bg-gray-200", "text-gray-700", "hover:bg-red-500", "hover:text-white");
+                button.classList.add("bg-secondary", "text-white", "hover:bg-green-600");
+            } else {
+                // Switch to Unfollow
+                button.textContent = "Unfollow";
+                button.setAttribute("data-following", "true");
+                button.classList.remove("bg-secondary", "text-white", "hover:bg-green-600");
+                button.classList.add("bg-gray-200", "text-gray-700", "hover:bg-red-500", "hover:text-white");
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

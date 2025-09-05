@@ -24,3 +24,10 @@ def home_view(request):
 def logout_view(request):
     logout(request)
     return redirect('home')
+# def organizations(request):
+#     return redirect('organizations')
+
+def organizations(request):
+    # Example: pass an empty list or your actual organizations queryset
+    organizations = []
+    return render(request, "users/organizations.html", {"organizations": organizations}) 
