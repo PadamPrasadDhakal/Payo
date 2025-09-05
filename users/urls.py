@@ -22,6 +22,6 @@ urlpatterns = [
     path("profile/", profile, name="profile"),
     path("profile/edit/", profile_edit, name="profile_edit"),
     path("dash_jobs/", dash_jobs, name="dash_jobs"),
-]
+    ]
 
 
