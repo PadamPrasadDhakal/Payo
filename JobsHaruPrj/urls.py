@@ -17,6 +17,7 @@ urlpatterns = [
     path("jobs/", include(("jobs.urls", "jobs"), namespace="jobs")),
     path('logout/',logout_view,name='logout'),
     path('organizations/', organizations, name='organizations'),
+    path('internships/',internships, name='internships'),
 # path('Organizations/', organizations),  # optional, not recommended
 ]
 
