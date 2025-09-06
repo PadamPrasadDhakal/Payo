@@ -4,7 +4,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView, DetailView, CreateView
 from django.urls import reverse_lazy
 
-from .models import Job, Application
+from organization.models import Job, Application
 
 
 class JobListView(ListView):

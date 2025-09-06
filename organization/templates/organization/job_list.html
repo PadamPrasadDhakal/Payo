@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="flex items-center justify-between mb-4">
+  <h2 class="text-2xl font-bold">Jobs</h2>
+  {% if user.is_authenticated and user.user_type == 'ORG' %}
+    <a class="px-4 py-2 rounded-md bg-primary text-white hover:bg-purple-700 transition" href="{% url 'organization:post-job' %}">Post a Job</a>
+  {% endif %}
+</div>
+
+<div class="grid md:grid-cols-2 gap-6">
+  {% for job in jobs %}
+    <a href="{% url 'organization:job-detail' job.id %}" class="block bg-white rounded-xl shadow p-6 hover:shadow-md hover:-translate-y-0.5 transition">
+      <h3 class="font-semibold text-lg">{{ job.title }}</h3>
+      <p class="text-gray-600">{{ job.location }}</p>
+      <p class="text-sm text-gray-500 mt-2">{{ job.get_job_type_display }} 2 {{ job.salary|default:"Negotiable" }}</p>
+    </a>
+  {% empty %}
+    <div class="col-span-full text-gray-500">No jobs yet.</div>
+  {% endfor %}
+</div>
+{% endblock %}

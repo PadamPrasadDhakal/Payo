@@ -16,17 +16,25 @@ ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "*").split(",")
 
 
 INSTALLED_APPS = [
+    # Django default apps
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+
+    # 3rd party apps
+    "crispy_forms",
+    "crispy_bootstrap4",
+
     # Local apps
     "users",
     "jobs",
     "makecv",
+    "organization"
 ]
+
 
 
 MIDDLEWARE = [
@@ -237,6 +245,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 # Ensure local apps and auth model are configured correctly even if defaults were reintroduced below.
-INSTALLED_APPS = list(INSTALLED_APPS) + ["users", "jobs"]
+INSTALLED_APPS = list(INSTALLED_APPS) + ["users", "organization"]
 AUTH_USER_MODEL = "users.User"
 ROOT_URLCONF = "JobsHaruPrj.urls"
