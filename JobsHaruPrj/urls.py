@@ -18,10 +18,6 @@ urlpatterns = [
     path('logout/',logout_view,name='logout'),
     path('organizations/', organizations, name='organizations'),
     path('internships/',internships, name='internships'),
-<<<<<<< HEAD
-    # path('Organizations/', organizations),  # optional, not recommended
-    path("organization/", include(("organization.urls", "organization"), namespace="organization")),
-=======
     path('assessments/',assessments, name='assessments'),
     path('profile/',profile, name='profile'),
     path('plans/',plans, name='plans'),
@@ -31,7 +27,6 @@ urlpatterns = [
     # path('logouts/',logouts,name='logouts'),
     
 # path('Organizations/', organizations),  # optional, not recommended
->>>>>>> acc2de0434845b98d8ea1a30df331a983bdce10d
 ]
 
 if settings.DEBUG:
