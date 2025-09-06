@@ -4,54 +4,60 @@
 {% block title %}Jobs - JobsHaru{% endblock %}
 
 {% block content %}
-<div class="relative w-full min-h-screen flex flex-col items-center justify-start 
-            bg-gradient-to-br from-blue-100 via-blue-200 to-blue-300 
-            p-8 sm:p-12 overflow-hidden">
+<script>
+  window.djangoJobs = {{ jobs|safe }};
+</script>
+<div class="relative flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-100 via-blue-200 to-blue-300 overflow-hidden rounded-3xl">
+    
     <!-- Background radial blobs -->
     <div class="absolute inset-0 pointer-events-none">
         <div class="absolute inset-0" style="background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 50%, #3b82f6 100%);"></div>
         <div class="absolute inset-0 opacity-30" style="background: radial-gradient(circle at 20% 30%, rgba(59,130,246,0.15) 0%, transparent 40%), radial-gradient(circle at 80% 70%, rgba(16,185,129,0.1) 0%, transparent 40%);"></div>
     </div>
 
+    <!-- Main White Card -->
+    <div class="relative z-10 bg-white rounded-2xl shadow-2xl p-6 w-[450px] h-[650px] flex flex-col justify-between">
+        
+     <!-- Job Info -->
+<div class="mb-0">  <!-- changed mb-1 → mb-0 -->
+  <div class="flex justify-between text-sm text-gray-700">
+    <span id="jobs-count">0 jobs remaining</span>
+    <button id="filter-btn" class="flex items-center gap-1 text-blue-500 hover:text-blue-400 transition">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2l-7 7v7a1 1 0 01-1 1h-2a1 1 0 01-1-1v-7L3 6V4z"></path>
+      </svg>
+      <span>Filters</span>
+    </button>
+  </div>
+  <div id="instructions" class="text-xs text-gray-700 mt-1 text-center">
+    <!-- changed mt-2 → mt-1 -->
+    Swipe left to reject • Swipe right to like • Swipe up to save
+  </div>
+</div>
 
-    <!-- Job Info -->
-    <div class="px-6 pt-2 relative z-10 w-full">
-        <div class="flex justify-between text-sm text-gray-700">
-            <span id="jobs-count">0 jobs remaining</span>
-            <button id="filter-btn" class="flex items-center gap-1 text-blue-500 hover:text-blue-400 transition">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2l-7 7v7a1 1 0 01-1 1h-2a1 1 0 01-1-1v-7L3 6V4z"></path>
+<!-- Job Cards -->
+<div id="job-cards" class="flex relative items-center justify-center mb-auto mt-16">
+  <!-- added mt-1 so it sticks closer -->
+</div>
+
+        <!-- Action Buttons -->
+        <div class="flex justify-center gap-6 mt-6">
+            <button id="reject-btn" class="w-12 h-12 rounded-full bg-red-500 flex items-center justify-center shadow-xl hover:bg-red-600 transition-all">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
-                <span>Filters</span>
+            </button>
+            <button id="save-btn" class="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center shadow-xl hover:bg-blue-700 transition-all">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.518 4.674a1 1 0 00.95.69h4.908c.969 0 1.371 1.24.588 1.81l-3.974 2.89a1 1 0 00-.364 1.118l1.518 4.674c.3.921-.755 1.688-1.538 1.118l-3.974-2.89a1 1 0 00-1.176 0l-3.974 2.89c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.364-1.118L2.035 9.1c-.783-.57-.38-1.81.588-1.81h4.908a1 1 0 00.95-.69l1.518-4.674z"></path>
+                </svg>
+            </button>
+            <button id="interested-btn" class="w-12 h-12 rounded-full bg-green-500 flex items-center justify-center shadow-xl hover:bg-green-600 transition-all">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
             </button>
         </div>
-        <div id="instructions" class="text-xs text-gray-700 mt-2 text-center">
-            Swipe left to reject • Swipe right to like • Swipe up to save
-        </div>
-    </div>
-
-    <!-- Job Cards -->
-    <div id="job-cards" class="flex-1 flex items-start justify-center relative px-4 pt-6 pb-16 w-full max-w-md">
-        <!-- Cards inserted by JS -->
-    </div>
-
-    <!-- Action Buttons -->
-    <div class="flex justify-center gap-8 pb-16 z-10">
-        <button id="reject-btn" class="w-14 h-14 rounded-full bg-red-500 flex items-center justify-center shadow-xl hover:bg-red-600 transition-all">
-            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-            </svg>
-        </button>
-        <button id="save-btn" class="w-14 h-14 rounded-full bg-blue-600 flex items-center justify-center shadow-xl hover:bg-blue-700 transition-all">
-            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.518 4.674a1 1 0 00.95.69h4.908c.969 0 1.371 1.24.588 1.81l-3.974 2.89a1 1 0 00-.364 1.118l1.518 4.674c.3.921-.755 1.688-1.538 1.118l-3.974-2.89a1 1 0 00-1.176 0l-3.974 2.89c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.364-1.118L2.035 9.1c-.783-.57-.38-1.81.588-1.81h4.908a1 1 0 00.95-.69l1.518-4.674z"></path>
-            </svg>
-        </button>
-        <button id="interested-btn" class="w-14 h-14 rounded-full bg-green-500 flex items-center justify-center shadow-xl hover:bg-green-600 transition-all">
-            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-            </svg>
-        </button>
     </div>
 </div>
 

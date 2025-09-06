@@ -5,7 +5,7 @@
     <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">Welcome, {{ user.organization_name|default:user.username }}!</h1>
     <p class="text-white/90 text-lg md:text-xl max-w-2xl mb-8">This is your organization dashboard. Track your job postings and applications here.</p>
     <div class="flex flex-wrap gap-3">
-      <a class="px-5 py-3 rounded-lg bg-white text-primary font-semibold shadow hover:shadow-md hover:-translate-y-0.5 transition" href="/jobs/post/">Post a Job or Internship</a>
+      <a class="px-5 py-3 rounded-lg bg-white text-primary font-semibold shadow hover:shadow-md hover:-translate-y-0.5 transition" href="/organization/jobs/new/">Post a Job or Internship</a>
     </div>
   </div>
   <div class="absolute -right-10 -bottom-10 w-72 h-72 bg-white/20 rounded-full blur-2xl animate-pulse"></div>

@@ -48,6 +48,4 @@ class Application(models.Model):
     def __str__(self) -> str:
         return f"{self.applicant.username} → {self.job.title} ({self.get_status_display()})"
 
-from django.db import models
-
 # Create your models here.

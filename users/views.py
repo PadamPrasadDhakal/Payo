@@ -6,6 +6,10 @@ from django.views.generic import TemplateView
 from .forms_profile import ApplicantProfileEditForm
 
 from .forms import LoginForm, ApplicantSignUpForm, OrganizationSignUpForm
+from organization.models import Job, Application
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+from django.contrib.auth import get_user_model
 
 
 class UserLoginView(LoginView):
@@ -81,9 +85,9 @@ def profile_edit(request):
         form = ApplicantProfileEditForm(instance=user)
     return render(request, "users/profile_edit.html", {"form": form})
 
-from django.shortcuts import render
 def dash_jobs(request):
-    return render(request, "users/dash_jobs.html")
+    jobs = Job.objects.all().values('id', 'title', 'location', 'salary')
+    return render(request, "users/dash_jobs.html", {"jobs": list(jobs)})
 def organizations(request):
     return render(request,"users/organizations.html")
 def payment(request):

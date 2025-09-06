@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Organization Dashboard{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto mt-8">
+  <h1 class="text-2xl font-bold mb-6">Your Latest Jobs</h1>
+  <table class="w-full table-auto border rounded-lg shadow">
+    <thead class="bg-gray-100">
+      <tr>
+        <th class="px-4 py-2">Title</th>
+        <th class="px-4 py-2">Applications</th>
+        <th class="px-4 py-2">Date Posted</th>
+        <th class="px-4 py-2">Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for job in jobs %}
+      <tr class="border-b hover:bg-gray-50 cursor-pointer" onclick="window.location='/organization/jobs/{{ job.id }}/'">
+        <td class="px-4 py-2 text-primary font-semibold">{{ job.title }}</td>
+        <td class="px-4 py-2">{{ job.app_count }}</td>
+        <td class="px-4 py-2">{{ job.created_at|date:'Y-m-d' }}</td>
+        <td class="px-4 py-2">
+          {% if job.status == 'Accepting' %}
+            <span class="px-2 py-1 rounded bg-green-200 text-green-800">Accepting</span>
+          {% elif job.status == 'Pending' %}
+            <span class="px-2 py-1 rounded bg-yellow-200 text-yellow-800">Pending</span>
+          {% else %}
+            <span class="px-2 py-1 rounded bg-blue-200 text-blue-800">Passed</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

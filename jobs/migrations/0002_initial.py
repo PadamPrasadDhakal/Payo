@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='application',
             name='job',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='applications', to='jobs.job'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='applications', to='organization.job'),
         ),
         migrations.AlterUniqueTogether(
             name='application',
