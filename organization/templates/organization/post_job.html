@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-2xl mx-auto bg-white rounded-xl shadow p-6">
+  <h1 class="text-2xl font-bold text-primary mb-6">Post a New Job</h1>
+  <form method="post" enctype="multipart/form-data" class="space-y-4">
+    {% csrf_token %}
+    {% for field in form %}
+      <div class="space-y-1">
+        <label class="text-sm font-medium">{{ field.label }}</label>
+        {{ field }}
+        {% if field.errors %}
+          <p class="text-sm text-red-600">{{ field.errors|striptags }}</p>
+        {% endif %}
+      </div>
+    {% endfor %}
+    <button class="px-4 py-2 rounded-md bg-primary text-white hover:bg-purple-700 transition" type="submit">Publish</button>
+  </form>
+</div>
+
+<style>
+  input, textarea, select {
+    border: 1px solid rgb(103, 98, 98) !important;
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.375rem;
+    outline: none;
+  }
+  input:focus, textarea:focus, select:focus {
+    box-shadow: 0 0 0 2px rgba(147, 51, 234, 0.5);
+  }
+  h1{
+    text-align:center;
+  }
+</style>
+{% endblock %}

@@ -1,21 +1,9 @@
-// Mock job data
-const jobs = [
-    { id: 1, title: "Senior Backend Developer", company: "TechCorp Nepal", location: "Kathmandu", salary: "NPR 60k–90k" },
-    { id: 2, title: "Frontend Developer", company: "Digital Solutions", location: "Lalitpur", salary: "NPR 45k–70k" },
-    { id: 3, title: "Full Stack Engineer", company: "StartupHub", location: "Pokhara", salary: "NPR 70k–100k" },
-    { id: 4, title: "DevOps Engineer", company: "CloudNepal", location: "Kathmandu", salary: "NPR 80k–120k" },
-    { id: 5, title: "Mobile App Developer (Flutter)", company: "AppVenture", location: "Lalitpur", salary: "NPR 50k–75k" },
-    { id: 6, title: "Data Scientist", company: "InfoAnalytics", location: "Kathmandu", salary: "NPR 75k–110k" },
-    { id: 7, title: "QA Automation Engineer", company: "QualityTech", location: "Bharatpur", salary: "NPR 40k–65k" },
-    { id: 8, title: "UX/UI Designer", company: "CreativeMinds", location: "Kathmandu", salary: "NPR 45k–70k" },
-    { id: 9, title: "Technical Project Manager", company: "NepalSoft", location: "Lalitpur", salary: "NPR 90k–130k" },
-    { id: 10, title: "System Administrator", company: "NetLink Pvt. Ltd.", location: "Pokhara", salary: "NPR 35k–55k" },
-    { id: 11, title: "React Native Developer", company: "InnoTech", location: "Kathmandu", salary: "NPR 60k–85k" },
-    { id: 12, title: "Junior Software Engineer", company: "TechKarma", location: "Lalitpur", salary: "NPR 30k–45k" },
-    { id: 13, title: "Product Manager", company: "NextGen Innovations", location: "Kathmandu", salary: "NPR 95k–140k" },
-  ];
+// Use jobs from Django backend
+const jobs = window.djangoJobs || [];
   
   let jobStack = [...jobs];
+  let tokens = 10;
+  let job_feedback = [];
   
   const jobCardsContainer = document.getElementById("job-cards");
   const jobsCount = document.getElementById("jobs-count");
@@ -37,11 +25,13 @@ const jobs = [
       const card = document.createElement("div");
       card.className = `absolute w-full h-[400px] bg-white rounded-2xl shadow-xl p-6 top-0 left-0 cursor-grab transition-transform duration-300`;
       card.style.zIndex = index;
-  
+
       card.innerHTML = `
-        <h3 class="text-xl font-bold mb-1">${job.title}</h3>
-        <p class="text-gray-500 mb-1">${job.company} • ${job.location}</p>
-        <p class="text-gray-500 mb-2">Salary: ${job.salary}</p>
+        <h3 class="text-xl font-bold mb-1">${job.title || ''}</h3>
+        <p class="text-gray-500 mb-1">Organization: ${job.org || ''}</p>
+        <p class="text-gray-500 mb-1">Location: ${job.location || ''}</p>
+        <p class="text-gray-500 mb-1">Salary: ${job.salary || ''}</p>
+        <p class="text-gray-500 mb-1">No. of Positions: ${job.positions || ''}</p>
       `;
   
       // Dragging variables
@@ -85,7 +75,7 @@ const jobs = [
       jobCardsContainer.appendChild(card);
     });
   
-    jobsCount.textContent = `${jobStack.length} jobs remaining`;
+  jobsCount.textContent = `${tokens} token available`;
   }
   
   // Handle swipe action
@@ -93,11 +83,23 @@ const jobs = [
     const threshold = 100; // px
     if (offsetX > threshold) {
       card.style.transform = `translate(1000px, ${offsetY}px) rotate(20deg)`;
-      showToast(`Interested in ${job.title}`, "success");
+      showToast(`Applied for ${job.title}`, "success");
+      job_feedback.push(1);
+      tokens = Math.max(0, tokens - 1);
+      // Send user/job data to backend for organization dashboard
+      fetch('/users/apply_job/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCSRFToken(),
+        },
+        body: JSON.stringify({ job_id: job.id })
+      });
       removeTopJob();
     } else if (offsetX < -threshold) {
       card.style.transform = `translate(-1000px, ${offsetY}px) rotate(-20deg)`;
       showToast(`Rejected ${job.title}`, "error");
+      job_feedback.push(0);
       removeTopJob();
     } else if (offsetY < -threshold) {
       card.style.transform = `translate(${offsetX}px, -1000px) rotate(0deg)`;
@@ -118,13 +120,39 @@ const jobs = [
   document.getElementById("reject-btn").addEventListener("click", () => {
     if (!jobStack.length) return;
     showToast(`Rejected ${jobStack[0].title}`, "error");
+    job_feedback.push(0);
     removeTopJob();
   });
   document.getElementById("interested-btn").addEventListener("click", () => {
     if (!jobStack.length) return;
-    showToast(`Interested in ${jobStack[0].title}`, "success");
+    showToast(`Applied for ${jobStack[0].title}`, "success");
+    job_feedback.push(1);
+    // Send user/job data to backend for organization dashboard
+    fetch('/users/apply_job/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCSRFToken(),
+      },
+      body: JSON.stringify({ job_id: jobStack[0].id })
+    });
     removeTopJob();
   });
+// Helper to get CSRF token from cookies
+function getCSRFToken() {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, 10) === ('csrftoken=')) {
+        cookieValue = decodeURIComponent(cookie.substring(10));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
   document.getElementById("save-btn").addEventListener("click", () => {
     if (!jobStack.length) return;
     showToast(`Saved ${jobStack[0].title}`, "info");

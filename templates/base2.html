@@ -31,30 +31,27 @@
             <div class="flex items-center justify-between h-16">
                 
                 <!-- Left Logo -->
-                <a href="/" class="text-xl font-extrabold tracking-tight text-primary hover:scale-105 transition-transform">
-                    JobsHaru
-                </a>
+        <a href="/" class="flex items-center gap-2 text-xl font-extrabold tracking-tight text-primary hover:scale-105 transition-transform">
+          {% if user.is_authenticated and user.profile.logo %}
+            <img src="{{ user.profile.logo.url }}" alt="Logo" class="h-8 w-8 rounded-full border border-primary" />
+          {% endif %}
+          JobsHaru
+        </a>
                 
                 <!-- Middle Menu -->
-                <div class="hidden md:flex items-center gap-8">
-                    <a href="/users/dash_jobs/" class="text-gray-700 hover:text-primary transition font-medium relative text-gray-700 hover:text-blue-600 font-medium transition-colors duration-300
-                 after:content-[''] after:absolute after:left-1/2 after:-bottom-1 after:w-0 after:h-[2px] 
-                 after:bg-blue-600 after:transition-all after:duration-300 after:ease-out 
-                 hover:after:w-full hover:after:left-0">Jobs</a>
-                    <a href="/internships/" class="text-gray-700 hover:text-primary transition font-medium relative text-gray-700 hover:text-blue-600 font-medium transition-colors duration-300
-                 after:content-[''] after:absolute after:left-1/2 after:-bottom-1 after:w-0 after:h-[2px] 
-                 after:bg-blue-600 after:transition-all after:duration-300 after:ease-out 
-                 hover:after:w-full hover:after:left-0">Internships</a>
-                <a href="/organizations/" 
-                class="relative text-gray-700 font-medium transition-colors duration-300 
-                        hover:text-blue-600
-                        after:content-[''] after:absolute after:left-1/2 after:-bottom-1 
-                        after:w-0 after:h-[2px] after:bg-blue-600 after:transition-all 
-                        after:duration-300 after:ease-out hover:after:w-full hover:after:left-0">
-                    Organizations
-                </a>
-
-                </div>
+        <div class="hidden md:flex items-center gap-8">
+          {% if user.is_authenticated and user.user_type == 'ORG' %}
+            <a href="/organization/dashboard/" class="text-gray-700 hover:text-primary transition font-medium">Dashboard</a>
+            <a href="/organization/jobs/" class="text-gray-700 hover:text-primary transition font-medium">Jobs</a>
+            <a href="/organization/jobs/new/" class="text-gray-700 hover:text-primary transition font-medium">Post Job</a>
+            <a href="/organization/applications/" class="text-gray-700 hover:text-primary transition font-medium">Applications</a>
+            <a href="/organization/upgrade/" class="hover:text-secondary transition">Upgrade to Pro</a>
+          {% else %}
+            <a href="/users/dash_jobs/" class="text-gray-700 hover:text-primary transition font-medium">Jobs</a>
+            <a href="/internships/" class="text-gray-700 hover:text-primary transition font-medium">Internships</a>
+            <a href="/organizations/" class="text-gray-700 hover:text-primary transition font-medium">Organizations</a>
+          {% endif %}
+        </div>
                 
                 <!-- Right Actions -->
                 <div class="flex items-center gap-3">
@@ -65,7 +62,7 @@
                         <a href="/plans/" class="px-3 py-1.5 rounded-lg bg-primary text-white hover:bg-gray-600 transition font-medium shadow-sm">
                             Plans
                         </a>
-                        <a href="/logout/" class="px-3 py-1.5 rounded-lg bg-yellow-500 border border-gray-300 hover:bg-gray-100 transition font-medium gap-49">
+                        <a href="users/logout/" class="px-3 py-1.5 rounded-lg bg-yellow-500 border border-gray-300 hover:bg-gray-100 transition font-medium gap-49">
                             Logout</a>
     <!-- Settings Dropdown -->
     <div class="ml-50px">

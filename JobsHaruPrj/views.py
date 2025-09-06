@@ -3,18 +3,17 @@ from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
 from django.shortcuts import redirect
-from jobs.models import Job, Application
+from organization.models import Job, Application
 
 def home_view(request):
     if request.user.is_authenticated:
         if hasattr(request.user, 'user_type') and request.user.user_type == 'ORG':
-            # Organization dashboard context
+            # Show Applications per Job table on home page
             jobs = Job.objects.filter(posted_by=request.user)
             job_count = jobs.count()
             applications_by_job = {job: job.applications.count() for job in jobs}
-            return render(request, "org_dashboard.html", {
+            return render(request, "org_home.html", {
                 "job_count": job_count,
-                "jobs": jobs,
                 "applications_by_job": applications_by_job,
             })
         else:

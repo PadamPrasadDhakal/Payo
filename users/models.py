@@ -21,6 +21,11 @@ class User(AbstractUser):
     organization_website = models.URLField(blank=True)
     organization_photo = models.ImageField(upload_to="organization_photos/", blank=True, null=True)
 
+    # Common fields for all users
+    phone = models.CharField(max_length=20, blank=True)
+    address = models.TextField(blank=True)
+    official_name = models.CharField(max_length=255, blank=True)
+
     # Applicant-specific fields
     profile_photo = models.ImageField(upload_to="profile_photos/", blank=True, null=True)
     resume = models.FileField(upload_to="resumes/", blank=True, null=True)
