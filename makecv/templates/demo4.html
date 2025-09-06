@@ -1,0 +1,75 @@
+{%load static%}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CV Mariana Napolitani</title>
+  <link rel="stylesheet" href="{%static 'demo4style.css'  %}"/>
+</head>
+<body>
+  <div class="container">
+    <div class="left">
+      <h2 style="text-transform:capitalize">{{detail.name}}</h2>
+      <h3 class="post" style="border:none;text-transform:capitalize;">{{detail.link}}</h3>
+
+      <section>
+        <h3 style="margin-top:5vh;">• OBJECTIVE</h3>
+        <p>
+          Adaptable and quick learner with strong communication,teamwork and problem-solving skills.Committed to contineous
+          improvement and ethical practices.Proficient in using digital tool and time management to meet deadlines and deliver quality results.{{detail.obj}}
+        </p>
+      </section>
+
+      <section>
+        <h3>• EXPERIENCE</h3>
+        {%for item in myexperience %}
+        <p>
+          {{item}}
+        </p>
+        {%endfor%}
+      </section>
+
+      <section>
+        <h3>• CONTACT</h3>
+        <p>📞 {{detail.phone}}</p>
+        <p>📧 {{detail.email}}</p>
+      </section>
+    </div>
+
+    <div class="right">
+      <div class="photo">
+        <img src="{{detail.imge.url}}" alt="photo" />
+      </div>
+
+      <section>
+        <h3>•EDUCATION</h3>
+        {% for item in myeducation %}
+        <p>
+          {{item}}
+        </p>
+        {%endfor%}
+      </section>
+
+      <section style="margin-left:-5vw">
+        <h3>• SKILLS</h3>
+
+        <ol>
+          {%  for item in myskills %}
+          <li><strong>{{item}}</strong></li>
+          {%endfor%}
+        </ol>
+      </section>
+
+      <section style="margin-left:-3.2vw">
+        <h3>• LANGUAGES</h3>
+        <ul>
+          {% for item in mylan%}
+          <li>{{item}}</li>
+          {%endfor%}
+        </ul>
+      </section>
+    </div>
+  </div>
+</body>
+</html>

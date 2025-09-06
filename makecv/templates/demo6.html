@@ -1,0 +1,72 @@
+{%load static%}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Willi Abern - CV</title>
+  <link rel="stylesheet" href="{%static 'demo6style.css' %}">
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="profile-pic">
+        <img src="{{detail.imge.url}}" alt="Profile Photo">
+      </div>
+      <h1>{{detail.name}}</h1>
+      <p class="title">{{detail.post}} </p>
+
+      <section class="contact">
+        <h2>Contact Details</h2>
+        <p>📞{{detail.email}} </p>
+        <p>📧{{detail.link}}</p>
+        <p>🌐{{detail.address}} </p>
+      </section>
+
+      <section class="education">
+        <h2>Languages</h2>
+        <ul>
+        {% for item in mylan%}
+        <li>{{item}}</li>
+        {%endfor%}
+        </ul>
+      </section>
+
+      <section class="skills" style="margin-top:-1vh">
+        <h2>Skills</h2>
+        <ul>
+        {%for item in myskills%}
+          <li>{{item}}</li>
+          {%endfor%}
+        </ul>
+      </section>
+    </aside>
+
+    <main class="content">
+      <section class="summary">
+        <h2>Summary</h2><p>
+            {{detail.obj}}</p>
+      </section>
+
+      <section class="experience">
+        <h2>Work Experience</h2>
+        {% for item in myexperience%}
+        <p class="date">{{item}}</p>
+        {%endfor%}
+      </section>
+    <section class="education">
+        <h2>Education</h2>
+        {% for item in myeducation%}
+        <p class="date">{{item}}</p>
+        {%endfor%}
+      </section>
+
+      <section class="references">
+        <h2>References</h2>
+        <p>Adaptable and quick learner with strong communication,teamwork and problem-solving skills.Committed to contineous
+          improvement and ethical practices.Proficient in using digital tool and time management to meet deadlines and deliver quality results.</p>
+      </section>
+    </main>
+  </div>
+</body>
+</html>
