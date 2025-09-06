@@ -1,0 +1,71 @@
+{% extends "base2.html" %}
+{% load static %}
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-900 to-purple-600 rounded-2xl ">
+  <div class="bg-white p-8 rounded-2xl shadow-lg w-full max-w-sm animate-fadeIn">
+    
+    <!-- Title -->
+    <h2 class="text-center mb-6 text-purple-800 text-2xl font-bold">
+      💳 Payment
+    </h2>
+
+    <!-- Payment Options -->
+    <label class="flex items-center p-3 border-2 border-gray-200 rounded-xl mb-3 cursor-pointer hover:border-purple-500 hover:bg-purple-50 transition">
+      <input type="radio" name="payment" value="khalti" checked onclick="showFields('khalti')" class="mr-3 scale-125 accent-purple-700" />
+      <span class="font-medium">Khalti</span>
+    </label>
+
+    <label class="flex items-center p-3 border-2 border-gray-200 rounded-xl mb-3 cursor-pointer hover:border-purple-500 hover:bg-purple-50 transition">
+      <input type="radio" name="payment" value="esewa" onclick="showFields('esewa')" class="mr-3 scale-125 accent-green-600" />
+      <span class="font-medium">eSewa</span>
+    </label>
+
+    <!-- Dynamic Fields -->
+    <div id="fields" class="mt-4"></div>
+
+    <!-- Pay Button -->
+    <button id="payBtn" class="w-full py-3 mt-6 rounded-xl font-bold text-white bg-purple-800 hover:opacity-90 active:scale-95 transition">
+      Pay with Khalti
+    </button>
+    
+  </div>
+</div>
+
+<!-- Tailwind Animation -->
+<style>
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fadeIn {
+  animation: fadeIn 0.6s ease forwards;
+}
+</style>
+
+<script>
+  function showFields(method) {
+    const fields = document.getElementById("fields");
+    const payBtn = document.getElementById("payBtn");
+
+    if (method === "khalti") {
+      fields.innerHTML = `
+        <input class="w-full p-3 border-2 border-gray-200 rounded-xl mt-3 focus:outline-none focus:ring-2 focus:ring-purple-500" type="text" placeholder="Khalti ID / Phone Number" />
+        <input class="w-full p-3 border-2 border-gray-200 rounded-xl mt-3 focus:outline-none focus:ring-2 focus:ring-purple-500" type="password" placeholder="Password" />
+      `;
+      payBtn.className = "w-full py-3 mt-6 rounded-xl font-bold text-white bg-purple-800 hover:opacity-90 active:scale-95 transition";
+      payBtn.textContent = "Pay with Khalti";
+    } 
+    else if (method === "esewa") {
+      fields.innerHTML = `
+        <input class="w-full p-3 border-2 border-gray-200 rounded-xl mt-3 focus:outline-none focus:ring-2 focus:ring-green-500" type="text" placeholder="eSewa ID / Phone Number" />
+        <input class="w-full p-3 border-2 border-gray-200 rounded-xl mt-3 focus:outline-none focus:ring-2 focus:ring-green-500" type="password" placeholder="MPIN" />
+      `;
+      payBtn.className = "w-full py-3 mt-6 rounded-xl font-bold text-white bg-green-600 hover:opacity-90 active:scale-95 transition";
+      payBtn.textContent = "Pay with eSewa";
+    }
+  }
+
+  // Default load
+  showFields("khalti");
+</script>
+{% endblock %}

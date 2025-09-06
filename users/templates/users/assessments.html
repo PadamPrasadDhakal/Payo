@@ -1,0 +1,306 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Quick Assessment | JobsHaru{% endblock %}
+
+{% block content %}
+<div class="relative w-full min-h-screen flex flex-col items-center justify-start 
+            bg-gradient-to-br from-indigo-100 via-indigo-200 to-indigo-300 
+            p-8 sm:p-12 overflow-hidden">
+
+    <!-- Page Header -->
+    <h1 class="text-3xl md:text-4xl font-extrabold text-center text-primary mb-12 drop-shadow-lg">
+        Quick IT Assessment
+    </h1>
+
+    <!-- Assessment Form -->
+    <form id="assessmentForm" class="w-full max-w-4xl bg-white/90 backdrop-blur-md rounded-xl shadow-lg p-8 space-y-8">
+        
+        <!-- Question 1 -->
+        <div class="question-card p-6 rounded-xl shadow hover:shadow-2xl transition duration-300">
+            <h3 class="font-semibold text-gray-800 mb-4">Q1. Which of the following is a valid C variable name?</h3>
+            <div class="flex flex-col space-y-3">
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="radio" name="q1" value="A" class="accent-primary">
+                    <span class="text-gray-700">int_number</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="radio" name="q1" value="B" class="accent-primary">
+                    <span class="text-gray-700">2number</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="radio" name="q1" value="C" class="accent-primary">
+                    <span class="text-gray-700">#number</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="radio" name="q1" value="D" class="accent-primary">
+                    <span class="text-gray-700">number-1</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Question 2 -->
+        <div class="question-card p-6 rounded-xl shadow hover:shadow-2xl transition duration-300">
+            <h3 class="font-semibold text-gray-800 mb-4">Q2. What does CPU stand for?</h3>
+            <div class="flex flex-col space-y-3">
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="radio" name="q2" value="A" class="accent-primary">
+                    <span class="text-gray-700">Central Process Unit</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="radio" name="q2" value="B" class="accent-primary">
+                    <span class="text-gray-700">Central Processing Unit</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="radio" name="q2" value="C" class="accent-primary">
+                    <span class="text-gray-700">Computer Personal Unit</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="radio" name="q2" value="D" class="accent-primary">
+                    <span class="text-gray-700">Control Processing Unit</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Question 3 -->
+        <div class="question-card p-6 rounded-xl shadow hover:shadow-2xl transition duration-300">
+            <h3 class="font-semibold text-gray-800 mb-4">Q3. Which of the following is a correct IP address format?</h3>
+            <div class="flex flex-col space-y-3">
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="radio" name="q3" value="A" class="accent-primary">
+                    <span class="text-gray-700">192.168.1.1</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="radio" name="q3" value="B" class="accent-primary">
+                    <span class="text-gray-700">192,168,1,1</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="radio" name="q3" value="C" class="accent-primary">
+                    <span class="text-gray-700">192.168.1</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="radio" name="q3" value="D" class="accent-primary">
+                    <span class="text-gray-700">192-168-1-1</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Question 4 -->
+        <div class="question-card p-6 rounded-xl shadow hover:shadow-2xl transition duration-300">
+            <h3 class="font-semibold text-gray-800 mb-4">Q4. What is the size of int data type in C (on most systems)?</h3>
+            <div class="flex flex-col space-y-3">
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="radio" name="q4" value="A" class="accent-primary">
+                    <span class="text-gray-700">2 bytes</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="radio" name="q4" value="B" class="accent-primary">
+                    <span class="text-gray-700">4 bytes</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="radio" name="q4" value="C" class="accent-primary">
+                    <span class="text-gray-700">8 bytes</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="radio" name="q4" value="D" class="accent-primary">
+                    <span class="text-gray-700">Depends on compiler</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Question 5 -->
+        <div class="question-card p-6 rounded-xl shadow hover:shadow-2xl transition duration-300">
+            <h3 class="font-semibold text-gray-800 mb-4">Q5. Which protocol is used for secure web communication?</h3>
+            <div class="flex flex-col space-y-3">
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="radio" name="q5" value="A" class="accent-primary">
+                    <span class="text-gray-700">HTTP</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="radio" name="q5" value="B" class="accent-primary">
+                    <span class="text-gray-700">FTP</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="radio" name="q5" value="C" class="accent-primary">
+                    <span class="text-gray-700">HTTPS</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="radio" name="q5" value="D" class="accent-primary">
+                    <span class="text-gray-700">SMTP</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Question 6 -->
+        <div class="question-card p-6 rounded-xl shadow hover:shadow-2xl transition duration-300">
+            <h3 class="font-semibold text-gray-800 mb-4">Q6. Which is a loop structure in C?</h3>
+            <div class="flex flex-col space-y-3">
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="radio" name="q6" value="A" class="accent-primary">
+                    <span class="text-gray-700">for</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="radio" name="q6" value="B" class="accent-primary">
+                    <span class="text-gray-700">if</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="radio" name="q6" value="C" class="accent-primary">
+                    <span class="text-gray-700">switch</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="radio" name="q6" value="D" class="accent-primary">
+                    <span class="text-gray-700">case</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Question 7 -->
+        <div class="question-card p-6 rounded-xl shadow hover:shadow-2xl transition duration-300">
+            <h3 class="font-semibold text-gray-800 mb-4">Q7. Which layer of OSI model handles routing?</h3>
+            <div class="flex flex-col space-y-3">
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="radio" name="q7" value="A" class="accent-primary">
+                    <span class="text-gray-700">Data Link Layer</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="radio" name="q7" value="B" class="accent-primary">
+                    <span class="text-gray-700">Network Layer</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="radio" name="q7" value="C" class="accent-primary">
+                    <span class="text-gray-700">Transport Layer</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="radio" name="q7" value="D" class="accent-primary">
+                    <span class="text-gray-700">Application Layer</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Question 8 -->
+        <div class="question-card p-6 rounded-xl shadow hover:shadow-2xl transition duration-300">
+            <h3 class="font-semibold text-gray-800 mb-4">Q8. Which is volatile memory?</h3>
+            <div class="flex flex-col space-y-3">
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="radio" name="q8" value="A" class="accent-primary">
+                    <span class="text-gray-700">ROM</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="radio" name="q8" value="B" class="accent-primary">
+                    <span class="text-gray-700">RAM</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="radio" name="q8" value="C" class="accent-primary">
+                    <span class="text-gray-700">Hard Disk</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="radio" name="q8" value="D" class="accent-primary">
+                    <span class="text-gray-700">Flash</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Question 9 -->
+        <div class="question-card p-6 rounded-xl shadow hover:shadow-2xl transition duration-300">
+            <h3 class="font-semibold text-gray-800 mb-4">Q9. Which keyword is used to define a constant in C?</h3>
+            <div class="flex flex-col space-y-3">
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="radio" name="q9" value="A" class="accent-primary">
+                    <span class="text-gray-700">const</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="radio" name="q9" value="B" class="accent-primary">
+                    <span class="text-gray-700">define</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="radio" name="q9" value="C" class="accent-primary">
+                    <span class="text-gray-700">static</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="radio" name="q9" value="D" class="accent-primary">
+                    <span class="text-gray-700">auto</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Question 10 -->
+        <div class="question-card p-6 rounded-xl shadow hover:shadow-2xl transition duration-300">
+            <h3 class="font-semibold text-gray-800 mb-4">Q10. Which protocol is used to send emails?</h3>
+            <div class="flex flex-col space-y-3">
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="radio" name="q10" value="A" class="accent-primary">
+                    <span class="text-gray-700">HTTP</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="radio" name="q10" value="B" class="accent-primary">
+                    <span class="text-gray-700">SMTP</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="radio" name="q10" value="C" class="accent-primary">
+                    <span class="text-gray-700">FTP</span>
+                </label>
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="radio" name="q10" value="D" class="accent-primary">
+                    <span class="text-gray-700">DNS</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="flex justify-center">
+            <button type="submit" 
+                class="px-8 py-3 rounded-lg bg-primary text-white font-semibold shadow hover:bg-purple-700 hover:shadow-md transition transform hover:-translate-y-0.5">
+                Submit Answers
+            </button>
+        </div>
+
+    </form>
+</div>
+
+<!-- JS to handle submission and simple answer check -->
+<script>
+document.getElementById("assessmentForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    let totalQuestions = 10;
+    let score = 0;
+
+    // Example correct answers
+    const correctAnswers = {
+        q1: "A",
+        q2: "B",
+        q3: "A",
+        q4: "B",
+        q5: "C",
+        q6: "A",
+        q7: "B",
+        q8: "B",
+        q9: "A",
+        q10: "B"
+    };
+
+    for (let i = 1; i <= totalQuestions; i++) {
+        let answer = document.querySelector(`input[name="q${i}"]:checked`);
+        if (answer && answer.value === correctAnswers[`q${i}`]) {
+            score++;
+        }
+    }
+
+    // Display result in interactive popup
+    const resultPopup = document.createElement("div");
+    resultPopup.className = "fixed inset-0 flex items-center justify-center bg-black/40 z-50";
+    resultPopup.innerHTML = `
+        <div class="bg-white rounded-xl p-8 shadow-lg text-center max-w-sm w-full">
+            <h2 class="text-2xl font-bold mb-4 text-gray-800">Assessment Completed</h2>
+            <p class="text-gray-700 mb-6">You scored <span class="text-primary font-bold">${score} / ${totalQuestions}</span></p>
+            <button id="closePopup" class="px-6 py-2 rounded-lg bg-primary text-white font-semibold hover:bg-purple-700 transition">Close</button>
+        </div>
+    `;
+    document.body.appendChild(resultPopup);
+
+    document.getElementById("closePopup").addEventListener("click", () => {
+        resultPopup.remove();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+});
+</script>
+{% endblock %}

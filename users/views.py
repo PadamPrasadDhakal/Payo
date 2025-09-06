@@ -39,7 +39,7 @@ class UserLogoutView(View):
 
 
 def signup_select(request):
-    return render(request, "users/signup.html")
+    return render(request, "users/signup2.html")
 
 
 def signup_applicant(request):
@@ -90,6 +90,7 @@ def dash_jobs(request):
     return render(request, "users/dash_jobs.html", {"jobs": list(jobs)})
 def organizations(request):
     return render(request,"users/organizations.html")
+<<<<<<< HEAD
 
 @csrf_exempt
 def apply_job(request):
@@ -102,3 +103,7 @@ def apply_job(request):
         Application.objects.get_or_create(job=job, applicant=user)
         return JsonResponse({"success": True})
     return JsonResponse({"success": False}, status=400)
+=======
+def payment(request):
+    return render(request,"users/payment.html")
+>>>>>>> acc2de0434845b98d8ea1a30df331a983bdce10d
