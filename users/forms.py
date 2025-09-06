@@ -22,6 +22,9 @@ class ApplicantSignUpForm(UserCreationForm):
         ("Other", "Other"),
     ]
 
+    official_name = forms.CharField(max_length=255, required=True, label="Full Name")
+    phone = forms.CharField(max_length=20, required=True, label="Phone Number")
+    address = forms.CharField(widget=forms.Textarea(attrs={'rows': 3}), required=True, label="Address")
     profile_photo = forms.ImageField(required=False)
     education_qualification = forms.ChoiceField(choices=EDUCATION_QUALIFICATIONS, required=False)
     education_institute = forms.CharField(required=False)
@@ -37,6 +40,9 @@ class ApplicantSignUpForm(UserCreationForm):
         fields = (
             "username",
             "email",
+            "official_name",
+            "phone",
+            "address",
             "password1",
             "password2",
             "profile_photo",
@@ -78,6 +84,9 @@ class ApplicantSignUpForm(UserCreationForm):
             field.widget.attrs.update({"class": css})
         self.fields["username"].widget.attrs.update({"placeholder": "Username"})
         self.fields["email"].widget.attrs.update({"placeholder": "Email"})
+        self.fields["official_name"].widget.attrs.update({"placeholder": "Full Name"})
+        self.fields["phone"].widget.attrs.update({"placeholder": "Phone Number"})
+        self.fields["address"].widget.attrs.update({"placeholder": "Address"})
         self.fields["password1"].widget.attrs.update({"placeholder": "Password"})
         self.fields["password2"].widget.attrs.update({"placeholder": "Confirm password"})
         self.fields["education_institute"].widget.attrs.update({"placeholder": "Institute name"})
@@ -89,11 +98,18 @@ class ApplicantSignUpForm(UserCreationForm):
 
 
 class OrganizationSignUpForm(UserCreationForm):
+    official_name = forms.CharField(max_length=255, required=False)
+    phone = forms.CharField(max_length=20, required=False)
+    address = forms.CharField(widget=forms.Textarea(attrs={'rows': 3}), required=False)
+    
     class Meta:
         model = User
         fields = (
             "username",
             "email",
+            "official_name",
+            "phone",
+            "address",
             "password1",
             "password2",
             "organization_name",
@@ -113,6 +129,9 @@ class OrganizationSignUpForm(UserCreationForm):
             field.widget.attrs.update({"class": TAILWIND_INPUT})
         self.fields["username"].widget.attrs.update({"placeholder": "Organization username"})
         self.fields["email"].widget.attrs.update({"placeholder": "Email"})
+        self.fields["official_name"].widget.attrs.update({"placeholder": "Official Organization Name"})
+        self.fields["phone"].widget.attrs.update({"placeholder": "Contact Phone"})
+        self.fields["address"].widget.attrs.update({"placeholder": "Organization Address"})
         self.fields["password1"].widget.attrs.update({"placeholder": "Password"})
         self.fields["password2"].widget.attrs.update({"placeholder": "Confirm password"})
 

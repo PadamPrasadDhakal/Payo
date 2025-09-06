@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Your Jobs{% endblock %}
+{% block content %}
+<div class="max-w-5xl mx-auto mt-8">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold">Jobs Posted by You ({{ job_count }})</h1>
+    <a href="/organization/jobs/new/" class="px-4 py-2 rounded bg-primary text-white hover:bg-purple-700 transition">Post New Job</a>
+  </div>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for job in jobs %}
+    <div class="bg-white rounded-xl shadow p-4 flex flex-col gap-2">
+      {% if job.poster %}
+        <img src="{{ job.poster.url }}" alt="Poster" class="w-full h-48 object-cover rounded-md mb-2" style="aspect-ratio:3/4;max-height:320px;" />
+      {% endif %}
+      <h2 class="text-lg font-bold text-primary">{{ job.title }}</h2>
+      <div class="text-gray-600">{{ job.location }}</div>
+      <div class="text-sm text-gray-500">{{ job.created_at|date:'Y-m-d' }}</div>
+      <a href="/organization/jobs/{{ job.id }}/" class="text-blue-600 underline mt-2">View Details</a>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

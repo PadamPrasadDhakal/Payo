@@ -10,6 +10,7 @@ from .views import (
     profile_edit,
     dash_jobs,
     organizations,
+    apply_job,
 )
 
 
@@ -23,7 +24,8 @@ urlpatterns = [
     path("profile/", profile, name="profile"),
     path("profile/edit/", profile_edit, name="profile_edit"),
     path("dash_jobs/", dash_jobs, name="dash_jobs"),
-    path("organizations/",organizations,name="organizations")
-    ]
+    path("organizations/", organizations, name="organizations"),
+    path("apply_job/", apply_job, name="apply_job"),
+]
 
 

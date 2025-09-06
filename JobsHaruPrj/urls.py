@@ -14,11 +14,12 @@ urlpatterns = [
     path("about/", TemplateView.as_view(template_name="about.html"), name="about"),
     path("contact/", TemplateView.as_view(template_name="contact.html"), name="contact"),
     path("users/", include(("users.urls", "users"), namespace="users")),
-    path("jobs/", include(("jobs.urls", "jobs"), namespace="jobs")),
+    # path("jobs/", include(("jobs.urls", "jobs"), namespace="jobs")),  # Disabled - using organization app
     path('logout/',logout_view,name='logout'),
     path('organizations/', organizations, name='organizations'),
     path('internships/',internships, name='internships'),
-# path('Organizations/', organizations),  # optional, not recommended
+    # path('Organizations/', organizations),  # optional, not recommended
+    path("organization/", include(("organization.urls", "organization"), namespace="organization")),
 ]
 
 if settings.DEBUG:

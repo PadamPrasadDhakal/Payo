@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Job Details{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto mt-8">
+  <h1 class="text-2xl font-bold mb-2">{{ job.title }}</h1>
+  <div class="mb-4 text-gray-600">
+    Posted: {{ job.created_at|date:'Y-m-d' }} | Applications: {{ job.applications.count }}
+  </div>
+  <div class="mb-6 text-gray-700">{{ job.description|linebreaks }}</div>
+
+  <h2 class="text-xl font-semibold mb-2">Applicants</h2>
+  <table class="w-full table-auto border rounded-lg shadow">
+    <thead class="bg-gray-100">
+      <tr>
+        <th class="px-4 py-2">Name</th>
+        <th class="px-4 py-2">Phone</th>
+        <th class="px-4 py-2">Email</th>
+        <th class="px-4 py-2">Address</th>
+  <!-- CV column removed -->
+        <th class="px-4 py-2">Date Applied</th>
+        <th class="px-4 py-2">Match Zone</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for app in organization.applications.all %}
+      <tr class="border-b">
+        <td class="px-4 py-2">{{ app.applicant.get_full_name }}</td>
+        <td class="px-4 py-2">{{ app.applicant.profile.phone }}</td>
+        <td class="px-4 py-2">{{ app.applicant.email }}</td>
+        <td class="px-4 py-2">{{ app.applicant.profile.address }}</td>
+        <td class="px-4 py-2">{{ app.created_at|date:'Y-m-d' }}</td>
+        <td class="px-4 py-2">
+          {% if app.match_score is defined and app.match_score >= 0.7 %}
+            <span class="px-2 py-1 rounded bg-green-200 text-green-800">Green</span>
+          {% elif app.match_score is defined and app.match_score >= 0.4 %}
+            <span class="px-2 py-1 rounded bg-yellow-200 text-yellow-800">Yellow</span>
+          {% else %}
+            <span class="px-2 py-1 rounded bg-red-200 text-red-800">Red</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
