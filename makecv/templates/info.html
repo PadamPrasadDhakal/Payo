@@ -1,0 +1,10 @@
+<h2>{{ detail.name }}</h2>
+<p>Email: {{ detail.email }}</p>
+<p>Phone: {{ detail.phone }}</p>
+<p>Objective: {{ detail.obj }}</p>
+{% if detail.imge %}
+    <img src="{{ detail.imge.url }}" alt="User Image" />
+{% else %}
+    <p>No image available</p>
+{% endif %}
+

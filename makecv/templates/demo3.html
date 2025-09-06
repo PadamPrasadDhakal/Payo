@@ -1,0 +1,77 @@
+{% load static%}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dani Martinez CV</title>
+  <link rel="stylesheet" href="{%static 'demo3style.css' %}"/>
+</head>
+<body>
+  <div class="container">
+    <div class="sidebar">
+      <div class="profile-pic">
+        <img src="{{detail.imge.url}}" alt="Profile Picture"/>
+      </div>
+      <button class="contact-button">CONTACT ME</button>
+      <div class="contact-info">
+        <p>{{detail.phone}} </p>
+        <p>{{detail.email}}</p>
+        <p>{{detail.address}}</p>
+      </div>
+
+      <div class="section">
+        <h3>EDUCATION</h3>
+        {% for item in myeducation %}
+        <div class="edu-item">
+          <p><strong>Course Studied</strong><br/>{{ item }}</p>
+        </div>
+        {%endfor%}
+      </div>
+
+      <div class="section">
+        <h3>SKILLS</h3>
+        {% for item in myskills%}
+        <ul class="skills">
+            {{item}}
+        </ul>
+        {%endfor%}
+      </div>
+    </div>
+
+    <div class="main">
+      <div class="header">
+        <h1>{{detail.name}}</h1>
+        <p style="margin-top:1.5vh; font-size:1.2rem;">{{detail.link}}</p>
+      </div>
+
+      <div class="section">
+        <h2>WORK EXPERIENCE</h2>
+        {% for item in myexperience %}
+          <div class="job-header">
+            {{item}}
+          </div>
+        {%endfor%}
+
+      <div class="section">
+        <h2>REFERENCES</h2>
+        <div class="reference">
+          <p>{{detail.obj}}</p>
+        </div>
+      </div>
+      <div class="profile">
+        <h2>Profile</h2>
+        <div class="textmode">
+            Adaptable and quick learner with strong communication,teamwork and problem-solving skills.Committed to contineous
+            improvement and ethical practices.Proficient in using digital tool and time management to meet deadlines and deliver quality results
+        </div>
+      </div>
+      <div class="line">
+        <div class="one">
+        </div>
+        <div class="two">
+        <div>
+    </div>
+  </div>
+</body>
+</html>

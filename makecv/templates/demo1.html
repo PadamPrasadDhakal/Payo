@@ -1,0 +1,86 @@
+{%  load static%}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CV Template</title>
+  <link rel="stylesheet" href="{% static 'demo1style.css' %}">
+</head>
+<body>
+  <div class="cv-container">
+    <div class="header">
+      <h1 style=" white-space:normal;">{{detail.name}}</h1>
+    </div>
+
+    <div class="cv-content">
+      <div class="left-column">
+        <div class="profile-pic">
+          <img src="{{ detail.imge.url }}" alt="Profile Photo">
+        </div>
+
+        <div class="contact">
+          <h2>Contact</h2>
+          <p><strong>Address:</strong><br> {{detail.address}}</p>
+          <p><strong>Phone:</strong><br> {{detail.phone}} </p>
+          <p><strong>Email:</strong><br> {{detail.email}} </p>
+        </div>
+
+        <div class="languages">
+          <h2>Languages</h2>
+          {% comment %} git mean language in db {% endcomment %}
+          {% for item in mylan %}
+          <p>
+            {{item}}
+          </p>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="right-column">
+        <div class="summary">
+          <h2>Summary</h2>
+          <p>{{detail.link}},{{ detail.obj}}</p>
+        </div>
+
+        <div class="skills">
+          <h2>Skill Highlights</h2>
+          <ul>
+            {% for item in myskill %}
+            <li>item<li>
+             {% endfor %}
+          </ul>
+        </div>
+
+        <div class="experience">
+          <h2>Experience</h2>
+          <p><strong>{{detail.link}}</strong> -<br>{{detail.address}}</p>
+          <ul>
+            {% for item in myexperience %}
+            <li> {{ item }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+
+        <div class="education">
+          <h2>Education</h2>
+          <ul>
+         {% for item in myeducation %}
+         <li> {{item}}</li>
+         {%endfor%}
+         <ul>
+        </div>
+
+        <div class="certifications">
+          <h2>Professional Strength</h2>
+          <p>Adaptable and quick learner with strong communication,teamwork and problem-solving skills.Committed to contineous
+            improvement and ethical practices.
+          </p>
+          <p>Proficient in using digital tool and time management to meet deadlines and deliver quality results</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer"></div>
+  </div>
+</body>
+</html>

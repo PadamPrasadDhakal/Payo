@@ -1,0 +1,80 @@
+{%load static%}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="{% static 'demo5style.css'%}">
+  <title>Curriculum Vitae</title>
+</head>
+<body>
+  <div class="container">
+    <div class="left">
+      <div class="profile-img">
+        <img src="{% static 'images/demo2.jpg'%}" alt="photo">
+      </div>
+      <div class="section" >
+        <h3>CONTACT</h3>
+        <ul>
+          <li>📞 {{detail.phone}}</li>
+          <li>📧{{detail.email}} </li>
+          <li>🌐 {{detail.address}}</li>
+        </ul>
+      </div>
+
+      <div class="section"  style="margin-top:35px;">
+        <h3>SKILLS</h3>
+        <ul>
+            {%for item in myskills %}
+             <li>{{item}}</li>
+             {%endfor%}
+        </ul>
+      </div>
+        <div class="section" style="margin-top:35px;">
+        <h3>LANGUAGES</h3>
+        <ul>
+            {%for item in mylan %}
+             <li>{{item}}</li>
+             {%endfor%}
+        </ul>
+      </div>
+    </div>
+
+    <div class="right">
+      <div class="title">CURRICULUM</div>
+      <div class="subtitle">VITAE</div>
+
+      <div class="section-block">
+        <h2>OBJECTIVE</h2>
+        <p>
+           Adaptable and quick learner with strong communication,teamwork and problem-solving skills.Committed to contineous
+          improvement and ethical practices.{{detail.obj}}
+        </p>
+      </div>
+
+      <div class="section-block">
+        <h2>DETAIL</h2>
+        <table class="data-table">
+          <tr><td class="highlight">Nama</td><td style="text-transform:capitalize">: {{detail.name}}</td></tr>
+          <tr><td class="highlight">post</td><td style="text-transform:capitalize">:{{detail.link}} </td></tr>
+          <tr><td class="highlight">address</td><td style="text-transform:capitalize">: {{detail.address}}</td></tr>
+        </table>
+      </div>
+
+      <div class="section-block">
+        <h2>EDUCATION</h2>
+        {%for item in myeducation%}
+        <p>{{item}} </p>
+        {%endfor%}
+
+      </div>
+       <div class="section-block">
+        <h2>EXPERIENCE</h2>
+        {%for item in myexperience%}
+        <p>{{item}} </p>
+        {%endfor%}
+      </div>
+    </div>
+  </div>
+</body>
+</html>
