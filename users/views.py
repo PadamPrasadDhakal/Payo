@@ -86,3 +86,5 @@ def dash_jobs(request):
     return render(request, "users/dash_jobs.html")
 def organizations(request):
     return render(request,"users/organizations.html")
+def payment(request):
+    return render(request,"users/payment.html")
