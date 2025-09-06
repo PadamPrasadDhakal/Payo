@@ -90,20 +90,5 @@ def dash_jobs(request):
     return render(request, "users/dash_jobs.html", {"jobs": list(jobs)})
 def organizations(request):
     return render(request,"users/organizations.html")
-<<<<<<< HEAD
-
-@csrf_exempt
-def apply_job(request):
-    if request.method == "POST":
-        import json
-        data = json.loads(request.body)
-        job_id = data.get("job_id")
-        user = request.user
-        job = Job.objects.get(id=job_id)
-        Application.objects.get_or_create(job=job, applicant=user)
-        return JsonResponse({"success": True})
-    return JsonResponse({"success": False}, status=400)
-=======
 def payment(request):
     return render(request,"users/payment.html")
->>>>>>> acc2de0434845b98d8ea1a30df331a983bdce10d
