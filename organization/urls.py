@@ -1,4 +1,5 @@
 from django.urls import path
+from django.shortcuts import redirect
 from .views import (
     organization_list_view,
     JobListView,
@@ -27,4 +28,5 @@ urlpatterns = [
     path("applications/<int:pk>/", application_detail, name="application-detail"),
     path("classify/", classify, name="classify"),
     path("match_resumes/", match_resumes, name="match-resumes"),
+    path("users/logout/", lambda request: redirect('/users/logout/')),  # Redirect to users logout
 ]
