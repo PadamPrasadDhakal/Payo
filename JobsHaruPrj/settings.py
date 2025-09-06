@@ -31,11 +31,7 @@ INSTALLED_APPS = [
     # Local apps
     "users",
     "jobs",
-<<<<<<< HEAD
-    "organization",
-=======
     "makecv",
->>>>>>> acc2de0434845b98d8ea1a30df331a983bdce10d
 ]
 
 
