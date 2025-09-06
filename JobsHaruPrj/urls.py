@@ -22,6 +22,8 @@ urlpatterns = [
     path('profile/',profile, name='profile'),
     path('plans/',plans, name='plans'),
     path('payment/',payment, name='payment'),
+    path('makecv/',include(("makecv.urls", "makecv"), namespace="makecv")),
+    # path('makecv/',include(("makecv.urls", "makecv"), namespace="makecv")),
     # path('logouts/',logouts,name='logouts'),
     
 # path('Organizations/', organizations),  # optional, not recommended

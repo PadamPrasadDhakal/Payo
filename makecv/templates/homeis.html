@@ -1,0 +1,79 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Create Your CV</title>
+  <link rel="stylesheet" href="{% static 'style.css' %}">
+</head>
+<body>
+  <div class="container">
+    <h1>Create Your CV</h1>
+    
+    <form method="POST" action="" enctype="multipart/form-data">
+      {% csrf_token %}
+
+      <!-- Hidden input for selected template -->
+      <input type="hidden" name="choise" id="selectedTemplate">
+
+      <div class="form-grid">
+        <input type="text" name="name" placeholder="Full Name" required>
+        <input type="email" name="email" placeholder="Email" required>
+        <input type="text" name="phone" placeholder="Phone Number" required>
+        <input type="text" name="address" placeholder="Address" required>
+        <input type="text" name="link" placeholder="Post">
+        <input type="text" name="git" placeholder="Languages (comma-separated)">
+        <input type="text" name="obj" placeholder="Objective (Career Goal)" required>
+        <input type="text" name="edu" placeholder="Education (e.g., BIM-TU, MCA-PU)" required>
+        <input type="text" name="exp" placeholder="Work Experience (comma-separated)">
+        <input type="text" name="skills" placeholder="Skills (e.g., Python, Excel)" required>
+      </div>
+
+      <label>Upload Your Profile Photo:</label>
+      <input type="file" accept="image/*" name="imge" required>
+
+      <h2>Choose a CV Template</h2>
+      <div class="template-grid">
+        <div class="template-card">
+          <img src="{% static 'images/demo1.jpeg' %}" alt="CV Template">
+          <button type="button" class="select-btn" onclick="selectTemplate('demo1', event)">Select</button>
+        </div>
+        <div class="template-card">
+          <img src="{% static 'images/demo1_cv.jpeg' %}" alt="CV Template">
+          <button type="button" class="select-btn" onclick="selectTemplate('demo2', event)">Select</button>
+        </div>
+        <div class="template-card">
+          <img src="{% static 'images/demo2_cv.webp' %}" alt="CV Template">
+          <button type="button" class="select-btn" onclick="selectTemplate('demo3', event)">Select</button>
+        </div>
+        <div class="template-card">
+          <img src="{% static 'images/demo4.png' %}" alt="CV Template">
+          <button type="button" class="select-btn" onclick="selectTemplate('demo4', event)">Select</button>
+        </div>
+        <div class="template-card">
+          <img src="{% static 'images/demo5.png' %}" alt="CV Template">
+          <button type="button" class="select-btn" onclick="selectTemplate('demo5', event)">Select</button>
+        </div>
+        <div class="template-card">
+          <img src="{% static 'images/demo6.png' %}" alt="CV Template">
+          <button type="button" class="select-btn" onclick="selectTemplate('demo6', event)">Select</button>
+        </div>
+      </div>
+
+      <div class="button-group">
+        <button type="submit" class="btn submit">Submit</button>
+        <button type="reset" class="btn reset">Reset</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    function selectTemplate(value, event) {
+      document.getElementById('selectedTemplate').value = value;
+      document.querySelectorAll('.select-btn').forEach(btn => btn.classList.remove('selected'));
+      event.target.classList.add('selected');
+    }
+  </script>
+</body>
+</html>
