@@ -20,6 +20,8 @@ urlpatterns = [
     path('internships/',internships, name='internships'),
     path('assessments/',assessments, name='assessments'),
     path('profile/',profile, name='profile'),
+    path('plans/',plans, name='plans'),
+    path('payment/',payment, name='payment'),
     # path('logouts/',logouts,name='logouts'),
     
 # path('Organizations/', organizations),  # optional, not recommended
