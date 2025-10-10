@@ -471,7 +471,8 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Notification functions
-let lastChecked = localStorage.getItem('lastStatusCheck') || Date.now();
+let lastChecked = localStorage.getItem('lastStatusCheck') || new Date(Date.now() - 24*60*60*1000).toISOString();
+let shownNotifications = JSON.parse(localStorage.getItem('shownNotifications') || '[]');
 
 function checkForUpdates() {
   fetch('/api/applications/recent-updates/', {
@@ -483,9 +484,21 @@ function checkForUpdates() {
   .then(response => response.json())
   .then(data => {
     if (data.success && data.updates.length > 0) {
-      showStatusNotifications(data.updates);
+      // Filter out already shown notifications
+      const newUpdates = data.updates.filter(update => 
+        !shownNotifications.includes(update.id) && 
+        new Date(update.updated_at) > new Date(lastChecked)
+      );
+      
+      if (newUpdates.length > 0) {
+        showStatusNotifications(newUpdates);
+        // Mark these notifications as shown
+        const newShownIds = newUpdates.map(update => update.id);
+        shownNotifications = [...shownNotifications, ...newShownIds];
+        localStorage.setItem('shownNotifications', JSON.stringify(shownNotifications));
+      }
     }
-    localStorage.setItem('lastStatusCheck', Date.now());
+    localStorage.setItem('lastStatusCheck', new Date().toISOString());
   })
   .catch(error => {
     console.error('Error checking for updates:', error);
@@ -494,7 +507,6 @@ function checkForUpdates() {
 
 function showStatusNotifications(updates) {
   const container = document.getElementById('status-notifications');
-  container.innerHTML = '';
   
   updates.forEach(update => {
     const notification = document.createElement('div');
@@ -518,7 +530,7 @@ function showStatusNotifications(updates) {
             </p>
           </div>
         </div>
-        <button onclick="this.parentElement.parentElement.remove()" class="text-gray-400 hover:text-gray-600">
+        <button onclick="dismissNotification(this, ${update.id})" class="text-gray-400 hover:text-gray-600">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
           </svg>
@@ -526,7 +538,18 @@ function showStatusNotifications(updates) {
       </div>
     `;
     container.appendChild(notification);
+    
+    // Auto-dismiss after 10 seconds
+    setTimeout(() => {
+      if (notification.parentNode) {
+        dismissNotification(notification.querySelector('button'), update.id);
+      }
+    }, 10000);
   });
+}
+
+function dismissNotification(button, updateId) {
+  button.parentElement.parentElement.remove();
 }
 
 function getNotificationColor(status) {

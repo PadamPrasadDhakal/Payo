@@ -46,11 +46,62 @@ class User(AbstractUser):
     last_token_reset = models.DateTimeField(auto_now_add=True)
     tokens_restored_flag = models.BooleanField(default=False)
 
+    # Profile boosting fields - count achievements regardless of final status
+    shortlisted_count = models.IntegerField(default=0, help_text="Total times shortlisted (regardless of final outcome)")
+    selected_count = models.IntegerField(default=0, help_text="Total times selected for interview (regardless of final outcome)")
+    hired_count = models.IntegerField(default=0, help_text="Total times hired")
+    profile_score = models.IntegerField(default=0, help_text="Calculated profile strength score")
+
     def is_organization(self) -> bool:
         return self.user_type == self.UserType.ORGANIZATION
 
     def is_applicant(self) -> bool:
         return self.user_type == self.UserType.APPLICANT
+
+    def update_profile_score(self):
+        """Calculate and update profile strength score based on achievements"""
+        if self.is_applicant():
+            # Base score calculation
+            score = 0
+            
+            # Points for completeness
+            if self.profile_photo:
+                score += 10
+            if self.resume:
+                score += 20
+            if self.skills:
+                score += 15
+            if self.education_qualification:
+                score += 10
+            if self.experience:
+                score += 15
+            
+            # Achievement bonuses (these boost the profile regardless of final outcome)
+            score += self.shortlisted_count * 25  # 25 points per shortlist
+            score += self.selected_count * 50     # 50 points per selection
+            score += self.hired_count * 100       # 100 points per hire
+            
+            # Cap at reasonable maximum
+            self.profile_score = min(score, 1000)
+            self.save(update_fields=['profile_score'])
+        
+        return self.profile_score
+
+    def increment_achievement(self, achievement_type):
+        """Increment achievement counters and update profile score"""
+        if not self.is_applicant():
+            return
+            
+        if achievement_type == 'shortlisted':
+            self.shortlisted_count += 1
+        elif achievement_type == 'selected':
+            self.selected_count += 1
+        elif achievement_type == 'hired':
+            self.hired_count += 1
+        
+        self.save()
+        self.update_profile_score()
+        print(f"Profile updated for {self.username}: shortlisted={self.shortlisted_count}, selected={self.selected_count}, hired={self.hired_count}, score={self.profile_score}")
 
 
 class SavedJob(models.Model):

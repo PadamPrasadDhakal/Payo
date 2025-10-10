@@ -68,23 +68,25 @@
     </thead>
     <tbody>
       {% for app in applications %}
-      <tr class="border-b hover:bg-gray-50">
+      <tr class="border-b hover:bg-gray-50 {% if app.status == 'WD' %}bg-gray-100{% endif %}">
         <td class="px-4 py-2">
           <div class="flex items-center">
             {% if app.applicant.profile_photo %}
-              <img src="{{ app.applicant.profile_photo.url }}" alt="Profile" class="w-8 h-8 rounded-full mr-2">
+              <img src="{{ app.applicant.profile_photo.url }}" alt="Profile" class="w-8 h-8 rounded-full mr-2 {% if app.status == 'WD' %}opacity-50{% endif %}">
             {% else %}
-              <div class="w-8 h-8 bg-gray-300 rounded-full mr-2 flex items-center justify-center">
+              <div class="w-8 h-8 bg-gray-300 rounded-full mr-2 flex items-center justify-center {% if app.status == 'WD' %}opacity-50{% endif %}">
                 <span class="text-xs">{{ app.applicant.get_full_name|first }}</span>
               </div>
             {% endif %}
-            {{ app.applicant.get_full_name|default:app.applicant.username }}
+            <span class="{% if app.status == 'WD' %}text-gray-500{% endif %}">
+              {{ app.applicant.get_full_name|default:app.applicant.username }}
+            </span>
           </div>
         </td>
-        <td class="px-4 py-2">{{ app.applicant.phone|default:"N/A" }}</td>
-        <td class="px-4 py-2">{{ app.applicant.email }}</td>
-        <td class="px-4 py-2">{{ app.applicant.address|default:"N/A" }}</td>
-        <td class="px-4 py-2">
+        <td class="px-4 py-2 {% if app.status == 'WD' %}text-gray-500{% endif %}">{{ app.applicant.phone|default:"N/A" }}</td>
+        <td class="px-4 py-2 {% if app.status == 'WD' %}text-gray-500{% endif %}">{{ app.applicant.email }}</td>
+        <td class="px-4 py-2 {% if app.status == 'WD' %}text-gray-500{% endif %}">{{ app.applicant.address|default:"N/A" }}</td>
+        <td class="px-4 py-2 {% if app.status == 'WD' %}text-gray-500{% endif %}">
           {% if app.applicant.education_qualification %}
             {{ app.applicant.education_qualification }}
             {% if app.applicant.education_institute %}
@@ -94,64 +96,153 @@
             N/A
           {% endif %}
         </td>
-        <td class="px-4 py-2">{{ app.created_at|date:'M d, Y' }}</td>
+        <td class="px-4 py-2 {% if app.status == 'WD' %}text-gray-500{% endif %}">{{ app.created_at|date:'M d, Y' }}</td>
         <td class="px-4 py-2">
-          <span class="px-2 py-1 rounded text-xs font-medium application-status-{{ app.id }}
-            {% if app.status == 'HD' %}bg-green-200 text-green-800
-            {% elif app.status == 'SE' %}bg-green-200 text-green-800
-            {% elif app.status == 'SL' %}bg-blue-200 text-blue-800
-            {% elif app.status == 'RV' %}bg-purple-200 text-purple-800
-            {% elif app.status == 'RJ' %}bg-red-200 text-red-800
-            {% elif app.status == 'WD' %}bg-gray-200 text-gray-800
-            {% else %}bg-yellow-200 text-yellow-800{% endif %}">
+          <span class="px-3 py-1 rounded-full text-xs font-semibold application-status-{{ app.id }}
+            {% if app.status == 'HD' %}bg-emerald-100 text-emerald-700
+            {% elif app.status == 'SE' %}bg-green-100 text-green-700
+            {% elif app.status == 'SL' %}bg-purple-100 text-purple-700
+            {% elif app.status == 'RV' %}bg-blue-100 text-blue-700
+            {% elif app.status == 'RJ' %}bg-red-100 text-red-700
+            {% elif app.status == 'WD' %}bg-gray-200 text-gray-600
+            {% else %}bg-yellow-100 text-yellow-700{% endif %}">
             {{ app.get_status_display }}
           </span>
         </td>
         <td class="px-4 py-2">
-          <div class="flex flex-col space-y-1">
-            <!-- Action buttons -->
-            <div class="flex space-x-1">
-              {% if app.status == 'PD' or app.status == 'RV' %}
-                <button onclick="updateStatus({{ app.id }}, 'RV', 'Under Review')" 
-                        class="bg-purple-500 hover:bg-purple-600 text-white text-xs px-2 py-1 rounded">
-                  Review
-                </button>
-                <button onclick="updateStatus({{ app.id }}, 'SL', 'Shortlisted')" 
-                        class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-2 py-1 rounded">
-                  Shortlist
-                </button>
-                <button onclick="openRejectDialog({{ app.id }})" 
-                        class="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 rounded">
-                  Reject
-                </button>
-              {% elif app.status == 'SL' %}
-                <button onclick="updateStatus({{ app.id }}, 'SE', 'Selected for Interview')" 
-                        class="bg-green-500 hover:bg-green-600 text-white text-xs px-2 py-1 rounded">
-                  Select
-                </button>
-                <button onclick="openRejectDialog({{ app.id }})" 
-                        class="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 rounded">
-                  Reject
-                </button>
-              {% elif app.status == 'SE' %}
-                <button onclick="updateStatus({{ app.id }}, 'HD', 'Hired Successfully')" 
-                        class="bg-emerald-500 hover:bg-emerald-600 text-white text-xs px-2 py-1 rounded">
-                  Hire
-                </button>
-                <button onclick="openRejectDialog({{ app.id }})" 
-                        class="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 rounded">
-                  Reject
-                </button>
-              {% endif %}
-            </div>
-            <!-- View actions -->
-            <div class="flex space-x-1">
-              {% if app.applicant.resume %}
+          <div class="flex flex-col space-y-2">
+            
+            {% if app.status == 'WD' %}
+              <!-- Withdrawn - No actions available -->
+              <div class="text-gray-400 text-xs italic">No actions available</div>
+              
+            {% else %}
+              <div class="flex flex-wrap gap-1">
+                {% if app.status == 'PD' %}
+                  <button onclick="updateStatus({{ app.id }}, 'RV', 'Application under review')" 
+                          class="inline-flex items-center px-2 py-1 bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium rounded transition-colors duration-200">
+                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    Review
+                  </button>
+                  <button onclick="updateStatus({{ app.id }}, 'SL', 'Application shortlisted')" 
+                          class="inline-flex items-center px-2 py-1 bg-purple-500 hover:bg-purple-600 text-white text-xs font-medium rounded transition-colors duration-200">
+                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Shortlist
+                  </button>
+                  <button onclick="openRejectDialog({{ app.id }})" 
+                          class="inline-flex items-center px-2 py-1 bg-red-500 hover:bg-red-600 text-white text-xs font-medium rounded transition-colors duration-200">
+                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                    Reject
+                  </button>
+                  
+                {% elif app.status == 'RV' %}
+                  <button onclick="updateStatus({{ app.id }}, 'SL', 'Application shortlisted')" 
+                          class="inline-flex items-center px-2 py-1 bg-purple-500 hover:bg-purple-600 text-white text-xs font-medium rounded transition-colors duration-200">
+                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Shortlist
+                  </button>
+                  <button onclick="openRejectDialog({{ app.id }})" 
+                          class="inline-flex items-center px-2 py-1 bg-red-500 hover:bg-red-600 text-white text-xs font-medium rounded transition-colors duration-200">
+                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                    Reject
+                  </button>
+                  
+                {% elif app.status == 'SL' %}
+                  <button onclick="updateStatus({{ app.id }}, 'SE', 'Selected for interview')" 
+                          class="inline-flex items-center px-2 py-1 bg-green-500 hover:bg-green-600 text-white text-xs font-medium rounded transition-colors duration-200">
+                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    Select
+                  </button>
+                  <button onclick="openRejectDialog({{ app.id }})" 
+                          class="inline-flex items-center px-2 py-1 bg-red-500 hover:bg-red-600 text-white text-xs font-medium rounded transition-colors duration-200">
+                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                    Reject
+                  </button>
+                  
+                {% elif app.status == 'SE' %}
+                  <button onclick="updateStatus({{ app.id }}, 'HD', 'Congratulations! You have been hired.')" 
+                          class="inline-flex items-center px-2 py-1 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-medium rounded transition-colors duration-200">
+                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Hire
+                  </button>
+                  <button onclick="openRejectDialog({{ app.id }})" 
+                          class="inline-flex items-center px-2 py-1 bg-red-500 hover:bg-red-600 text-white text-xs font-medium rounded transition-colors duration-200">
+                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                    Reject
+                  </button>
+                  
+                {% elif app.status == 'RJ' %}
+                  <span class="inline-flex items-center px-2 py-1 bg-red-100 text-red-700 text-xs font-medium rounded">
+                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                    Rejected
+                  </span>
+                  
+                {% elif app.status == 'HD' %}
+                  <span class="inline-flex items-center px-2 py-1 bg-emerald-100 text-emerald-700 text-xs font-medium rounded">
+                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Hired
+                  </span>
+                {% endif %}
+              </div>
+            {% endif %}
+            
+            <!-- View links -->
+            <div class="flex flex-wrap gap-2">
+              {% if app.applicant.resume and app.status != 'WD' %}
                 <a href="{{ app.applicant.resume.url }}" target="_blank" 
-                   class="text-blue-600 hover:text-blue-800 text-xs">Resume</a>
+                   class="inline-flex items-center px-2 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 hover:text-indigo-700 text-xs font-medium rounded transition-colors duration-200">
+                  <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                  </svg>
+                  Resume
+                </a>
+              {% elif app.applicant.resume and app.status == 'WD' %}
+                <span class="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-400 text-xs font-medium rounded cursor-not-allowed">
+                  <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                  </svg>
+                  Resume
+                </span>
               {% endif %}
-              <a href="{% url 'organization:application-detail' app.pk %}" 
-                 class="text-indigo-600 hover:text-indigo-800 text-xs">Details</a>
+              
+              {% if app.status != 'WD' %}
+                <a href="{% url 'organization:application-detail' app.pk %}" 
+                   class="inline-flex items-center px-2 py-1 bg-gray-50 hover:bg-gray-100 text-gray-600 hover:text-gray-700 text-xs font-medium rounded transition-colors duration-200">
+                  <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                  Details
+                </a>
+              {% else %}
+                <span class="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-400 text-xs font-medium rounded cursor-not-allowed">
+                  <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                  Details
+                </a>
+              {% endif %}
             </div>
           </div>
         </td>
@@ -183,31 +274,53 @@
   </div>
 </div>
 
-<!-- Reject Dialog -->
-<div id="rejectDialog" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
-  <div class="flex items-center justify-center min-h-screen">
-    <div class="bg-white rounded-lg p-6 w-96">
-      <h3 class="text-lg font-semibold mb-4">Reject Application</h3>
-      <p class="text-gray-600 mb-4">Are you sure you want to reject this application? Please provide a reason:</p>
-      <textarea id="rejectReason" 
-                class="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500" 
-                rows="3" placeholder="Reason for rejection (optional)"></textarea>
-      <div class="flex justify-end space-x-2 mt-4">
+<!-- Improved Reject Dialog -->
+<div id="rejectDialog" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 transform transition-all">
+    <div class="p-6">
+      <div class="flex items-center mb-4">
+        <div class="flex-shrink-0">
+          <svg class="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+          </svg>
+        </div>
+        <div class="ml-3">
+          <h3 class="text-lg font-semibold text-gray-900">Reject Application</h3>
+          <p class="text-sm text-gray-600">This action cannot be undone</p>
+        </div>
+      </div>
+      
+      <div class="mb-4">
+        <label for="rejectReason" class="block text-sm font-medium text-gray-700 mb-2">
+          Reason for rejection <span class="text-gray-400">(Optional)</span>
+        </label>
+        <textarea id="rejectReason" 
+                  class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors" 
+                  rows="3" 
+                  placeholder="Please provide a reason for rejection to help the candidate improve..."></textarea>
+      </div>
+      
+      <div class="flex justify-end space-x-3">
         <button onclick="closeRejectDialog()" 
-                class="px-4 py-2 text-gray-600 border rounded hover:bg-gray-100">
+                class="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition-colors duration-200">
           Cancel
         </button>
         <button onclick="confirmReject()" 
-                class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
-          Reject
+                class="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium transition-colors duration-200 shadow-sm">
+          <span class="flex items-center">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+            Reject Application
+          </span>
         </button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Success/Error Messages -->
-<div id="messageContainer" class="fixed top-4 right-4 z-50"></div>
+<!-- Improved Success/Error Messages -->
+<div id="messageContainer" class="fixed top-4 right-4 z-50 space-y-2"></div>
 
 <script>
 let currentApplicationId = null;
@@ -215,19 +328,44 @@ let currentApplicationId = null;
 function showMessage(message, type = 'success') {
   const container = document.getElementById('messageContainer');
   const messageDiv = document.createElement('div');
-  messageDiv.className = `mb-2 px-4 py-2 rounded shadow-lg text-white ${
-    type === 'success' ? 'bg-green-500' : 'bg-red-500'
-  }`;
-  messageDiv.textContent = message;
+  
+  const bgColor = type === 'success' ? 'bg-green-500' : 'bg-red-500';
+  const icon = type === 'success' 
+    ? '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>'
+    : '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>';
+  
+  messageDiv.className = `flex items-center p-4 rounded-lg shadow-lg text-white ${bgColor} transform transition-all duration-300 ease-out opacity-0 translate-x-4`;
+  messageDiv.innerHTML = `
+    <div class="flex-shrink-0">${icon}</div>
+    <div class="ml-3">
+      <p class="text-sm font-medium">${message}</p>
+    </div>
+    <button onclick="this.parentElement.remove()" class="ml-4 text-white/80 hover:text-white">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+      </svg>
+    </button>
+  `;
   
   container.appendChild(messageDiv);
   
-  // Auto remove after 3 seconds
+  // Animate in
+  setTimeout(() => {
+    messageDiv.classList.remove('opacity-0', 'translate-x-4');
+    messageDiv.classList.add('opacity-100', 'translate-x-0');
+  }, 100);
+  
+  // Auto remove after 4 seconds
   setTimeout(() => {
     if (messageDiv.parentNode) {
-      messageDiv.parentNode.removeChild(messageDiv);
+      messageDiv.classList.add('opacity-0', 'translate-x-4');
+      setTimeout(() => {
+        if (messageDiv.parentNode) {
+          messageDiv.parentNode.removeChild(messageDiv);
+        }
+      }, 300);
     }
-  }, 3000);
+  }, 4000);
 }
 
 function updateStatus(applicationId, status, message) {

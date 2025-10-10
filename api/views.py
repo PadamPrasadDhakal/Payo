@@ -315,15 +315,16 @@ def withdraw_application(request, application_id):
 def recent_application_updates(request):
     """Get recent status updates for user's applications"""
     try:
-        # Get applications updated in the last 24 hours
+        # Get applications updated in the last 48 hours (extended window)
         from datetime import timedelta
-        recent_cutoff = timezone.now() - timedelta(days=1)
+        recent_cutoff = timezone.now() - timedelta(hours=48)
         
+        # Get recent updates
         updates = Application.objects.filter(
             applicant=request.user,
             reviewed_at__gte=recent_cutoff,
             reviewed_at__isnull=False
-        ).select_related('job').order_by('-reviewed_at')[:10]
+        ).select_related('job').order_by('-reviewed_at')[:15]
         
         update_list = []
         for app in updates:
@@ -338,7 +339,9 @@ def recent_application_updates(request):
         
         return JsonResponse({
             'success': True,
-            'updates': update_list
+            'updates': update_list,
+            'count': len(update_list),
+            'cutoff_time': recent_cutoff.isoformat()
         })
         
     except Exception as e:

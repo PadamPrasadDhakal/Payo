@@ -248,10 +248,29 @@ def update_application_status(request):
         # Update application
         old_status = application.status
         application.status = new_status
+        # Always update reviewed_at for ALL status changes to ensure notifications work
         application.reviewed_at = timezone.now()
         if notes:
             application.notes = notes
+        else:
+            # Add default note for tracking
+            application.notes = f"Status changed from {application.get_status_display()} to {dict(Application.Status.choices)[new_status]} on {timezone.now().strftime('%Y-%m-%d %H:%M:%S')}"
         application.save()
+        
+        # Update profile achievements for boosting (regardless of final outcome)
+        applicant = application.applicant
+        if applicant.is_applicant():
+            # Only increment if this is a new achievement (prevent double counting)
+            if old_status != new_status:
+                if new_status == 'SL' and old_status not in ['SL', 'SE', 'HD']:  # First time shortlisted
+                    applicant.increment_achievement('shortlisted')
+                elif new_status == 'SE' and old_status not in ['SE', 'HD']:  # First time selected
+                    applicant.increment_achievement('selected')
+                elif new_status == 'HD' and old_status != 'HD':  # First time hired
+                    applicant.increment_achievement('hired')
+        
+        # Log the update for debugging
+        print(f"Status updated for application {application.id}: {old_status} -> {new_status} at {application.reviewed_at}")
         
         return JsonResponse({
             'success': True,
