@@ -94,8 +94,22 @@ const jobs = window.djangoJobs || [];
           'X-CSRFToken': getCSRFToken(),
         },
         body: JSON.stringify({ job_id: job.id })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.error === 'Profile incomplete') {
+          showToast(data.message, "error");
+          setTimeout(() => {
+            window.location.href = data.redirect_url;
+          }, 2000);
+          return;
+        }
+        removeTopJob();
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        removeTopJob();
       });
-      removeTopJob();
     } else if (offsetX < -threshold) {
       card.style.transform = `translate(-1000px, ${offsetY}px) rotate(-20deg)`;
       showToast(`Rejected ${job.title}`, "error");
@@ -135,8 +149,22 @@ const jobs = window.djangoJobs || [];
         'X-CSRFToken': getCSRFToken(),
       },
       body: JSON.stringify({ job_id: jobStack[0].id })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.error === 'Profile incomplete') {
+        showToast(data.message, "error");
+        setTimeout(() => {
+          window.location.href = data.redirect_url;
+        }, 2000);
+        return;
+      }
+      removeTopJob();
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      removeTopJob();
     });
-    removeTopJob();
   });
 // Helper to get CSRF token from cookies
 function getCSRFToken() {

@@ -1,0 +1,424 @@
+{% extends "base2.html" %}
+{% block title %}For Job Seekers - JobsHaru{% endblock %}
+{% block content %}
+
+<!-- Hero Section -->
+<section class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-500 via-purple-600 to-indigo-600 text-white p-10 md:p-16 shadow-lg">
+  <div class="relative z-10">
+    <div class="max-w-4xl mx-auto text-center">
+      <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight mb-6">
+        Your Dream Job is Just a 
+        <span class="bg-gradient-to-r from-yellow-300 to-orange-400 bg-clip-text text-transparent">Swipe Away</span>
+      </h1>
+      <p class="text-white/90 text-lg md:text-xl max-w-3xl mx-auto mb-8">
+        Join thousands of professionals who found their perfect career match. Apply smarter, get noticed faster, and land your dream job with AI-powered recommendations.
+      </p>
+      <div class="flex flex-wrap gap-4 justify-center">
+        <a href="/users/signup/applicant/" class="px-8 py-4 rounded-xl bg-white text-blue-600 font-semibold shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+          Start Your Journey
+        </a>
+        <a href="/users/dash_jobs/" class="px-8 py-4 rounded-xl bg-black/20 backdrop-blur border border-white/30 font-semibold hover:bg-black/30 transition-all duration-300">
+          Browse Jobs
+        </a>
+      </div>
+    </div>
+  </div>
+  <div class="absolute -right-20 -bottom-20 w-96 h-96 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
+  <div class="absolute -left-20 -top-20 w-96 h-96 bg-yellow-300/20 rounded-full blur-3xl animate-ping"></div>
+</section>
+
+<!-- Feature Highlights Grid -->
+<section class="mt-16">
+  <div class="text-center mb-12">
+    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Why Choose JobsHaru?</h2>
+    <p class="text-gray-600 text-lg max-w-2xl mx-auto">Everything you need to accelerate your career journey</p>
+  </div>
+  
+  <div class="grid md:grid-cols-2 gap-8 mb-16">
+    <div class="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 hover:shadow-xl hover:-translate-y-2 transition-all duration-300 group">
+      <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+        <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z" clip-rule="evenodd"></path>
+        </svg>
+      </div>
+      <h3 class="text-xl font-bold text-gray-900 mb-4">AI-Powered Matching</h3>
+      <p class="text-gray-600 mb-4">Our smart algorithm analyzes your skills, experience, and preferences to recommend the most relevant job opportunities.</p>
+      <ul class="space-y-2 text-sm text-gray-600">
+        <li class="flex items-center gap-2">
+          <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+          </svg>
+          Personalized job recommendations
+        </li>
+        <li class="flex items-center gap-2">
+          <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+          </svg>
+          Real-time market insights
+        </li>
+      </ul>
+    </div>
+
+    <div class="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 hover:shadow-xl hover:-translate-y-2 transition-all duration-300 group">
+      <div class="w-16 h-16 bg-gradient-to-r from-green-500 to-teal-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+        <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+        </svg>
+      </div>
+      <h3 class="text-xl font-bold text-gray-900 mb-4">One-Click Applications</h3>
+      <p class="text-gray-600 mb-4">Apply to multiple jobs with just one click. Your profile and resume are automatically formatted for each application.</p>
+      <ul class="space-y-2 text-sm text-gray-600">
+        <li class="flex items-center gap-2">
+          <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+          </svg>
+          Auto-fill applications
+        </li>
+        <li class="flex items-center gap-2">
+          <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+          </svg>
+          Track application status
+        </li>
+      </ul>
+    </div>
+
+    <div class="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 hover:shadow-xl hover:-translate-y-2 transition-all duration-300 group">
+      <div class="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+        <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+      </div>
+      <h3 class="text-xl font-bold text-gray-900 mb-4">Resume Builder</h3>
+      <p class="text-gray-600 mb-4">Create professional resumes with our AI-powered builder. Choose from modern templates and get expert suggestions.</p>
+      <ul class="space-y-2 text-sm text-gray-600">
+        <li class="flex items-center gap-2">
+          <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+          </svg>
+          Professional templates
+        </li>
+        <li class="flex items-center gap-2">
+          <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+          </svg>
+          AI content suggestions
+        </li>
+      </ul>
+    </div>
+
+    <div class="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 hover:shadow-xl hover:-translate-y-2 transition-all duration-300 group">
+      <div class="w-16 h-16 bg-gradient-to-r from-orange-500 to-red-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+        <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M18 13V5a2 2 0 00-2-2H4a2 2 0 00-2 2v8a2 2 0 002 2h3l3 3 3-3h3a2 2 0 002-2zM5 7a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1zm1 3a1 1 0 100 2h3a1 1 0 100-2H6z" clip-rule="evenodd"></path>
+        </svg>
+      </div>
+      <h3 class="text-xl font-bold text-gray-900 mb-4">Career Guidance</h3>
+      <p class="text-gray-600 mb-4">Get personalized career advice, interview tips, and skill development recommendations from industry experts.</p>
+      <ul class="space-y-2 text-sm text-gray-600">
+        <li class="flex items-center gap-2">
+          <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+          </svg>
+          Interview preparation
+        </li>
+        <li class="flex items-center gap-2">
+          <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+          </svg>
+          Skill development paths
+        </li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- Testimonials Section -->
+<section class="bg-gradient-to-r from-gray-50 to-blue-50 rounded-2xl p-8 md:p-12 mb-16">
+  <div class="text-center mb-12">
+    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Success Stories</h2>
+    <p class="text-gray-600 text-lg max-w-2xl mx-auto">See how JobsHaru helped professionals like you land their dream jobs</p>
+  </div>
+  
+  <div class="grid md:grid-cols-3 gap-8">
+    <div class="bg-white rounded-2xl p-8 shadow-lg">
+      <div class="flex items-center gap-4 mb-6">
+        <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
+          S
+        </div>
+        <div>
+          <h4 class="font-semibold text-gray-900">Sarah Chen</h4>
+          <p class="text-gray-600 text-sm">Software Engineer at TechCorp</p>
+        </div>
+      </div>
+      <p class="text-gray-600 mb-4">"JobsHaru's AI matching helped me find the perfect role that aligned with my skills and career goals. The application process was seamless!"</p>
+      <div class="flex text-yellow-400">
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+        </svg>
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+        </svg>
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+        </svg>
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+        </svg>
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+        </svg>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-2xl p-8 shadow-lg">
+      <div class="flex items-center gap-4 mb-6">
+        <div class="w-12 h-12 bg-gradient-to-r from-green-500 to-teal-600 rounded-full flex items-center justify-center text-white font-bold">
+          R
+        </div>
+        <div>
+          <h4 class="font-semibold text-gray-900">Rajesh Sharma</h4>
+          <p class="text-gray-600 text-sm">Marketing Manager at GrowthLab</p>
+        </div>
+      </div>
+      <p class="text-gray-600 mb-4">"The resume builder and career guidance features were game-changers for me. I got 3x more interview calls after optimizing my profile."</p>
+      <div class="flex text-yellow-400">
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+        </svg>
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+        </svg>
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+        </svg>
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+        </svg>
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+        </svg>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-2xl p-8 shadow-lg">
+      <div class="flex items-center gap-4 mb-6">
+        <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full flex items-center justify-center text-white font-bold">
+          P
+        </div>
+        <div>
+          <h4 class="font-semibold text-gray-900">Priya Patel</h4>
+          <p class="text-gray-600 text-sm">UX Designer at CreativeLab</p>
+        </div>
+      </div>
+      <p class="text-gray-600 mb-4">"I love how personalized the job recommendations are. JobsHaru understood my career goals and helped me transition to a better role."</p>
+      <div class="flex text-yellow-400">
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+        </svg>
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+        </svg>
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+        </svg>
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+        </svg>
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Career Tips Section -->
+<section class="mb-16">
+  <div class="text-center mb-12">
+    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Career Tips & Insights</h2>
+    <p class="text-gray-600 text-lg max-w-2xl mx-auto">Stay ahead in your career with expert advice and industry insights</p>
+  </div>
+  
+  <div class="grid md:grid-cols-3 gap-8">
+    <article class="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+      <div class="h-48 bg-gradient-to-r from-blue-500 to-purple-600"></div>
+      <div class="p-6">
+        <div class="flex items-center gap-2 text-sm text-blue-600 mb-3">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
+          </svg>
+          Career Advice
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 mb-3">How to Ace Your Next Interview</h3>
+        <p class="text-gray-600 mb-4">Learn the top strategies and common questions that will help you stand out from other candidates.</p>
+        <a href="#" class="text-blue-600 font-medium hover:text-blue-700 flex items-center gap-1">
+          Read more
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+          </svg>
+        </a>
+      </div>
+    </article>
+
+    <article class="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+      <div class="h-48 bg-gradient-to-r from-green-500 to-teal-600"></div>
+      <div class="p-6">
+        <div class="flex items-center gap-2 text-sm text-green-600 mb-3">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+          </svg>
+          Skills Development
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 mb-3">Top Skills Employers Want in 2025</h3>
+        <p class="text-gray-600 mb-4">Discover the most in-demand skills across different industries and how to develop them effectively.</p>
+        <a href="#" class="text-green-600 font-medium hover:text-green-700 flex items-center gap-1">
+          Read more
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+          </svg>
+        </a>
+      </div>
+    </article>
+
+    <article class="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+      <div class="h-48 bg-gradient-to-r from-purple-500 to-pink-600"></div>
+      <div class="p-6">
+        <div class="flex items-center gap-2 text-sm text-purple-600 mb-3">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm0 2h12v8H4V6z" clip-rule="evenodd"></path>
+          </svg>
+          Resume Tips
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 mb-3">Building a Resume That Gets Noticed</h3>
+        <p class="text-gray-600 mb-4">Learn how to craft a compelling resume that passes ATS systems and impresses hiring managers.</p>
+        <a href="#" class="text-purple-600 font-medium hover:text-purple-700 flex items-center gap-1">
+          Read more
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+          </svg>
+        </a>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- FAQ Section -->
+<section class="bg-white rounded-2xl p-8 md:p-12 shadow-lg mb-16">
+  <div class="text-center mb-12">
+    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Frequently Asked Questions</h2>
+    <p class="text-gray-600 text-lg max-w-2xl mx-auto">Everything you need to know about JobsHaru</p>
+  </div>
+  
+  <div class="max-w-3xl mx-auto space-y-4">
+    <div class="border border-gray-200 rounded-xl">
+      <button class="w-full p-6 text-left flex items-center justify-between hover:bg-gray-50 transition-colors" onclick="toggleFAQ(1)">
+        <span class="font-semibold text-gray-900">How many jobs can I apply to daily?</span>
+        <svg class="w-5 h-5 text-gray-500 transform transition-transform" id="faq-icon-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+        </svg>
+      </button>
+      <div class="hidden px-6 pb-6" id="faq-content-1">
+        <p class="text-gray-600">With our free plan, you can apply to 7 jobs per day. This limit resets every 24 hours, ensuring you have fresh opportunities daily while maintaining quality applications.</p>
+      </div>
+    </div>
+
+    <div class="border border-gray-200 rounded-xl">
+      <button class="w-full p-6 text-left flex items-center justify-between hover:bg-gray-50 transition-colors" onclick="toggleFAQ(2)">
+        <span class="font-semibold text-gray-900">Is JobsHaru really free to use?</span>
+        <svg class="w-5 h-5 text-gray-500 transform transition-transform" id="faq-icon-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+        </svg>
+      </button>
+      <div class="hidden px-6 pb-6" id="faq-content-2">
+        <p class="text-gray-600">Yes! JobsHaru is completely free for job seekers. You get access to job recommendations, resume builder, application tracking, and basic AI features at no cost.</p>
+      </div>
+    </div>
+
+    <div class="border border-gray-200 rounded-xl">
+      <button class="w-full p-6 text-left flex items-center justify-between hover:bg-gray-50 transition-colors" onclick="toggleFAQ(3)">
+        <span class="font-semibold text-gray-900">How does the AI matching work?</span>
+        <svg class="w-5 h-5 text-gray-500 transform transition-transform" id="faq-icon-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+        </svg>
+      </button>
+      <div class="hidden px-6 pb-6" id="faq-content-3">
+        <p class="text-gray-600">Our AI analyzes your skills, experience, preferences, and career goals to recommend the most relevant job opportunities. The more you use the platform, the better our recommendations become.</p>
+      </div>
+    </div>
+
+    <div class="border border-gray-200 rounded-xl">
+      <button class="w-full p-6 text-left flex items-center justify-between hover:bg-gray-50 transition-colors" onclick="toggleFAQ(4)">
+        <span class="font-semibold text-gray-900">Can I save jobs for later?</span>
+        <svg class="w-5 h-5 text-gray-500 transform transition-transform" id="faq-icon-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+        </svg>
+      </button>
+      <div class="hidden px-6 pb-6" id="faq-content-4">
+        <p class="text-gray-600">Absolutely! You can save up to 10 jobs in your favorites list with the free plan. This helps you keep track of interesting opportunities and apply when you're ready.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Footer -->
+<section class="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 rounded-2xl p-8 md:p-12 text-white text-center">
+  <h2 class="text-3xl md:text-4xl font-bold mb-4">Ready to Transform Your Career?</h2>
+  <p class="text-white/90 text-lg md:text-xl max-w-2xl mx-auto mb-8">
+    Join thousands of professionals who found their dream jobs through JobsHaru. Your perfect career match is waiting!
+  </p>
+  <div class="flex flex-wrap gap-4 justify-center">
+    <a href="/users/signup/applicant/" class="px-8 py-4 rounded-xl bg-white text-blue-600 font-semibold shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+      Create Free Account
+    </a>
+    <a href="/users/dash_jobs/" class="px-8 py-4 rounded-xl bg-black/20 backdrop-blur border border-white/30 font-semibold hover:bg-black/30 transition-all duration-300">
+      Explore Jobs
+    </a>
+    
+  </div>
+</section>
+
+<script>
+function toggleFAQ(id) {
+  const content = document.getElementById(`faq-content-${id}`);
+  const icon = document.getElementById(`faq-icon-${id}`);
+  
+  if (content.classList.contains('hidden')) {
+    content.classList.remove('hidden');
+    icon.style.transform = 'rotate(180deg)';
+  } else {
+    content.classList.add('hidden');
+    icon.style.transform = 'rotate(0deg)';
+  }
+}
+
+// Scroll animations
+function initScrollAnimations() {
+  const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+  };
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, observerOptions);
+
+  // Observe all sections
+  const sections = document.querySelectorAll('section');
+  sections.forEach(section => {
+    section.style.opacity = '0';
+    section.style.transform = 'translateY(30px)';
+    section.style.transition = 'opacity 0.8s ease-out, transform 0.8s ease-out';
+    observer.observe(section);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', initScrollAnimations);
+</script>
+
+{% endblock %}

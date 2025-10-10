@@ -44,6 +44,12 @@
                  after:content-[''] after:absolute after:left-1/2 after:-bottom-1 after:w-0 after:h-[2px] 
                  after:bg-blue-600 after:transition-all after:duration-300 after:ease-out 
                  hover:after:w-full hover:after:left-0">Jobs</a>
+                    {% if user.is_authenticated and not user.is_organization %}
+                    <a href="/users/applications/" class="text-gray-700 hover:text-primary transition font-medium relative text-gray-700 hover:text-blue-600 font-medium transition-colors duration-300
+                 after:content-[''] after:absolute after:left-1/2 after:-bottom-1 after:w-0 after:h-[2px] 
+                 after:bg-blue-600 after:transition-all after:duration-300 after:ease-out 
+                 hover:after:w-full hover:after:left-0">My Applications</a>
+                    {% endif %}
                     <a href="/internships/" class="text-gray-700 hover:text-primary transition font-medium relative text-gray-700 hover:text-blue-600 font-medium transition-colors duration-300
                  after:content-[''] after:absolute after:left-1/2 after:-bottom-1 after:w-0 after:h-[2px] 
                  after:bg-blue-600 after:transition-all after:duration-300 after:ease-out 

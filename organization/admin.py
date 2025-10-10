@@ -1,5 +1,4 @@
 from django.contrib import admin
-from .models import Job, Application
 
-admin.site.register(Job)
-admin.site.register(Application)
+# Job and Application models are registered in jobs/admin.py with custom admin classes
+# This avoids duplicate registration errors

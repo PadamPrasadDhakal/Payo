@@ -9,8 +9,12 @@ from .views import (
     profile,
     profile_edit,
     dash_jobs,
+    applications_dashboard,
     organizations,
-    payment
+    payment,
+    apply_job,
+    google_signup_redirect,
+    add_info
 )
 
 
@@ -24,8 +28,12 @@ urlpatterns = [
     path("profile/", profile, name="profile"),
     path("profile/edit/", profile_edit, name="profile_edit"),
     path("dash_jobs/", dash_jobs, name="dash_jobs"),
+    path("applications/", applications_dashboard, name="applications_dashboard"),
     path("organizations/",organizations,name="organizations"),
     path("payment/",payment,name="payment"),
+    path("apply_job/", apply_job, name="apply_job"),
+    path("google-signup-redirect/", google_signup_redirect, name="google_signup_redirect"),
+    path("add-info/", add_info, name="add_info"),
     ]
 
 

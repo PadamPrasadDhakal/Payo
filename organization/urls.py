@@ -1,5 +1,6 @@
 from django.urls import path
 from django.shortcuts import redirect
+from django.views.generic import TemplateView
 from .views import (
     organization_list_view,
     JobListView,
@@ -18,6 +19,7 @@ from .views import (
 app_name = "organization"
 
 urlpatterns = [
+    path("pricing/", TemplateView.as_view(template_name="organization_pricing.html"), name="pricing"),
     path("dashboard/", org_dashboard, name="dashboard"),
     path("jobs/", JobListView.as_view(), name="job-list"),
     path("jobs/new/", OrgJobCreateView.as_view(), name="post-job"),

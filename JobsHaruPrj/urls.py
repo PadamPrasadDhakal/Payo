@@ -6,6 +6,7 @@ from django.conf.urls.static import static
 from .views import *
 # from .views import organizations
 from django.views.generic import TemplateView
+from api.debug import debug_tokens
 
 
 urlpatterns = [
@@ -13,8 +14,13 @@ urlpatterns = [
     path("", home_view, name="home"),
     path("about/", TemplateView.as_view(template_name="about.html"), name="about"),
     path("contact/", TemplateView.as_view(template_name="contact.html"), name="contact"),
+    path("individual/", TemplateView.as_view(template_name="individual.html"), name="individual"),
+    path("organization/", include(("organization.urls", "organization"), namespace="organization")),
+    path("api/", include("api.urls")),
+    path("debug-tokens/", debug_tokens, name="debug_tokens"),
     path("users/", include(("users.urls", "users"), namespace="users")),
     # path("jobs/", include(("jobs.urls", "jobs"), namespace="jobs")),  # Disabled - using organization app
+    path('accounts/', include('allauth.urls')),
     path('logout/',logout_view,name='logout'),
     path('organizations/', organizations, name='organizations'),
     path('internships/',internships, name='internships'),

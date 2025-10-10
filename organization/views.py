@@ -38,10 +38,28 @@ class JobListView(ListView):
         # Only show jobs posted by the logged-in organization
         return Job.objects.filter(posted_by=self.request.user).order_by('-created_at')
 
+@method_decorator(login_required, name='dispatch')
 class JobDetailView(DetailView):
     model = Job
     context_object_name = "job"
     template_name = "organization/job_detail.html"
+    
+    def get_object(self):
+        job = super().get_object()
+        # Ensure the job belongs to the logged-in organization
+        if job.posted_by != self.request.user:
+            from django.http import Http404
+            raise Http404("Job not found")
+        return job
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        job = self.object
+        # Add applications with related user data
+        applications = job.applications.select_related('applicant').order_by('-created_at')
+        context['applications'] = applications
+        context['applications_count'] = applications.count()
+        return context
 
 class JobCreateView(LoginRequiredMixin, CreateView):
     model = Job

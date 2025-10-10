@@ -1,0 +1,457 @@
+{% extends "base2.html" %}
+{% load static %}
+
+{% block title %}My Applications - JobsHaru{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 py-8">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    
+    <!-- Header -->
+    <div class="mb-8">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900">My Job Applications</h1>
+          <p class="mt-2 text-gray-600">Track the status of your job applications</p>
+        </div>
+        <div class="mt-4 sm:mt-0">
+          <a href="{% url 'users:dash_jobs' %}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+            </svg>
+            Find New Jobs
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 mb-8">
+      <div class="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
+        <div class="text-2xl font-bold text-gray-900">{{ stats.total }}</div>
+        <div class="text-sm text-gray-600">Total</div>
+      </div>
+      <div class="bg-yellow-50 rounded-lg shadow-sm p-4 border border-yellow-200">
+        <div class="text-2xl font-bold text-yellow-700">{{ stats.pending }}</div>
+        <div class="text-sm text-yellow-600">Pending</div>
+      </div>
+      <div class="bg-blue-50 rounded-lg shadow-sm p-4 border border-blue-200">
+        <div class="text-2xl font-bold text-blue-700">{{ stats.reviewing }}</div>
+        <div class="text-sm text-blue-600">Reviewing</div>
+      </div>
+      <div class="bg-purple-50 rounded-lg shadow-sm p-4 border border-purple-200">
+        <div class="text-2xl font-bold text-purple-700">{{ stats.shortlisted }}</div>
+        <div class="text-sm text-purple-600">Shortlisted</div>
+      </div>
+      <div class="bg-green-50 rounded-lg shadow-sm p-4 border border-green-200">
+        <div class="text-2xl font-bold text-green-700">{{ stats.selected }}</div>
+        <div class="text-sm text-green-600">Selected</div>
+      </div>
+      <div class="bg-red-50 rounded-lg shadow-sm p-4 border border-red-200">
+        <div class="text-2xl font-bold text-red-700">{{ stats.rejected }}</div>
+        <div class="text-sm text-red-600">Rejected</div>
+      </div>
+      <div class="bg-gray-50 rounded-lg shadow-sm p-4 border border-gray-200">
+        <div class="text-2xl font-bold text-gray-700">{{ stats.withdrawn }}</div>
+        <div class="text-sm text-gray-600">Withdrawn</div>
+      </div>
+      <div class="bg-emerald-50 rounded-lg shadow-sm p-4 border border-emerald-200">
+        <div class="text-2xl font-bold text-emerald-700">{{ stats.hired }}</div>
+        <div class="text-sm text-emerald-600">Hired</div>
+      </div>
+    </div>
+
+    <!-- Filters and Search -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
+      <form method="GET" class="space-y-4 md:space-y-0 md:flex md:items-end md:gap-4">
+        
+        <!-- Search -->
+        <div class="flex-1">
+          <label for="search" class="block text-sm font-medium text-gray-700 mb-2">Search Applications</label>
+          <div class="relative">
+            <input type="text" 
+                   id="search" 
+                   name="search" 
+                   value="{{ search_query }}"
+                   placeholder="Search by job title, company, or location..."
+                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pl-10">
+            <svg class="w-5 h-5 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Status Filter -->
+        <div class="md:w-48">
+          <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Filter by Status</label>
+          <select id="status" 
+                  name="status" 
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            <option value="">All Statuses</option>
+            {% for value, label in status_choices %}
+              <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Sort -->
+        <div class="md:w-48">
+          <label for="sort" class="block text-sm font-medium text-gray-700 mb-2">Sort By</label>
+          <select id="sort" 
+                  name="sort" 
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            <option value="-created_at" {% if sort_by == '-created_at' %}selected{% endif %}>Newest First</option>
+            <option value="created_at" {% if sort_by == 'created_at' %}selected{% endif %}>Oldest First</option>
+            <option value="job__title" {% if sort_by == 'job__title' %}selected{% endif %}>Job Title A-Z</option>
+            <option value="-job__title" {% if sort_by == '-job__title' %}selected{% endif %}>Job Title Z-A</option>
+            <option value="status" {% if sort_by == 'status' %}selected{% endif %}>Status</option>
+            <option value="-job__deadline" {% if sort_by == '-job__deadline' %}selected{% endif %}>Deadline</option>
+          </select>
+        </div>
+
+        <!-- Submit -->
+        <div>
+          <button type="submit" 
+                  class="w-full md:w-auto px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+            Apply Filters
+          </button>
+        </div>
+
+        <!-- Clear -->
+        {% if search_query or status_filter or sort_by != '-created_at' %}
+        <div>
+          <a href="{% url 'users:applications_dashboard' %}" 
+             class="w-full md:w-auto inline-block px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-center">
+            Clear
+          </a>
+        </div>
+        {% endif %}
+      </form>
+    </div>
+
+    <!-- Applications List -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+      {% if page_obj %}
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Job Details</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Applied Date</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Closing Date</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              {% for application in page_obj %}
+                <tr class="hover:bg-gray-50">
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div>
+                      <div class="text-sm font-medium text-gray-900">{{ application.job.title }}</div>
+                      <div class="text-sm text-gray-500">{{ application.job.location|default:"Remote" }}</div>
+                      <div class="text-sm text-gray-500">{{ application.job.get_job_type_display }}</div>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-900">{{ application.job.posted_by.organization_name|default:application.job.posted_by.username }}</div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-900">{{ application.created_at|date:"M d, Y" }}</div>
+                    <div class="text-sm text-gray-500">{{ application.created_at|time:"g:i A" }}</div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-900">{{ application.job.get_closing_date|date:"M d, Y" }}</div>
+                    {% if application.job.is_expired %}
+                      <div class="text-sm text-red-500">Expired</div>
+                    {% else %}
+                      <div class="text-sm text-green-600">{{ application.job.days_remaining }} days left</div>
+                    {% endif %}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {{ application.get_status_color }}">
+                      {{ application.get_status_display }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <div class="flex space-x-2">
+                      <button onclick="viewApplication({{ application.id }})" 
+                              class="text-blue-600 hover:text-blue-900 transition-colors">
+                        View
+                      </button>
+                      {% if application.is_active %}
+                        <button onclick="withdrawApplication({{ application.id }})" 
+                                class="text-red-600 hover:text-red-900 transition-colors">
+                          Withdraw
+                        </button>
+                      {% endif %}
+                    </div>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+        <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+          <div class="flex-1 flex justify-between items-center">
+            <div>
+              <p class="text-sm text-gray-700">
+                Showing <span class="font-medium">{{ page_obj.start_index }}</span> to 
+                <span class="font-medium">{{ page_obj.end_index }}</span> of 
+                <span class="font-medium">{{ page_obj.paginator.count }}</span> applications
+              </p>
+            </div>
+            <div class="flex space-x-2">
+              {% if page_obj.has_previous %}
+                <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if status_filter %}status={{ status_filter }}&{% endif %}{% if sort_by %}sort={{ sort_by }}&{% endif %}page={{ page_obj.previous_page_number }}"
+                   class="px-3 py-2 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300">Previous</a>
+              {% endif %}
+              
+              <span class="px-3 py-2 text-sm bg-blue-600 text-white rounded">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+              </span>
+              
+              {% if page_obj.has_next %}
+                <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if status_filter %}status={{ status_filter }}&{% endif %}{% if sort_by %}sort={{ sort_by }}&{% endif %}page={{ page_obj.next_page_number }}"
+                   class="px-3 py-2 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300">Next</a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% endif %}
+
+      {% else %}
+        <!-- Empty State -->
+        <div class="text-center py-12">
+          <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+          <h3 class="mt-2 text-sm font-medium text-gray-900">No applications found</h3>
+          <p class="mt-1 text-sm text-gray-500">
+            {% if search_query or status_filter %}
+              Try adjusting your search or filter criteria.
+            {% else %}
+              Start applying to jobs to see them here.
+            {% endif %}
+          </p>
+          <div class="mt-6">
+            {% if search_query or status_filter %}
+              <a href="{% url 'users:applications_dashboard' %}" 
+                 class="inline-flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700">
+                Clear Filters
+              </a>
+            {% endif %}
+            <a href="{% url 'users:dash_jobs' %}" 
+               class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 ml-3">
+              Find Jobs
+            </a>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+
+<!-- Application Details Modal -->
+<div id="application-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
+  <div class="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-hidden">
+    <div class="p-6 border-b border-gray-200">
+      <div class="flex justify-between items-start">
+        <h3 class="text-lg font-semibold text-gray-900">Application Details</h3>
+        <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div id="modal-content" class="p-6 overflow-y-auto max-h-96">
+      <!-- Content will be loaded here -->
+    </div>
+  </div>
+</div>
+
+<script>
+async function viewApplication(applicationId) {
+  const modal = document.getElementById('application-modal');
+  const content = document.getElementById('modal-content');
+  
+  content.innerHTML = '<div class="text-center py-8"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div><p class="mt-2 text-gray-600">Loading application details...</p></div>';
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+  
+  try {
+    const response = await fetch(`/api/applications/${applicationId}/`);
+    const data = await response.json();
+    
+    if (data.success) {
+      const app = data.application;
+      content.innerHTML = `
+        <div class="space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <h4 class="font-semibold text-gray-900 mb-2">Application Status</h4>
+              <span class="inline-flex px-3 py-1 text-sm font-semibold rounded-full ${getStatusColorClass(app.status_code)}">
+                ${app.status}
+              </span>
+              <p class="text-sm text-gray-600 mt-2">Applied on ${new Date(app.applied_date).toLocaleDateString('en-US', {year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'})}</p>
+            </div>
+            <div>
+              <h4 class="font-semibold text-gray-900 mb-2">Job Details</h4>
+              <p class="font-medium">${app.job.title}</p>
+              <p class="text-sm text-gray-600">${app.job.posted_by}</p>
+              <p class="text-sm text-gray-600">${app.job.location} • ${app.job.job_type}</p>
+              <p class="text-sm text-gray-600">Salary: ${app.job.salary}</p>
+            </div>
+          </div>
+          
+          <div>
+            <h4 class="font-semibold text-gray-900 mb-2">Job Description</h4>
+            <div class="bg-gray-50 rounded-lg p-4 max-h-32 overflow-y-auto">
+              <p class="text-sm text-gray-700 whitespace-pre-wrap">${app.job.description}</p>
+            </div>
+          </div>
+          
+          ${app.job.requirements ? `
+          <div>
+            <h4 class="font-semibold text-gray-900 mb-2">Requirements</h4>
+            <div class="bg-gray-50 rounded-lg p-4 max-h-32 overflow-y-auto">
+              <p class="text-sm text-gray-700 whitespace-pre-wrap">${app.job.requirements}</p>
+            </div>
+          </div>
+          ` : ''}
+          
+          ${app.cover_letter ? `
+          <div>
+            <h4 class="font-semibold text-gray-900 mb-2">Your Cover Letter</h4>
+            <div class="bg-blue-50 rounded-lg p-4 max-h-32 overflow-y-auto">
+              <p class="text-sm text-gray-700 whitespace-pre-wrap">${app.cover_letter}</p>
+            </div>
+          </div>
+          ` : ''}
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <h5 class="font-medium text-gray-900 mb-1">Application Deadline</h5>
+              <p class="text-sm text-gray-600">${new Date(app.job.closing_date).toLocaleDateString('en-US', {year: 'numeric', month: 'long', day: 'numeric'})}</p>
+              ${app.job.is_expired ? 
+                '<p class="text-sm text-red-600">Expired</p>' : 
+                `<p class="text-sm text-green-600">${app.job.days_remaining} days remaining</p>`
+              }
+            </div>
+            <div>
+              <h5 class="font-medium text-gray-900 mb-1">Job Posted</h5>
+              <p class="text-sm text-gray-600">${new Date(app.job.posted_date).toLocaleDateString('en-US', {year: 'numeric', month: 'long', day: 'numeric'})}</p>
+            </div>
+          </div>
+          
+          <div class="flex space-x-3 pt-4 border-t border-gray-200">
+            <button onclick="closeModal()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">Close</button>
+            ${app.status_code !== 'RJ' && app.status_code !== 'WD' && app.status_code !== 'HD' ? 
+              `<button onclick="withdrawApplicationFromModal(${app.id})" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">Withdraw Application</button>` : 
+              ''
+            }
+          </div>
+        </div>
+      `;
+    } else {
+      content.innerHTML = `
+        <div class="text-center py-8">
+          <div class="text-red-500 text-lg mb-2">Error</div>
+          <p class="text-gray-600">${data.message || 'Failed to load application details'}</p>
+          <button onclick="closeModal()" class="mt-4 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">Close</button>
+        </div>
+      `;
+    }
+  } catch (error) {
+    content.innerHTML = `
+      <div class="text-center py-8">
+        <div class="text-red-500 text-lg mb-2">Error</div>
+        <p class="text-gray-600">Failed to load application details. Please try again.</p>
+        <button onclick="closeModal()" class="mt-4 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">Close</button>
+      </div>
+    `;
+  }
+}
+
+async function withdrawApplication(applicationId) {
+  if (!confirm('Are you sure you want to withdraw this application? This action cannot be undone.')) {
+    return;
+  }
+  
+  try {
+    const response = await fetch(`/api/applications/${applicationId}/withdraw/`, {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': getCSRFToken(),
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      alert('Application withdrawn successfully.');
+      location.reload(); // Refresh page to show updated status
+    } else {
+      alert(data.message || 'Failed to withdraw application');
+    }
+  } catch (error) {
+    alert('An error occurred while withdrawing the application');
+  }
+}
+
+async function withdrawApplicationFromModal(applicationId) {
+  await withdrawApplication(applicationId);
+  closeModal();
+}
+
+function getStatusColorClass(statusCode) {
+  const colors = {
+    'PD': 'text-yellow-600 bg-yellow-100',
+    'RV': 'text-blue-600 bg-blue-100',
+    'SL': 'text-purple-600 bg-purple-100',
+    'SE': 'text-green-600 bg-green-100',
+    'RJ': 'text-red-600 bg-red-100',
+    'WD': 'text-gray-600 bg-gray-100',
+    'HD': 'text-emerald-600 bg-emerald-100',
+  };
+  return colors[statusCode] || 'text-gray-600 bg-gray-100';
+}
+
+function getCSRFToken() {
+  const cookies = document.cookie.split(';');
+  for (let cookie of cookies) {
+    const [name, value] = cookie.trim().split('=');
+    if (name === 'csrftoken') {
+      return value;
+    }
+  }
+  return '';
+}
+
+function closeModal() {
+  const modal = document.getElementById('application-modal');
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+}
+
+// Auto-submit form when filters change
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.querySelector('form');
+  const selects = form.querySelectorAll('select');
+  
+  selects.forEach(select => {
+    select.addEventListener('change', function() {
+      form.submit();
+    });
+  });
+});
+</script>
+
+{% endblock %}
