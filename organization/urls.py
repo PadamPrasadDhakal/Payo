@@ -14,6 +14,7 @@ from .views import (
     org_dashboard,
     org_jobs,
     OrgJobCreateView,
+    update_application_status,
 )
 
 app_name = "organization"
@@ -28,6 +29,7 @@ urlpatterns = [
     path("jobs/<int:pk>/apply/", apply_job, name="apply-job"),
     path("applications/", applications_overview, name="applications-overview"),
     path("applications/<int:pk>/", application_detail, name="application-detail"),
+    path("applications/update-status/", update_application_status, name="update-application-status"),
     path("classify/", classify, name="classify"),
     path("match_resumes/", match_resumes, name="match-resumes"),
     path("users/logout/", lambda request: redirect('/users/logout/')),  # Redirect to users logout

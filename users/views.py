@@ -53,7 +53,7 @@ def signup_applicant(request):
         form = ApplicantSignUpForm(request.POST, request.FILES)
         if form.is_valid():
             user = form.save()
-            login(request, user)
+            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             return redirect("users:dashboard")
     else:
         form = ApplicantSignUpForm()
@@ -65,7 +65,7 @@ def signup_organization(request):
         form = OrganizationSignUpForm(request.POST)
         if form.is_valid():
             user = form.save()
-            login(request, user)
+            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             return redirect("users:dashboard")
     else:
         form = OrganizationSignUpForm()

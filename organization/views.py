@@ -15,6 +15,9 @@ from sklearn.metrics.pairwise import cosine_similarity
 from django.http import JsonResponse
 from django.utils import timezone
 from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+import json
 
 # Create your views here.
 
@@ -216,6 +219,53 @@ class OrgJobCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         form.instance.posted_by = self.request.user
         return super().form_valid(form)
+
+
+@login_required
+@csrf_exempt
+@require_POST
+def update_application_status(request):
+    """Update application status with optional notes"""
+    try:
+        data = json.loads(request.body)
+        application_id = data.get('application_id')
+        new_status = data.get('status')
+        notes = data.get('notes', '')
+        
+        if not application_id or not new_status:
+            return JsonResponse({'error': 'Missing required fields'}, status=400)
+        
+        # Get application and verify organization owns the job
+        application = get_object_or_404(Application, id=application_id)
+        if application.job.posted_by != request.user:
+            return JsonResponse({'error': 'Unauthorized'}, status=403)
+        
+        # Validate status
+        valid_statuses = [choice[0] for choice in Application.Status.choices]
+        if new_status not in valid_statuses:
+            return JsonResponse({'error': 'Invalid status'}, status=400)
+        
+        # Update application
+        old_status = application.status
+        application.status = new_status
+        application.reviewed_at = timezone.now()
+        if notes:
+            application.notes = notes
+        application.save()
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'Application status updated to {application.get_status_display()}',
+            'old_status': old_status,
+            'new_status': new_status,
+            'status_display': application.get_status_display(),
+            'status_color': application.get_status_color()
+        })
+        
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
 
 
 

@@ -9,12 +9,23 @@
     
     <!-- Header -->
     <div class="mb-8">
+      <!-- Status Change Notifications -->
+      <div id="status-notifications" class="mb-6">
+        <!-- Notifications will be loaded here -->
+      </div>
+      
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 class="text-3xl font-bold text-gray-900">My Job Applications</h1>
           <p class="mt-2 text-gray-600">Track the status of your job applications</p>
         </div>
-        <div class="mt-4 sm:mt-0">
+        <div class="mt-4 sm:mt-0 flex space-x-3">
+          <button onclick="checkForUpdates()" class="inline-flex items-center px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+            Refresh
+          </button>
           <a href="{% url 'users:dash_jobs' %}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
@@ -451,7 +462,105 @@ document.addEventListener('DOMContentLoaded', function() {
       form.submit();
     });
   });
+  
+  // Check for status updates on page load
+  checkForUpdates();
+  
+  // Auto-refresh every 30 seconds
+  setInterval(checkForUpdates, 30000);
 });
+
+// Notification functions
+let lastChecked = localStorage.getItem('lastStatusCheck') || Date.now();
+
+function checkForUpdates() {
+  fetch('/api/applications/recent-updates/', {
+    method: 'GET',
+    headers: {
+      'X-CSRFToken': getCSRFToken(),
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success && data.updates.length > 0) {
+      showStatusNotifications(data.updates);
+    }
+    localStorage.setItem('lastStatusCheck', Date.now());
+  })
+  .catch(error => {
+    console.error('Error checking for updates:', error);
+  });
+}
+
+function showStatusNotifications(updates) {
+  const container = document.getElementById('status-notifications');
+  container.innerHTML = '';
+  
+  updates.forEach(update => {
+    const notification = document.createElement('div');
+    notification.className = `mb-3 p-4 rounded-lg border-l-4 ${getNotificationColor(update.status)} bg-white shadow-md`;
+    notification.innerHTML = `
+      <div class="flex justify-between items-start">
+        <div class="flex">
+          <div class="flex-shrink-0">
+            ${getStatusIcon(update.status)}
+          </div>
+          <div class="ml-3">
+            <p class="text-sm font-medium text-gray-900">
+              Application Status Updated
+            </p>
+            <p class="text-sm text-gray-600">
+              Your application for <strong>${update.job_title}</strong> has been 
+              <span class="font-semibold">${update.status_display}</span>
+            </p>
+            <p class="text-xs text-gray-500 mt-1">
+              ${timeAgo(update.updated_at)}
+            </p>
+          </div>
+        </div>
+        <button onclick="this.parentElement.parentElement.remove()" class="text-gray-400 hover:text-gray-600">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+    `;
+    container.appendChild(notification);
+  });
+}
+
+function getNotificationColor(status) {
+  const colors = {
+    'RV': 'border-blue-400',
+    'SL': 'border-purple-400', 
+    'SE': 'border-green-400',
+    'RJ': 'border-red-400',
+    'HD': 'border-emerald-400',
+  };
+  return colors[status] || 'border-gray-400';
+}
+
+function getStatusIcon(status) {
+  const icons = {
+    'RV': '<svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>',
+    'SL': '<svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>',
+    'SE': '<svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>',
+    'RJ': '<svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>',
+    'HD': '<svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>',
+  };
+  return icons[status] || '<svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+}
+
+function timeAgo(dateString) {
+  const now = new Date();
+  const date = new Date(dateString);
+  const diffInSeconds = Math.floor((now - date) / 1000);
+  
+  if (diffInSeconds < 60) return 'Just now';
+  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
+  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+  return `${Math.floor(diffInSeconds / 86400)} days ago`;
+}
 </script>
 
 {% endblock %}

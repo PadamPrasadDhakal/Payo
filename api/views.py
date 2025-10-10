@@ -309,3 +309,37 @@ def withdraw_application(request, application_id):
         return JsonResponse({'error': 'Application not found'}, status=404)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required
+def recent_application_updates(request):
+    """Get recent status updates for user's applications"""
+    try:
+        # Get applications updated in the last 24 hours
+        from datetime import timedelta
+        recent_cutoff = timezone.now() - timedelta(days=1)
+        
+        updates = Application.objects.filter(
+            applicant=request.user,
+            reviewed_at__gte=recent_cutoff,
+            reviewed_at__isnull=False
+        ).select_related('job').order_by('-reviewed_at')[:10]
+        
+        update_list = []
+        for app in updates:
+            update_list.append({
+                'id': app.id,
+                'job_title': app.job.title,
+                'status': app.status,
+                'status_display': app.get_status_display(),
+                'updated_at': app.reviewed_at.isoformat(),
+                'notes': app.notes
+            })
+        
+        return JsonResponse({
+            'success': True,
+            'updates': update_list
+        })
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

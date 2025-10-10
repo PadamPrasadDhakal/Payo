@@ -11,4 +11,5 @@ urlpatterns = [
     path('user/ack_tokens_restored/', views.ack_tokens_restored, name='api_ack_tokens_restored'),
     path('applications/<int:application_id>/', views.application_detail, name='api_application_detail'),
     path('applications/<int:application_id>/withdraw/', views.withdraw_application, name='api_withdraw_application'),
+    path('applications/recent-updates/', views.recent_application_updates, name='api_recent_updates'),
 ]

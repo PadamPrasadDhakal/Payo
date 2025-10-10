@@ -96,22 +96,63 @@
         </td>
         <td class="px-4 py-2">{{ app.created_at|date:'M d, Y' }}</td>
         <td class="px-4 py-2">
-          <span class="px-2 py-1 rounded text-xs font-medium
+          <span class="px-2 py-1 rounded text-xs font-medium application-status-{{ app.id }}
             {% if app.status == 'HD' %}bg-green-200 text-green-800
+            {% elif app.status == 'SE' %}bg-green-200 text-green-800
             {% elif app.status == 'SL' %}bg-blue-200 text-blue-800
+            {% elif app.status == 'RV' %}bg-purple-200 text-purple-800
             {% elif app.status == 'RJ' %}bg-red-200 text-red-800
-            {% else %}bg-gray-200 text-gray-800{% endif %}">
+            {% elif app.status == 'WD' %}bg-gray-200 text-gray-800
+            {% else %}bg-yellow-200 text-yellow-800{% endif %}">
             {{ app.get_status_display }}
           </span>
         </td>
         <td class="px-4 py-2">
-          <div class="flex space-x-2">
-            {% if app.applicant.resume %}
-              <a href="{{ app.applicant.resume.url }}" target="_blank" 
-                 class="text-blue-600 hover:text-blue-800 text-sm">View Resume</a>
-            {% endif %}
-            <a href="{% url 'organization:application-detail' app.pk %}" 
-               class="text-indigo-600 hover:text-indigo-800 text-sm">Details</a>
+          <div class="flex flex-col space-y-1">
+            <!-- Action buttons -->
+            <div class="flex space-x-1">
+              {% if app.status == 'PD' or app.status == 'RV' %}
+                <button onclick="updateStatus({{ app.id }}, 'RV', 'Under Review')" 
+                        class="bg-purple-500 hover:bg-purple-600 text-white text-xs px-2 py-1 rounded">
+                  Review
+                </button>
+                <button onclick="updateStatus({{ app.id }}, 'SL', 'Shortlisted')" 
+                        class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-2 py-1 rounded">
+                  Shortlist
+                </button>
+                <button onclick="openRejectDialog({{ app.id }})" 
+                        class="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 rounded">
+                  Reject
+                </button>
+              {% elif app.status == 'SL' %}
+                <button onclick="updateStatus({{ app.id }}, 'SE', 'Selected for Interview')" 
+                        class="bg-green-500 hover:bg-green-600 text-white text-xs px-2 py-1 rounded">
+                  Select
+                </button>
+                <button onclick="openRejectDialog({{ app.id }})" 
+                        class="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 rounded">
+                  Reject
+                </button>
+              {% elif app.status == 'SE' %}
+                <button onclick="updateStatus({{ app.id }}, 'HD', 'Hired Successfully')" 
+                        class="bg-emerald-500 hover:bg-emerald-600 text-white text-xs px-2 py-1 rounded">
+                  Hire
+                </button>
+                <button onclick="openRejectDialog({{ app.id }})" 
+                        class="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 rounded">
+                  Reject
+                </button>
+              {% endif %}
+            </div>
+            <!-- View actions -->
+            <div class="flex space-x-1">
+              {% if app.applicant.resume %}
+                <a href="{{ app.applicant.resume.url }}" target="_blank" 
+                   class="text-blue-600 hover:text-blue-800 text-xs">Resume</a>
+              {% endif %}
+              <a href="{% url 'organization:application-detail' app.pk %}" 
+                 class="text-indigo-600 hover:text-indigo-800 text-xs">Details</a>
+            </div>
           </div>
         </td>
       </tr>
@@ -141,4 +182,128 @@
     </div>
   </div>
 </div>
+
+<!-- Reject Dialog -->
+<div id="rejectDialog" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+  <div class="flex items-center justify-center min-h-screen">
+    <div class="bg-white rounded-lg p-6 w-96">
+      <h3 class="text-lg font-semibold mb-4">Reject Application</h3>
+      <p class="text-gray-600 mb-4">Are you sure you want to reject this application? Please provide a reason:</p>
+      <textarea id="rejectReason" 
+                class="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500" 
+                rows="3" placeholder="Reason for rejection (optional)"></textarea>
+      <div class="flex justify-end space-x-2 mt-4">
+        <button onclick="closeRejectDialog()" 
+                class="px-4 py-2 text-gray-600 border rounded hover:bg-gray-100">
+          Cancel
+        </button>
+        <button onclick="confirmReject()" 
+                class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
+          Reject
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Success/Error Messages -->
+<div id="messageContainer" class="fixed top-4 right-4 z-50"></div>
+
+<script>
+let currentApplicationId = null;
+
+function showMessage(message, type = 'success') {
+  const container = document.getElementById('messageContainer');
+  const messageDiv = document.createElement('div');
+  messageDiv.className = `mb-2 px-4 py-2 rounded shadow-lg text-white ${
+    type === 'success' ? 'bg-green-500' : 'bg-red-500'
+  }`;
+  messageDiv.textContent = message;
+  
+  container.appendChild(messageDiv);
+  
+  // Auto remove after 3 seconds
+  setTimeout(() => {
+    if (messageDiv.parentNode) {
+      messageDiv.parentNode.removeChild(messageDiv);
+    }
+  }, 3000);
+}
+
+function updateStatus(applicationId, status, message) {
+  fetch('{% url "organization:update-application-status" %}', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': getCSRFToken(),
+    },
+    body: JSON.stringify({
+      application_id: applicationId,
+      status: status,
+      notes: message
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      showMessage(data.message, 'success');
+      // Update status display
+      const statusElement = document.querySelector(`.application-status-${applicationId}`);
+      if (statusElement) {
+        statusElement.textContent = data.status_display;
+        statusElement.className = `px-2 py-1 rounded text-xs font-medium application-status-${applicationId} ${data.status_color}`;
+      }
+      // Reload page to update action buttons
+      setTimeout(() => location.reload(), 1000);
+    } else {
+      showMessage(data.error || 'Failed to update status', 'error');
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    showMessage('An error occurred while updating status', 'error');
+  });
+}
+
+function openRejectDialog(applicationId) {
+  currentApplicationId = applicationId;
+  document.getElementById('rejectDialog').classList.remove('hidden');
+  document.getElementById('rejectReason').value = '';
+}
+
+function closeRejectDialog() {
+  document.getElementById('rejectDialog').classList.add('hidden');
+  currentApplicationId = null;
+}
+
+function confirmReject() {
+  const reason = document.getElementById('rejectReason').value;
+  const notes = reason ? `Rejected: ${reason}` : 'Application rejected';
+  
+  updateStatus(currentApplicationId, 'RJ', notes);
+  closeRejectDialog();
+}
+
+function getCSRFToken() {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, 10) === ('csrftoken=')) {
+        cookieValue = decodeURIComponent(cookie.substring(10));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+
+// Close dialog when clicking outside
+document.getElementById('rejectDialog').addEventListener('click', function(e) {
+  if (e.target === this) {
+    closeRejectDialog();
+  }
+});
+</script>
 {% endblock %}
