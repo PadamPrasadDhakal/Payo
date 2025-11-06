@@ -24,7 +24,8 @@ urlpatterns = [
     path("dashboard/", org_dashboard, name="dashboard"),
     path("jobs/", JobListView.as_view(), name="job-list"),
     path("jobs/new/", OrgJobCreateView.as_view(), name="post-job"),
-    path("", organization_list_view, name="list"),
+    # Serve a public marketing/home page for organizations at /organization/
+    path("", TemplateView.as_view(template_name="organization.html"), name="list"),
     path("jobs/<int:pk>/", JobDetailView.as_view(), name="job-detail"),
     path("jobs/<int:pk>/apply/", apply_job, name="apply-job"),
     path("applications/", applications_overview, name="applications-overview"),

@@ -21,7 +21,9 @@ import json
 
 # Create your views here.
 
+@login_required
 def organization_list_view(request):
+    # Only allow logged-in organizations to view their jobs list
     org = request.user
     jobs = Job.objects.filter(posted_by=org).order_by('-created_at')[:3]
     for job in jobs:
