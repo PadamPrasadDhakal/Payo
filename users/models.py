@@ -292,3 +292,34 @@ class KycAudit(models.Model):
         return f"KycAudit({self.kyc_type}#{self.kyc_id} by {self.actor})"
 
 
+class Notification(models.Model):
+    NOTIFICATION_TYPES = (
+        ('KYC_VERIFIED', 'KYC Verified'),
+        ('KYC_REJECTED', 'KYC Rejected'),
+        ('KYC_SUBMITTED', 'KYC Submitted'),
+        ('KYC_MORE_INFO', 'KYC Request More Info'),
+        ('JOB_APPLICATION', 'Job Application'),
+        ('JOB_SHORTLIST', 'Job Shortlist'),
+        ('JOB_OFFER', 'Job Offer'),
+        ('GENERAL', 'General Notification'),
+    )
+    
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    title = models.CharField(max_length=255)
+    message = models.TextField()
+    notification_type = models.CharField(max_length=20, choices=NOTIFICATION_TYPES, default='GENERAL')
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    related_id = models.IntegerField(blank=True, null=True, help_text="ID of related KYC/Job/Application")
+    
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['user', '-created_at']),
+            models.Index(fields=['user', 'is_read']),
+        ]
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.title}"
+

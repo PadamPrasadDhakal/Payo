@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+
+{% block title %}KYC Profile{% endblock %}
+
+{% block content %}
+<div class="container mx-auto py-8">
+    <h1 class="text-3xl font-bold mb-8 text-gray-800">KYC Verification Status</h1>
+    
+    {% if kyc %}
+        <!-- Status Card -->
+        <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Status -->
+                <div class="border-r border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-4">Verification Status</h3>
+                    <div class="mb-4">
+                        {% if kyc.status == 'VERIFIED' %}
+                            <span class="inline-block px-4 py-2 bg-green-100 text-green-800 rounded-full font-semibold">
+                                ✓ VERIFIED
+                            </span>
+                        {% elif kyc.status == 'REJECTED' %}
+                            <span class="inline-block px-4 py-2 bg-red-100 text-red-800 rounded-full font-semibold">
+                                ✗ REJECTED
+                            </span>
+                        {% elif kyc.status == 'SUBMITTED' %}
+                            <span class="inline-block px-4 py-2 bg-blue-100 text-blue-800 rounded-full font-semibold">
+                                ⏳ UNDER REVIEW
+                            </span>
+                        {% else %}
+                            <span class="inline-block px-4 py-2 bg-gray-100 text-gray-800 rounded-full font-semibold">
+                                ✏ DRAFT
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Progress -->
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-700 mb-4">Current Step</h3>
+                    <div class="flex items-center gap-2">
+                        <div class="text-3xl font-bold text-blue-600">{{ kyc.current_step }}</div>
+                        <div class="text-gray-600">/ 3</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Rejection Reason (if rejected) -->
+            {% if kyc.status == 'REJECTED' and kyc.rejection_reason %}
+            <div class="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <h4 class="font-semibold text-red-700 mb-2">Reason for Rejection:</h4>
+                <p class="text-red-600">{{ kyc.rejection_reason }}</p>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Details Section -->
+        <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Submitted Information</h2>
+            
+            {% if kyc_type == 'individual' %}
+                <!-- Individual KYC Details -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Step 1 -->
+                    <div class="border-l-4 border-blue-500 pl-4">
+                        <h3 class="font-semibold text-gray-700 mb-3">Personal Information</h3>
+                        <div class="space-y-2 text-sm text-gray-600">
+                            <p><strong>Full Name:</strong> {{ kyc.full_name }}</p>
+                            <p><strong>Date of Birth:</strong> {{ kyc.date_of_birth|date:"M d, Y" }}</p>
+                            <p><strong>Gender:</strong> {{ kyc.gender }}</p>
+                            <p><strong>Nationality:</strong> {{ kyc.nationality }}</p>
+                            <p><strong>Marital Status:</strong> {{ kyc.marital_status }}</p>
+                            <p><strong>Occupation:</strong> {{ kyc.occupation }}</p>
+                            <p><strong>Education Level:</strong> {{ kyc.education_level }}</p>
+                            <p><strong>Mobile:</strong> {{ kyc.mobile_number }}</p>
+                            <p><strong>Email:</strong> {{ kyc.email_address }}</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 2 -->
+                    <div class="border-l-4 border-green-500 pl-4">
+                        <h3 class="font-semibold text-gray-700 mb-3">Identification</h3>
+                        <div class="space-y-2 text-sm text-gray-600">
+                            <p><strong>Citizenship #:</strong> {{ kyc.citizenship_number }}</p>
+                            <p><strong>Issue Date:</strong> {{ kyc.citizenship_issue_date|date:"M d, Y" }}</p>
+                            <p><strong>Issue District:</strong> {{ kyc.citizenship_issue_district }}</p>
+                            <p><strong>Passport #:</strong> {{ kyc.passport_number|default:"N/A" }}</p>
+                            <p><strong>License #:</strong> {{ kyc.driving_license_number|default:"N/A" }}</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 3 -->
+                    <div class="border-l-4 border-purple-500 pl-4">
+                        <h3 class="font-semibold text-gray-700 mb-3">Additional Info</h3>
+                        <div class="space-y-2 text-sm text-gray-600">
+                            <p><strong>Father's Name:</strong> {{ kyc.father_name }}</p>
+                            <p><strong>Mother's Name:</strong> {{ kyc.mother_name }}</p>
+                            <p><strong>Monthly Transaction:</strong> {{ kyc.expected_monthly_transaction }}</p>
+                            <p><strong>Annual Income:</strong> {{ kyc.annual_income_range }}</p>
+                            <p><strong>Purpose:</strong> {{ kyc.purpose_of_account }}</p>
+                            <p><strong>PEP:</strong> {% if kyc.is_pep %}Yes{% else %}No{% endif %}</p>
+                            <p><strong>FATCA:</strong> {% if kyc.is_fatca %}Yes{% else %}No{% endif %}</p>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <!-- Organization KYC Details -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Step 1 -->
+                    <div class="border-l-4 border-blue-500 pl-4">
+                        <h3 class="font-semibold text-gray-700 mb-3">Organization Info</h3>
+                        <div class="space-y-2 text-sm text-gray-600">
+                            <p><strong>Organization Name:</strong> {{ kyc.org_name }}</p>
+                            <p><strong>Registration #:</strong> {{ kyc.registration_number }}</p>
+                            <p><strong>Type:</strong> {{ kyc.organization_type }}</p>
+                            <p><strong>PAN/VAT:</strong> {{ kyc.pan_vat_number }}</p>
+                            <p><strong>Industry:</strong> {{ kyc.industry_type }}</p>
+                            <p><strong>Contact:</strong> {{ kyc.contact_number }}</p>
+                            <p><strong>Email:</strong> {{ kyc.email_address }}</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 3 -->
+                    <div class="border-l-4 border-purple-500 pl-4">
+                        <h3 class="font-semibold text-gray-700 mb-3">Verification</h3>
+                        <div class="space-y-2 text-sm text-gray-600">
+                            <p><strong>Source of Funds:</strong> {{ kyc.source_of_funds }}</p>
+                            <p><strong>Monthly Transaction:</strong> {{ kyc.expected_monthly_transaction_volume }}</p>
+                            <p><strong>PEP:</strong> {% if kyc.is_pep %}Yes{% else %}No{% endif %}</p>
+                            <p><strong>FATCA:</strong> {% if kyc.is_fatca %}Yes{% else %}No{% endif %}</p>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Timeline -->
+        <div class="bg-white rounded-lg shadow-lg p-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">KYC Timeline</h2>
+            <div class="space-y-4">
+                <div class="flex gap-4">
+                    <div class="flex-shrink-0">
+                        <div class="flex items-center justify-center h-8 w-8 rounded-full bg-blue-600 text-white">
+                            ✓
+                        </div>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-gray-800">Submitted</p>
+                        <p class="text-gray-600 text-sm">{{ kyc.submitted_at|date:"M d, Y at H:i" }}</p>
+                    </div>
+                </div>
+                <div class="flex gap-4">
+                    <div class="flex-shrink-0">
+                        <div class="flex items-center justify-center h-8 w-8 rounded-full {% if kyc.status == 'VERIFIED' %}bg-green-600{% elif kyc.status == 'REJECTED' %}bg-red-600{% else %}bg-gray-400{% endif %} text-white">
+                            {% if kyc.status == 'VERIFIED' %}✓{% elif kyc.status == 'REJECTED' %}✗{% else %}⏳{% endif %}
+                        </div>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-gray-800">
+                            {% if kyc.status == 'VERIFIED' %}Verified{% elif kyc.status == 'REJECTED' %}Rejected{% else %}Under Review{% endif %}
+                        </p>
+                        <p class="text-gray-600 text-sm">{{ kyc.updated_at|date:"M d, Y at H:i" }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="mt-8 flex gap-4">
+            {% if kyc.status == 'DRAFT' or kyc.status == 'REJECTED' %}
+            <a href="{% url 'kyc_form' %}" class="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700">
+                {% if kyc.status == 'DRAFT' %}Continue KYC{% else %}Resubmit KYC{% endif %}
+            </a>
+            {% endif %}
+            <a href="{% url 'notifications' %}" class="px-6 py-3 bg-gray-600 text-white rounded-lg font-semibold hover:bg-gray-700">
+                View Notifications
+            </a>
+        </div>
+    {% else %}
+        <!-- No KYC Found -->
+        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-8 text-center">
+            <h2 class="text-2xl font-bold text-yellow-800 mb-4">No KYC Found</h2>
+            <p class="text-yellow-700 mb-6">You haven't started your KYC verification yet.</p>
+            <a href="{% url 'kyc_form' %}" class="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700">
+                Start KYC Verification
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -23,7 +23,7 @@ import json
 from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import Http404
 from django.core.paginator import Paginator
-from users.models import IndividualKYC, OrganizationKYC, KycAudit
+from users.models import IndividualKYC, OrganizationKYC, KycAudit, Notification
 
 class UserLoginView(LoginView):
     template_name = "users/login.html"
@@ -408,3 +408,78 @@ def apply_job(request):
             return JsonResponse({'error': str(e)}, status=500)
     
     return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+
+@login_required
+def kyc_profile(request):
+    """Display user's KYC status and details"""
+    context = {}
+    
+    if request.user.is_applicant():
+        try:
+            kyc = IndividualKYC.objects.get(user=request.user)
+            context['kyc'] = kyc
+            context['kyc_type'] = 'individual'
+        except IndividualKYC.DoesNotExist:
+            context['kyc'] = None
+            context['kyc_type'] = 'individual'
+    else:
+        try:
+            kyc = OrganizationKYC.objects.get(user=request.user)
+            context['kyc'] = kyc
+            context['kyc_type'] = 'organization'
+        except OrganizationKYC.DoesNotExist:
+            context['kyc'] = None
+            context['kyc_type'] = 'organization'
+    
+    context['is_verified'] = request.user.is_kyc_verified
+    context['title'] = 'KYC Profile'
+    return render(request, 'users/kyc_profile.html', context)
+
+
+@login_required
+def notifications(request):
+    """Display all user notifications with pagination"""
+    all_notifications = request.user.notifications.all()
+    
+    # Mark as read if requested
+    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        action = request.POST.get('action')
+        
+        if action == 'mark_all_read':
+            all_notifications.filter(is_read=False).update(is_read=True)
+            return JsonResponse({'message': 'All notifications marked as read', 'success': True})
+        
+        elif action == 'mark_read':
+            notification_id = request.POST.get('notification_id')
+            try:
+                notif = Notification.objects.get(id=notification_id, user=request.user)
+                notif.is_read = True
+                notif.save()
+                return JsonResponse({'message': 'Notification marked as read', 'success': True})
+            except Notification.DoesNotExist:
+                return JsonResponse({'error': 'Notification not found'}, status=404)
+        
+        return JsonResponse({'error': 'Invalid action'}, status=400)
+    
+    # Pagination for GET request
+    paginator = Paginator(all_notifications, 10)
+    page_number = request.GET.get('page', 1)
+    notifications_page = paginator.get_page(page_number)
+    
+    # Count unread
+    unread_count = all_notifications.filter(is_read=False).count()
+    
+    context = {
+        'notifications': notifications_page,
+        'unread_count': unread_count,
+        'title': 'Notifications'
+    }
+    return render(request, 'users/notifications.html', context)
+
+
+@login_required
+def notification_count_api(request):
+    """API endpoint for getting unread notification count"""
+    unread_count = request.user.notifications.filter(is_read=False).count()
+    return JsonResponse({'unread_count': unread_count, 'success': True})
