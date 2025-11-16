@@ -166,10 +166,20 @@
         
         <!-- Action Buttons -->
         <div class="mt-8 flex gap-4">
-            {% if kyc.status == 'DRAFT' or kyc.status == 'REJECTED' %}
+            {% if is_editable %}
             <a href="{% url 'kyc_form' %}" class="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700">
-                {% if kyc.status == 'DRAFT' %}Continue KYC{% else %}Resubmit KYC{% endif %}
+                {% if kyc.status == 'DRAFT' %}Continue KYC{% elif kyc.status == 'REJECTED' %}Resubmit KYC{% else %}Edit KYC{% endif %}
             </a>
+            {% else %}
+                {% if kyc.status == 'VERIFIED' %}
+                <div class="px-6 py-3 bg-green-100 text-green-800 rounded-lg font-semibold border border-green-300">
+                    ✓ KYC Verified - Cannot be edited
+                </div>
+                {% elif kyc.status == 'SUBMITTED' %}
+                <div class="px-6 py-3 bg-blue-100 text-blue-800 rounded-lg font-semibold border border-blue-300">
+                    ⏳ Under Review - Cannot be edited yet
+                </div>
+                {% endif %}
             {% endif %}
             <a href="{% url 'notifications' %}" class="px-6 py-3 bg-gray-600 text-white rounded-lg font-semibold hover:bg-gray-700">
                 View Notifications

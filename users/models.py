@@ -181,6 +181,14 @@ class KycBase(models.Model):
 
     class Meta:
         abstract = True
+    
+    def is_editable(self):
+        """Check if KYC can be edited. Only REJECTED and SUBMITTED statuses allow editing."""
+        return self.status in [self.KycStatus.REJECTED, self.KycStatus.SUBMITTED]
+    
+    def can_view(self):
+        """User can always view their own KYC"""
+        return True
 
 
 class IndividualKYC(KycBase):

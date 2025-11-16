@@ -218,10 +218,42 @@ def kyc_form_view(request):
     # Check if user already has KYC submitted/verified
     kyc_status = request.user.get_kyc_status()
     
+    # Check if KYC can be edited
+    can_edit = True
+    edit_error = None
+    
+    try:
+        if kyc_type == 'individual':
+            kyc = IndividualKYC.objects.get(user=request.user)
+        else:
+            kyc = OrganizationKYC.objects.get(user=request.user)
+        
+        # Only allow editing if status is REJECTED or SUBMITTED
+        if not kyc.is_editable():
+            can_edit = False
+            if kyc.status == 'VERIFIED':
+                edit_error = 'Your KYC is verified. You cannot edit it.'
+            elif kyc.status == 'DRAFT':
+                edit_error = 'Your KYC is still in draft. Please complete and submit it first.'
+    except (IndividualKYC.DoesNotExist, OrganizationKYC.DoesNotExist):
+        # New KYC, allow to create
+        can_edit = True
+    
+    # If cannot edit, show error page
+    if not can_edit:
+        context = {
+            'kyc_type': kyc_type,
+            'kyc_status': kyc_status,
+            'error': edit_error,
+            'can_edit': False
+        }
+        return render(request, 'users/kyc_form.html', context)
+    
     context = {
         'kyc_type': kyc_type,
         'kyc_status': kyc_status,
-        'show_banner': request.user.needs_kyc_banner()
+        'show_banner': request.user.needs_kyc_banner(),
+        'can_edit': True
     }
     return render(request, 'users/kyc_form.html', context)
 
@@ -412,7 +444,7 @@ def apply_job(request):
 
 @login_required
 def kyc_profile(request):
-    """Display user's KYC status and details"""
+    """Display user's KYC status and details. URL depends on user type."""
     context = {}
     
     if request.user.is_applicant():
@@ -434,6 +466,12 @@ def kyc_profile(request):
     
     context['is_verified'] = request.user.is_kyc_verified
     context['title'] = 'KYC Profile'
+    
+    # Check if editable
+    if context['kyc']:
+        context['is_editable'] = context['kyc'].is_editable()
+        context['edit_message'] = 'You can edit your KYC' if context['is_editable'] else 'Your KYC cannot be edited in this status'
+    
     return render(request, 'users/kyc_profile.html', context)
 
 

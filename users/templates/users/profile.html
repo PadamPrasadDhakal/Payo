@@ -81,4 +81,42 @@
 
 </div>
 
+<!-- KYC Status Section -->
+<div class="mt-12 mb-8">
+  <div class="bg-white rounded-2xl shadow-lg p-10 hover:shadow-2xl transition">
+    <h3 class="font-semibold text-2xl mb-6 text-primary flex items-center gap-2">
+      <span class="text-2xl">🔐</span> KYC Verification Status
+    </h3>
+    
+    {% if user.is_kyc_verified %}
+      <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-lg mb-6">
+        <p class="text-green-800 font-semibold">✓ KYC Verified</p>
+        <p class="text-green-700 text-sm mt-1">Your identity has been verified. You can enjoy all features.</p>
+      </div>
+    {% else %}
+      <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded-lg mb-6">
+        <p class="text-yellow-800 font-semibold">⚠ KYC Not Verified</p>
+        <p class="text-yellow-700 text-sm mt-1">
+          {% if user.is_applicant %}
+            Complete KYC to apply for unlimited jobs. Unverified users can apply to only 2 jobs per day.
+          {% else %}
+            Complete KYC to post jobs on our platform.
+          {% endif %}
+        </p>
+      </div>
+    {% endif %}
+    
+    <div class="flex gap-4">
+      <a href="{% url 'kyc_profile' %}" class="inline-block px-6 py-3 rounded-lg bg-primary text-white hover:bg-purple-700 transition transform hover:scale-105 shadow">
+        View KYC Details
+      </a>
+      {% if not user.is_kyc_verified %}
+      <a href="{% url 'kyc_form' %}" class="inline-block px-6 py-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition transform hover:scale-105 shadow">
+        Start KYC Verification
+      </a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
 {% endblock %}
