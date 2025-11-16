@@ -1,0 +1,55 @@
+{% extends "base2.html" %}
+{% block title %}KYC Detail{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto">
+  <h2 class="text-2xl font-bold mb-4">KYC Detail</h2>
+  <div class="bg-white p-6 rounded shadow">
+    <h3 class="font-semibold">Type: {{ kyc_type }}</h3>
+    <p class="text-sm text-gray-600">Status: {{ kyc.status }}</p>
+    <p class="mt-4">User: <a href="/admin/auth/user/{{ kyc.user.id }}/change/">{{ kyc.user.username }}</a></p>
+
+    <div class="mt-4">
+      {% for field, value in kyc.__dict__.items %}
+        {% if field not in ['_state','id','user_id'] %}
+          <div class="mb-2">
+            <strong>{{ field }}:</strong>
+            <div class="text-sm text-gray-700">{{ value }}</div>
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+
+    <div class="mt-6 flex gap-2">
+      <button id="btn-verify" class="px-4 py-2 bg-green-600 text-white rounded">Verify</button>
+      <button id="btn-reject" class="px-4 py-2 bg-red-600 text-white rounded">Reject</button>
+      <a href="/users/cms/?model=kyc" class="px-4 py-2 bg-gray-200 rounded">Back</a>
+    </div>
+
+    <div id="action-result" class="mt-3 text-sm"></div>
+  </div>
+</div>
+
+<script>
+const kycType = '{{ kyc_type }}';
+const kycId = '{{ kyc.id }}';
+
+function getCookie(name) {
+  const v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+  return v ? v[2] : null;
+}
+
+document.getElementById('btn-verify').addEventListener('click', ()=>{
+  if(!confirm('Mark KYC as VERIFIED?')) return;
+  fetch(`/api/kyc/${kycType}/${kycId}/admin_action/`, {method:'POST', headers: {'Content-Type':'application/json', 'X-CSRFToken': getCookie('csrftoken')}, body: JSON.stringify({status:'VERIFIED', reason: ''})})
+    .then(r=>r.json()).then(d=>{ document.getElementById('action-result').innerText = JSON.stringify(d); if(d.success) location.reload(); })
+});
+
+document.getElementById('btn-reject').addEventListener('click', ()=>{
+  const reason = prompt('Enter rejection reason:');
+  if(!reason) return;
+  fetch(`/api/kyc/${kycType}/${kycId}/admin_action/`, {method:'POST', headers: {'Content-Type':'application/json', 'X-CSRFToken': getCookie('csrftoken')}, body: JSON.stringify({status:'REJECTED', reason: reason})})
+    .then(r=>r.json()).then(d=>{ document.getElementById('action-result').innerText = JSON.stringify(d); if(d.success) location.reload(); })
+});
+</script>
+
+{% endblock %}

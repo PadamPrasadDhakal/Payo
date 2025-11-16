@@ -16,7 +16,7 @@ from .views import (
     google_signup_redirect,
     add_info
 )
-from .views import kyc_form_view, cms_dashboard
+from .views import kyc_form_view, cms_dashboard, cms_kyc_detail
 
 
 urlpatterns = [
@@ -37,6 +37,7 @@ urlpatterns = [
     path("add-info/", add_info, name="add_info"),
     path("kyc/", kyc_form_view, name="kyc_form"),
     path("cms/", cms_dashboard, name="cms_dashboard"),
+    path("cms/kyc/<str:kyc_type>/<int:kyc_id>/", cms_kyc_detail, name="cms_kyc_detail"),
     ]
 
 

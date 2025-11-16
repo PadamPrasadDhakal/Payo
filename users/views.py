@@ -1,6 +1,6 @@
 from django.contrib.auth import login
 from django.contrib.auth.views import LoginView, LogoutView
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.views.generic import TemplateView
 from .forms_profile import ApplicantProfileEditForm
@@ -337,6 +337,17 @@ def cms_dashboard(request):
         raise Http404()
 
     return render(request, 'cms/dashboard.html', context)
+
+
+@staff_member_required
+def cms_kyc_detail(request, kyc_type, kyc_id):
+    """Show full KYC details for staff and allow verify/reject actions via the admin API."""
+    if kyc_type == 'individual':
+        k = get_object_or_404(IndividualKYC, id=kyc_id)
+    else:
+        k = get_object_or_404(OrganizationKYC, id=kyc_id)
+
+    return render(request, 'cms/kyc_detail.html', {'kyc': k, 'kyc_type': kyc_type})
 def organizations(request):
     return render(request,"users/organizations.html")
 def payment(request):

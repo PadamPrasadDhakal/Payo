@@ -10,6 +10,10 @@ import json
 from users.models import User, SavedJob
 from organization.models import Job, Application
 from users.models import IndividualKYC, OrganizationKYC, KycAudit
+from users.forms_kyc import (
+    IndividualKYCStep1Form, IndividualKYCStep2Form, IndividualKYCStep3Form,
+    OrganizationKYCStep1Form, OrganizationKYCStep2Form, OrganizationKYCStep3Form
+)
 from django.views.decorators.http import require_http_methods
 from django.utils import timezone
 from rest_framework.views import APIView
@@ -137,27 +141,55 @@ def kyc_list_create(request):
             return JsonResponse({'success': True, 'kyc': data})
 
         elif request.method == 'POST':
-            payload = json.loads(request.body)
-            kyc_type = payload.get('type')
-            step = int(payload.get('step', 1))
-            data = payload.get('data', {})
+            # Accept JSON or multipart form submissions. For files, frontend should send FormData.
+            kyc_type = None
+            step = 1
+            data = {}
+            files = {}
+            # try JSON first
+            try:
+                payload = json.loads(request.body)
+                kyc_type = payload.get('type')
+                step = int(payload.get('step', 1))
+                data = payload.get('data', {}) or {}
+            except Exception:
+                # fallback to form data
+                kyc_type = request.POST.get('type')
+                step = int(request.POST.get('step', 1) or 1)
+                data = request.POST.dict()
+                files = request.FILES
 
             if kyc_type == 'individual':
                 obj, created = IndividualKYC.objects.get_or_create(user=request.user)
-                # Save partial fields provided
-                for k, v in data.items():
-                    if hasattr(obj, k):
-                        setattr(obj, k, v)
+                # Validate using forms per step
+                if step == 1:
+                    form = IndividualKYCStep1Form(data or None, instance=obj)
+                elif step == 2:
+                    form = IndividualKYCStep2Form(data or None, files or None, instance=obj)
+                else:
+                    form = IndividualKYCStep3Form(data or None, instance=obj)
+
+                if not form.is_valid():
+                    return JsonResponse({'success': False, 'errors': form.errors}, status=400)
+
+                form.save()
                 obj.current_step = step
-                # If user explicitly submits final step, do not flip status here
                 obj.save()
                 return JsonResponse({'success': True, 'id': obj.id, 'status': obj.status})
 
             elif kyc_type == 'organization':
                 obj, created = OrganizationKYC.objects.get_or_create(user=request.user)
-                for k, v in data.items():
-                    if hasattr(obj, k):
-                        setattr(obj, k, v)
+                if step == 1:
+                    form = OrganizationKYCStep1Form(data or None, instance=obj)
+                elif step == 2:
+                    form = OrganizationKYCStep2Form(data or None, files or None, instance=obj)
+                else:
+                    form = OrganizationKYCStep3Form(data or None, instance=obj)
+
+                if not form.is_valid():
+                    return JsonResponse({'success': False, 'errors': form.errors}, status=400)
+
+                form.save()
                 obj.current_step = step
                 obj.save()
                 return JsonResponse({'success': True, 'id': obj.id, 'status': obj.status})
@@ -619,24 +651,41 @@ class KYCListCreateAPIView(APIView):
         return Response({'success': True, 'kyc': data})
 
     def post(self, request):
-        kyc_type = request.data.get('type')
-        step = int(request.data.get('step', 1))
-        payload = request.data.get('data', {})
+        # Accept JSON or multipart/form-data. Use forms for validation per step.
+        kyc_type = request.data.get('type') or request.POST.get('type')
+        step = int(request.data.get('step', request.POST.get('step', 1)))
+        payload = request.data.get('data') or request.data or request.POST.dict()
 
         if kyc_type == 'individual':
             obj, created = IndividualKYC.objects.get_or_create(user=request.user)
-            for k, v in payload.items():
-                if hasattr(obj, k):
-                    setattr(obj, k, v)
+            if step == 1:
+                form = IndividualKYCStep1Form(payload, instance=obj)
+            elif step == 2:
+                form = IndividualKYCStep2Form(payload, request.FILES or None, instance=obj)
+            else:
+                form = IndividualKYCStep3Form(payload, instance=obj)
+
+            if not form.is_valid():
+                return Response({'success': False, 'errors': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+            form.save()
             obj.current_step = step
             obj.save()
             return Response({'success': True, 'id': obj.id, 'status': obj.status})
 
         elif kyc_type == 'organization':
             obj, created = OrganizationKYC.objects.get_or_create(user=request.user)
-            for k, v in payload.items():
-                if hasattr(obj, k):
-                    setattr(obj, k, v)
+            if step == 1:
+                form = OrganizationKYCStep1Form(payload, instance=obj)
+            elif step == 2:
+                form = OrganizationKYCStep2Form(payload, request.FILES or None, instance=obj)
+            else:
+                form = OrganizationKYCStep3Form(payload, instance=obj)
+
+            if not form.is_valid():
+                return Response({'success': False, 'errors': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+            form.save()
             obj.current_step = step
             obj.save()
             return Response({'success': True, 'id': obj.id, 'status': obj.status})
