@@ -21,7 +21,12 @@
 
     <div class="mt-6 flex gap-2">
       <button id="btn-verify" class="px-4 py-2 bg-green-600 text-white rounded">Verify</button>
-      <button id="btn-reject" class="px-4 py-2 bg-red-600 text-white rounded">Reject</button>
+      <div>
+        <textarea id="reject-reason" placeholder="Rejection reason (required when rejecting)" class="border rounded p-2 w-64 h-24"></textarea>
+        <div class="mt-2">
+          <button id="btn-reject" class="px-4 py-2 bg-red-600 text-white rounded">Reject</button>
+        </div>
+      </div>
       <a href="/users/cms/?model=kyc" class="px-4 py-2 bg-gray-200 rounded">Back</a>
     </div>
 
@@ -45,8 +50,9 @@ document.getElementById('btn-verify').addEventListener('click', ()=>{
 });
 
 document.getElementById('btn-reject').addEventListener('click', ()=>{
-  const reason = prompt('Enter rejection reason:');
-  if(!reason) return;
+  const reason = document.getElementById('reject-reason').value.trim();
+  if(!reason){ alert('Please enter a rejection reason'); return; }
+  if(!confirm('Reject this KYC?')) return;
   fetch(`/api/kyc/${kycType}/${kycId}/admin_action/`, {method:'POST', headers: {'Content-Type':'application/json', 'X-CSRFToken': getCookie('csrftoken')}, body: JSON.stringify({status:'REJECTED', reason: reason})})
     .then(r=>r.json()).then(d=>{ document.getElementById('action-result').innerText = JSON.stringify(d); if(d.success) location.reload(); })
 });

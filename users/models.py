@@ -129,6 +129,10 @@ class KycBase(models.Model):
     status = models.CharField(max_length=16, choices=KycStatus.choices, default=KycStatus.DRAFT)
     submitted_at = models.DateTimeField(blank=True, null=True)
     updated_at = models.DateTimeField(auto_now=True)
+    # Track which step the user last saved (1..3)
+    current_step = models.IntegerField(default=1)
+    # Optional rejection reason set by admin when a KYC is rejected
+    rejection_reason = models.TextField(blank=True, null=True)
 
     class Meta:
         abstract = True

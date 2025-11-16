@@ -278,6 +278,7 @@ def kyc_admin_action(request, kyc_type, kyc_id):
             return JsonResponse({'success': True, 'status': 'VERIFIED'})
         elif action == 'REJECTED':
             k.status = 'REJECTED'
+            k.rejection_reason = reason
             k.save()
             k.user.is_kyc_verified = False
             k.user.save(update_fields=['is_kyc_verified'])

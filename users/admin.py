@@ -47,6 +47,7 @@ class IndividualKYCAdmin(admin.ModelAdmin):
     def mark_rejected(self, request, queryset):
         for k in queryset:
             k.status = 'REJECTED'
+            k.rejection_reason = 'Rejected via admin bulk action'
             k.save()
             k.user.is_kyc_verified = False
             k.user.save(update_fields=['is_kyc_verified'])
@@ -80,6 +81,7 @@ class OrganizationKYCAdmin(admin.ModelAdmin):
     def mark_rejected(self, request, queryset):
         for k in queryset:
             k.status = 'REJECTED'
+            k.rejection_reason = 'Rejected via admin bulk action'
             k.save()
             k.user.is_kyc_verified = False
             k.user.save(update_fields=['is_kyc_verified'])
