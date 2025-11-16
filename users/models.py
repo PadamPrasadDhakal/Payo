@@ -49,6 +49,10 @@ class User(AbstractUser):
     selected_count = models.IntegerField(default=0, help_text="Total times selected for interview (regardless of final outcome)")
     hired_count = models.IntegerField(default=0, help_text="Total times hired")
     profile_score = models.IntegerField(default=0, help_text="Calculated profile strength score")
+    
+    # KYC flag
+    is_kyc_verified = models.BooleanField(default=False)
+    kyc_last_submitted = models.DateTimeField(blank=True, null=True)
 
     def is_organization(self) -> bool:
         return self.user_type == self.UserType.ORGANIZATION
@@ -112,5 +116,63 @@ class SavedJob(models.Model):
 
     def __str__(self):
         return f"{self.user.username} saved {self.job.title}"
+
+
+class KycBase(models.Model):
+    class KycStatus(models.TextChoices):
+        DRAFT = 'DRAFT', 'Draft'
+        SUBMITTED = 'SUBMITTED', 'Submitted'
+        VERIFIED = 'VERIFIED', 'Verified'
+        REJECTED = 'REJECTED', 'Rejected'
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='%(class)s_records')
+    status = models.CharField(max_length=16, choices=KycStatus.choices, default=KycStatus.DRAFT)
+    submitted_at = models.DateTimeField(blank=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        abstract = True
+
+
+class IndividualKYC(KycBase):
+    full_name = models.CharField(max_length=255)
+    date_of_birth = models.DateField(blank=True, null=True)
+    nationality = models.CharField(max_length=100, blank=True)
+    citizenship_number = models.CharField(max_length=128, blank=True)
+    id_document = models.FileField(upload_to='kyc/individual/docs/', blank=True, null=True)
+    selfie = models.ImageField(upload_to='kyc/individual/selfies/', blank=True, null=True)
+    additional_info = models.JSONField(blank=True, null=True)
+
+    def __str__(self):
+        return f"IndividualKYC({self.user.username}, {self.status})"
+
+
+class OrganizationKYC(KycBase):
+    org_name = models.CharField(max_length=255)
+    registration_number = models.CharField(max_length=128, blank=True)
+    registered_address = models.CharField(max_length=512, blank=True)
+    incorporation_certificate = models.FileField(upload_to='kyc/organization/docs/', blank=True, null=True)
+    directors = models.JSONField(blank=True, null=True)
+    shareholders = models.JSONField(blank=True, null=True)
+    additional_info = models.JSONField(blank=True, null=True)
+
+    def __str__(self):
+        return f"OrganizationKYC({self.org_name}, {self.status})"
+
+
+class KycAudit(models.Model):
+    KYC_TYPE_CHOICES = (
+        ('IND', 'Individual'),
+        ('ORG', 'Organization'),
+    )
+    kyc_type = models.CharField(max_length=3, choices=KYC_TYPE_CHOICES)
+    kyc_id = models.IntegerField()
+    actor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='kyc_audits')
+    action = models.CharField(max_length=64)
+    message = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"KycAudit({self.kyc_type}#{self.kyc_id} by {self.actor})"
 
 

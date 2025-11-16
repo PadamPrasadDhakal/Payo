@@ -1,0 +1,18 @@
+<div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">
+  <div class="max-w-7xl mx-auto px-4 flex items-center justify-between">
+    <div class="flex items-center gap-4">
+      <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+      <div>
+        <p class="text-sm font-semibold text-yellow-800">Complete KYC to unlock full features</p>
+        <p class="text-sm text-yellow-700">Verify your identity to remove limits and enable posting/publishing.</p>
+      </div>
+    </div>
+    <div>
+      {% if user.is_authenticated %}
+        <a href="/users/kyc/" class="px-4 py-2 rounded-lg bg-yellow-600 text-white font-medium">Start KYC</a>
+      {% else %}
+        <a href="/users/login/?next=/users/kyc/" class="px-4 py-2 rounded-lg bg-yellow-600 text-white font-medium">Login to Start</a>
+      {% endif %}
+    </div>
+  </div>
+</div>

@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     # 3rd party apps
     "crispy_forms",
     "crispy_bootstrap4",
+    "rest_framework",
     
     # Authentication
     'allauth',
@@ -53,6 +54,8 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "allauth.account.middleware.AccountMiddleware",
+        # KYC enforcement middleware to block unverified orgs from posting
+        "users.middleware.KycEnforcementMiddleware",
 ]
 
 ROOT_URLCONF = "JobsHaruPrj.urls"

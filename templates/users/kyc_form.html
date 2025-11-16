@@ -1,0 +1,97 @@
+{% extends "base2.html" %}
+{% block title %}KYC - JobsHaru{% endblock %}
+{% block content %}
+
+<div class="max-w-3xl mx-auto bg-white p-8 rounded-xl shadow">
+  <h2 class="text-2xl font-bold mb-4">Complete KYC</h2>
+  <p class="text-sm text-gray-600 mb-6">This is a 3-step form. You can save progress and continue later.</p>
+
+  <div id="kyc-steps" class="space-y-6">
+    <div id="step-1" class="kyc-step">
+      <h3 class="font-semibold">Step 1 — Personal / Organization Details</h3>
+      <div class="mt-3">
+        <!-- minimal fields for demo -->
+        <label class="block mb-2">Full name / Organization name</label>
+        <input id="field-name" class="w-full border rounded px-3 py-2" />
+      </div>
+      <div class="mt-3">
+        <label class="block mb-2">Contact mobile / Contact number</label>
+        <input id="field-contact" class="w-full border rounded px-3 py-2" />
+      </div>
+      <div class="mt-4 flex gap-2 justify-between">
+        <button id="next-1" class="px-4 py-2 bg-blue-600 text-white rounded">Next</button>
+      </div>
+    </div>
+
+    <div id="step-2" class="kyc-step hidden">
+      <h3 class="font-semibold">Step 2 — Identification & Documents</h3>
+      <div class="mt-3">
+        <label class="block mb-2">Citizenship / Registration number</label>
+        <input id="field-idnum" class="w-full border rounded px-3 py-2" />
+      </div>
+      <div class="mt-3">
+        <label class="block mb-2">Upload document (demo)</label>
+        <input id="field-doc" type="file" class="w-full" />
+      </div>
+      <div class="mt-4 flex gap-2 justify-between">
+        <button id="prev-2" class="px-4 py-2 bg-gray-200 rounded">Previous</button>
+        <button id="next-2" class="px-4 py-2 bg-blue-600 text-white rounded">Next</button>
+      </div>
+    </div>
+
+    <div id="step-3" class="kyc-step hidden">
+      <h3 class="font-semibold">Step 3 — Financial & Declarations</h3>
+      <div class="mt-3">
+        <label class="block mb-2">Purpose of account</label>
+        <input id="field-purpose" class="w-full border rounded px-3 py-2" />
+      </div>
+      <div class="mt-4 flex gap-2 justify-between">
+        <button id="prev-3" class="px-4 py-2 bg-gray-200 rounded">Previous</button>
+        <button id="save-final" class="px-4 py-2 bg-green-600 text-white rounded">Save & Submit</button>
+      </div>
+    </div>
+  </div>
+  <div id="kyc-status" class="mt-4 text-sm text-gray-600"></div>
+</div>
+
+<script>
+const kycType = '{{ kyc_type }}';
+let currentStep = 1;
+
+function showStep(n){
+  document.querySelectorAll('.kyc-step').forEach(el=>el.classList.add('hidden'));
+  document.getElementById('step-'+n).classList.remove('hidden');
+  currentStep = n;
+}
+
+document.getElementById('next-1').addEventListener('click', ()=>{
+  // Save partial via API
+  const payload = {type: kycType, step: 1, data: {full_name: document.getElementById('field-name').value, contact_mobile: document.getElementById('field-contact').value}};
+  fetch('/api/kyc/', {method:'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload)})
+    .then(r=>r.json()).then(d=>{ document.getElementById('kyc-status').innerText = 'Saved step 1'; showStep(2); }).catch(e=>console.error(e));
+});
+
+document.getElementById('prev-2').addEventListener('click', ()=> showStep(1));
+document.getElementById('next-2').addEventListener('click', ()=> showStep(3));
+document.getElementById('prev-3').addEventListener('click', ()=> showStep(2));
+
+document.getElementById('save-final').addEventListener('click', ()=>{
+  // Save step 3 then submit
+  const payload = {type: kycType, step: 3, data: {purpose_of_account: document.getElementById('field-purpose').value}};
+  fetch('/api/kyc/', {method:'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload)})
+    .then(r=>r.json()).then(d=>{
+      // Submit
+      fetch(`/api/kyc/${kycType}/${d.id}/submit/`, {method:'PATCH', headers: {'X-CSRFToken': getCookie('csrftoken')}})
+        .then(r=>r.json()).then(res=>{ document.getElementById('kyc-status').innerText = 'KYC submitted for review.'; })
+    }).catch(e=>console.error(e));
+});
+
+function getCookie(name) {
+  const v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+  return v ? v[2] : null;
+}
+
+showStep(1);
+</script>
+
+{% endblock %}

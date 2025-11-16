@@ -133,6 +133,11 @@
         </div>
     </nav>
 
+    <!-- KYC Banner (included for logged-in users who haven't completed KYC) -->
+    {% if user.is_authenticated and not user.is_kyc_verified %}
+      {% include 'includes/kyc_banner.html' %}
+    {% endif %}
+
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 py-8">
         {% block content %}{% endblock %}

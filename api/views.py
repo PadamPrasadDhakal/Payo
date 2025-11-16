@@ -9,6 +9,15 @@ import json
 
 from users.models import User, SavedJob
 from organization.models import Job, Application
+from users.models import IndividualKYC, OrganizationKYC, KycAudit
+from django.views.decorators.http import require_http_methods
+from django.utils import timezone
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status, permissions
+from rest_framework.throttling import SimpleRateThrottle
+from users.serializers import IndividualKYCSerializer, OrganizationKYCSerializer, KycAuditSerializer
+from django.core.exceptions import PermissionDenied
 
 
 @login_required
@@ -56,6 +65,13 @@ def apply_job(request):
                     'message': 'Already applied to this job',
                     'tokens_left': user.tokens_left
                 }, status=400)
+
+            # Enforce KYC rate limit: unverified users can apply at most 2 jobs per calendar day
+            if not user.is_kyc_verified:
+                today = timezone.now().date()
+                today_count = Application.objects.filter(applicant=user, created_at__date=today).count()
+                if today_count >= 2:
+                    return JsonResponse({'error': 'Unverified users can apply to 2 jobs per day. Complete KYC to remove this limit.'}, status=429)
             
             # Create application
             Application.objects.create(
@@ -76,6 +92,175 @@ def apply_job(request):
     
     except json.JSONDecodeError:
         return JsonResponse({'error': 'Invalid JSON data'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required
+@csrf_exempt
+def kyc_list_create(request):
+    """GET: list user's KYC records
+       POST: create or update partial KYC for user (accepts 'type' and step/data)
+    """
+    try:
+        if request.method == 'GET':
+            user = request.user
+            ind = None
+            org = None
+            try:
+                ind = IndividualKYC.objects.get(user=user)
+            except IndividualKYC.DoesNotExist:
+                ind = None
+            try:
+                org = OrganizationKYC.objects.get(user=user)
+            except OrganizationKYC.DoesNotExist:
+                org = None
+
+            data = {
+                'individual': None,
+                'organization': None
+            }
+            if ind:
+                data['individual'] = {
+                    'id': ind.id,
+                    'status': ind.status,
+                    'current_step': ind.current_step,
+                    'submitted_at': ind.submitted_at.isoformat() if ind.submitted_at else None
+                }
+            if org:
+                data['organization'] = {
+                    'id': org.id,
+                    'status': org.status,
+                    'current_step': org.current_step,
+                    'submitted_at': org.submitted_at.isoformat() if org.submitted_at else None
+                }
+            return JsonResponse({'success': True, 'kyc': data})
+
+        elif request.method == 'POST':
+            payload = json.loads(request.body)
+            kyc_type = payload.get('type')
+            step = int(payload.get('step', 1))
+            data = payload.get('data', {})
+
+            if kyc_type == 'individual':
+                obj, created = IndividualKYC.objects.get_or_create(user=request.user)
+                # Save partial fields provided
+                for k, v in data.items():
+                    if hasattr(obj, k):
+                        setattr(obj, k, v)
+                obj.current_step = step
+                # If user explicitly submits final step, do not flip status here
+                obj.save()
+                return JsonResponse({'success': True, 'id': obj.id, 'status': obj.status})
+
+            elif kyc_type == 'organization':
+                obj, created = OrganizationKYC.objects.get_or_create(user=request.user)
+                for k, v in data.items():
+                    if hasattr(obj, k):
+                        setattr(obj, k, v)
+                obj.current_step = step
+                obj.save()
+                return JsonResponse({'success': True, 'id': obj.id, 'status': obj.status})
+
+            else:
+                return JsonResponse({'error': 'Invalid kyc type'}, status=400)
+
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required
+def kyc_detail(request, kyc_type, kyc_id):
+    try:
+        if kyc_type == 'individual':
+            k = get_object_or_404(IndividualKYC, id=kyc_id, user=request.user)
+        else:
+            k = get_object_or_404(OrganizationKYC, id=kyc_id, user=request.user)
+
+        # Return a simple representation
+        resp = {}
+        for field in ['id', 'status', 'current_step', 'submitted_at', 'updated_at']:
+            val = getattr(k, field, None)
+            resp[field] = val.isoformat() if hasattr(val, 'isoformat') else val
+
+        return JsonResponse({'success': True, 'kyc': resp})
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required
+@csrf_exempt
+def kyc_submit(request, kyc_type, kyc_id):
+    """User submits KYC for review (sets status to SUBMITTED)"""
+    if request.method != 'PATCH':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+    try:
+        if kyc_type == 'individual':
+            k = get_object_or_404(IndividualKYC, id=kyc_id, user=request.user)
+        else:
+            k = get_object_or_404(OrganizationKYC, id=kyc_id, user=request.user)
+
+        k.status = 'SUBMITTED'
+        k.submitted_at = timezone.now()
+        k.save()
+        KycAudit.objects.create(kyc_type='IND' if kyc_type=='individual' else 'ORG', kyc_id=k.id, actor=request.user, action='SUBMITTED', message='User submitted KYC')
+        return JsonResponse({'success': True, 'message': 'KYC submitted for review', 'status': k.status})
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required
+@csrf_exempt
+def kyc_admin_action(request, kyc_type, kyc_id):
+    """Admin endpoint to verify/reject/request_more_info for a KYC record"""
+    if not request.user.is_staff:
+        return JsonResponse({'error': 'Admin privileges required'}, status=403)
+
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+    try:
+        payload = json.loads(request.body)
+        action = payload.get('status')  # VERIFIED|REJECTED|REQUEST_MORE_INFO
+        reason = payload.get('reason', '')
+        missing_fields = payload.get('missing_fields', [])
+
+        if kyc_type == 'individual':
+            k = get_object_or_404(IndividualKYC, id=kyc_id)
+            k.user_ref = k.user
+        else:
+            k = get_object_or_404(OrganizationKYC, id=kyc_id)
+            k.user_ref = k.user
+
+        if action == 'VERIFIED':
+            k.status = 'VERIFIED'
+            k.save()
+            k.user.is_kyc_verified = True
+            k.user.save(update_fields=['is_kyc_verified'])
+            KycAudit.objects.create(kyc_type='IND' if kyc_type=='individual' else 'ORG', kyc_id=k.id, actor=request.user, action='VERIFIED', message=reason)
+            return JsonResponse({'success': True, 'status': 'VERIFIED'})
+        elif action == 'REJECTED':
+            k.status = 'REJECTED'
+            k.save()
+            k.user.is_kyc_verified = False
+            k.user.save(update_fields=['is_kyc_verified'])
+            KycAudit.objects.create(kyc_type='IND' if kyc_type=='individual' else 'ORG', kyc_id=k.id, actor=request.user, action='REJECTED', message=reason)
+            return JsonResponse({'success': True, 'status': 'REJECTED'})
+        elif action == 'REQUEST_MORE_INFO':
+            k.status = 'DRAFT'
+            k.save()
+            KycAudit.objects.create(kyc_type='IND' if kyc_type=='individual' else 'ORG', kyc_id=k.id, actor=request.user, action='REQUEST_MORE_INFO', message=json.dumps({'missing_fields': missing_fields, 'note': reason}))
+            return JsonResponse({'success': True, 'status': 'DRAFT'})
+        else:
+            return JsonResponse({'error': 'Invalid action'}, status=400)
+
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
@@ -346,3 +531,178 @@ def recent_application_updates(request):
         
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+
+class UnverifiedUserRateThrottle(SimpleRateThrottle):
+    """Throttle that limits unverified users to 2 applications per day.
+
+    Returns None (no throttling) for verified users.
+    """
+    scope = 'unverified_apply'
+
+    def get_cache_key(self, request, view):
+        user = request.user
+        if not user or not user.is_authenticated:
+            return None
+        # Only throttle unverified users
+        if getattr(user, 'is_kyc_verified', False):
+            return None
+
+        # Use user id + date as key
+        ident = f"unverified_apply_{user.id}_{timezone.now().date().isoformat()}"
+        return self.cache_format % {
+            'scope': self.scope,
+            'ident': ident
+        }
+
+
+class ApplyAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    throttle_classes = [UnverifiedUserRateThrottle]
+
+    def post(self, request, *args, **kwargs):
+        job_id = request.data.get('job_id') or request.data.get('id')
+        if not job_id:
+            return Response({'error': 'Job ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = User.objects.select_for_update().get(id=request.user.id)
+        except User.DoesNotExist:
+            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            job = Job.objects.get(id=job_id)
+        except Job.DoesNotExist:
+            return Response({'error': 'Job not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        if Application.objects.filter(job=job, applicant=user).exists():
+            return Response({'success': False, 'message': 'Already applied to this job'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Additional server-side KYC limit: unverified users limited to 2 apps/day
+        if not user.is_kyc_verified:
+            today = timezone.now().date()
+            today_count = Application.objects.filter(applicant=user, created_at__date=today).count()
+            if today_count >= 2:
+                return Response({'error': 'Unverified users can apply to 2 jobs per day. Complete KYC to remove this limit.'}, status=429)
+
+        # Create application
+        Application.objects.create(job=job, applicant=user, cover_letter=request.data.get('cover_letter', 'Applied via API'))
+
+        # Optional tokens decrement (if implemented)
+        if hasattr(user, 'tokens_left') and user.tokens_left > 0:
+            user.tokens_left -= 1
+            user.save(update_fields=['tokens_left'])
+
+        return Response({'success': True, 'message': 'Application sent.'})
+
+
+class KYCListCreateAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        ind = None
+        org = None
+        try:
+            ind = IndividualKYC.objects.get(user=user)
+        except IndividualKYC.DoesNotExist:
+            ind = None
+        try:
+            org = OrganizationKYC.objects.get(user=user)
+        except OrganizationKYC.DoesNotExist:
+            org = None
+
+        data = {
+            'individual': IndividualKYCSerializer(ind).data if ind else None,
+            'organization': OrganizationKYCSerializer(org).data if org else None
+        }
+        return Response({'success': True, 'kyc': data})
+
+    def post(self, request):
+        kyc_type = request.data.get('type')
+        step = int(request.data.get('step', 1))
+        payload = request.data.get('data', {})
+
+        if kyc_type == 'individual':
+            obj, created = IndividualKYC.objects.get_or_create(user=request.user)
+            for k, v in payload.items():
+                if hasattr(obj, k):
+                    setattr(obj, k, v)
+            obj.current_step = step
+            obj.save()
+            return Response({'success': True, 'id': obj.id, 'status': obj.status})
+
+        elif kyc_type == 'organization':
+            obj, created = OrganizationKYC.objects.get_or_create(user=request.user)
+            for k, v in payload.items():
+                if hasattr(obj, k):
+                    setattr(obj, k, v)
+            obj.current_step = step
+            obj.save()
+            return Response({'success': True, 'id': obj.id, 'status': obj.status})
+
+        return Response({'error': 'Invalid kyc type'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class KYCDetailAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, kyc_type, kyc_id):
+        if kyc_type == 'individual':
+            k = get_object_or_404(IndividualKYC, id=kyc_id, user=request.user)
+            return Response(IndividualKYCSerializer(k).data)
+        else:
+            k = get_object_or_404(OrganizationKYC, id=kyc_id, user=request.user)
+            return Response(OrganizationKYCSerializer(k).data)
+
+
+class KYCSubmitAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def patch(self, request, kyc_type, kyc_id):
+        if kyc_type == 'individual':
+            k = get_object_or_404(IndividualKYC, id=kyc_id, user=request.user)
+        else:
+            k = get_object_or_404(OrganizationKYC, id=kyc_id, user=request.user)
+
+        k.status = 'SUBMITTED'
+        k.submitted_at = timezone.now()
+        k.save()
+        KycAudit.objects.create(kyc_type='IND' if kyc_type=='individual' else 'ORG', kyc_id=k.id, actor=request.user, action='SUBMITTED', message='User submitted KYC')
+        return Response({'success': True, 'status': k.status})
+
+
+class KYCAdminActionAPIView(APIView):
+    permission_classes = [permissions.IsAdminUser]
+
+    def post(self, request, kyc_type, kyc_id):
+        action = request.data.get('status')
+        reason = request.data.get('reason', '')
+        missing_fields = request.data.get('missing_fields', [])
+
+        if kyc_type == 'individual':
+            k = get_object_or_404(IndividualKYC, id=kyc_id)
+        else:
+            k = get_object_or_404(OrganizationKYC, id=kyc_id)
+
+        if action == 'VERIFIED':
+            k.status = 'VERIFIED'
+            k.save()
+            k.user.is_kyc_verified = True
+            k.user.save(update_fields=['is_kyc_verified'])
+            KycAudit.objects.create(kyc_type='IND' if kyc_type=='individual' else 'ORG', kyc_id=k.id, actor=request.user, action='VERIFIED', message=reason)
+            return Response({'success': True, 'status': 'VERIFIED'})
+        elif action == 'REJECTED':
+            k.status = 'REJECTED'
+            k.save()
+            k.user.is_kyc_verified = False
+            k.user.save(update_fields=['is_kyc_verified'])
+            KycAudit.objects.create(kyc_type='IND' if kyc_type=='individual' else 'ORG', kyc_id=k.id, actor=request.user, action='REJECTED', message=reason)
+            return Response({'success': True, 'status': 'REJECTED'})
+        elif action == 'REQUEST_MORE_INFO':
+            k.status = 'DRAFT'
+            k.save()
+            KycAudit.objects.create(kyc_type='IND' if kyc_type=='individual' else 'ORG', kyc_id=k.id, actor=request.user, action='REQUEST_MORE_INFO', message=json.dumps({'missing_fields': missing_fields, 'note': reason}))
+            return Response({'success': True, 'status': 'DRAFT'})
+        else:
+            return Response({'error': 'Invalid action'}, status=status.HTTP_400_BAD_REQUEST)

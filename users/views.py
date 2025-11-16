@@ -20,6 +20,10 @@ from django.contrib.auth import logout
 from django.views import View
 from django.http import HttpResponseRedirect
 import json
+from django.contrib.admin.views.decorators import staff_member_required
+from django.shortcuts import Http404
+from django.core.paginator import Paginator
+from users.models import IndividualKYC, OrganizationKYC, KycAudit
 
 class UserLoginView(LoginView):
     template_name = "users/login.html"
@@ -204,6 +208,135 @@ def applications_dashboard(request):
     }
     
     return render(request, 'users/applications_dashboard.html', context)
+
+
+@login_required
+def kyc_form_view(request):
+    """Render the multi-step KYC form page. The frontend JS will call API endpoints to save steps and submit."""
+    # Determine which KYC type to show by user_type
+    kyc_type = 'individual' if request.user.user_type == request.user.UserType.APPLICANT else 'organization'
+    return render(request, 'users/kyc_form.html', {'kyc_type': kyc_type})
+
+
+@staff_member_required
+def cms_dashboard(request):
+    """Lightweight CMS dashboard that lists Users, Jobs, Applications and KYC records with basic filters.
+
+    Supports GET params: model (users|jobs|applications|kyc), search, status, date_from, date_to,
+    user_type, registration_number, kyc_type (individual|organization).
+    """
+    # Simple selector to choose which table to show
+    model = request.GET.get('model', 'users')
+    page = int(request.GET.get('page', 1))
+    per_page = 20
+
+    # Common filters
+    search = request.GET.get('search', '').strip()
+    status_filter = request.GET.get('status', '').strip()
+    date_from = request.GET.get('date_from', '').strip()
+    date_to = request.GET.get('date_to', '').strip()
+    user_type = request.GET.get('user_type', '').strip()
+    registration_number = request.GET.get('registration_number', '').strip()
+    kyc_type = request.GET.get('kyc_type', '').strip()
+
+    context = {
+        'selected': model,
+        'search': search,
+        'status_filter': status_filter,
+        'date_from': date_from,
+        'date_to': date_to,
+        'user_type': user_type,
+        'registration_number': registration_number,
+        'kyc_type': kyc_type,
+    }
+
+    if model == 'users':
+        qs = User.objects.all().order_by('-date_joined')
+        if search:
+            qs = qs.filter(Q(username__icontains=search) | Q(email__icontains=search))
+        if user_type:
+            qs = qs.filter(user_type=user_type)
+        if status_filter == 'kyc_verified':
+            qs = qs.filter(is_kyc_verified=True)
+        elif status_filter == 'kyc_unverified':
+            qs = qs.filter(is_kyc_verified=False)
+        if date_from:
+            qs = qs.filter(date_joined__date__gte=date_from)
+        if date_to:
+            qs = qs.filter(date_joined__date__lte=date_to)
+
+        paginator = Paginator(qs, per_page)
+        context['page_obj'] = paginator.get_page(page)
+        context['columns'] = ['username', 'email', 'user_type', 'is_kyc_verified', 'date_joined']
+
+    elif model == 'jobs':
+        qs = Job.objects.select_related('posted_by').all().order_by('-created_at')
+        if search:
+            qs = qs.filter(Q(title__icontains=search) | Q(posted_by__organization_name__icontains=search) | Q(posted_by__username__icontains=search))
+        if date_from:
+            qs = qs.filter(created_at__date__gte=date_from)
+        if date_to:
+            qs = qs.filter(created_at__date__lte=date_to)
+
+        paginator = Paginator(qs, per_page)
+        context['page_obj'] = paginator.get_page(page)
+        context['columns'] = ['title', 'posted_by', 'created_at', 'deadline']
+
+    elif model == 'applications':
+        qs = Application.objects.select_related('job', 'applicant').all().order_by('-created_at')
+        if search:
+            qs = qs.filter(Q(job__title__icontains=search) | Q(applicant__username__icontains=search) | Q(job__posted_by__organization_name__icontains=search))
+        if status_filter:
+            qs = qs.filter(status=status_filter)
+        if date_from:
+            qs = qs.filter(created_at__date__gte=date_from)
+        if date_to:
+            qs = qs.filter(created_at__date__lte=date_to)
+
+        paginator = Paginator(qs, per_page)
+        context['page_obj'] = paginator.get_page(page)
+        context['columns'] = ['job', 'applicant', 'status', 'created_at']
+
+    elif model == 'kyc':
+        # Support filtering by type (individual/organization), status, date range, org name, registration number
+        items = []
+        if kyc_type in ('', 'individual'):
+            ind_qs = IndividualKYC.objects.select_related('user').all().order_by('-updated_at')
+            if status_filter:
+                ind_qs = ind_qs.filter(status=status_filter)
+            if search:
+                ind_qs = ind_qs.filter(Q(full_name__icontains=search) | Q(user__username__icontains=search) | Q(citizenship_number__icontains=search))
+            if date_from:
+                ind_qs = ind_qs.filter(updated_at__date__gte=date_from)
+            if date_to:
+                ind_qs = ind_qs.filter(updated_at__date__lte=date_to)
+            for k in ind_qs:
+                items.append({'type': 'individual', 'id': k.id, 'user': k.user, 'status': k.status, 'updated_at': k.updated_at})
+
+        if kyc_type in ('', 'organization'):
+            org_qs = OrganizationKYC.objects.select_related('user').all().order_by('-updated_at')
+            if status_filter:
+                org_qs = org_qs.filter(status=status_filter)
+            if search:
+                org_qs = org_qs.filter(Q(org_name__icontains=search) | Q(user__username__icontains=search) | Q(registration_number__icontains=search))
+            if registration_number:
+                org_qs = org_qs.filter(registration_number__icontains=registration_number)
+            if date_from:
+                org_qs = org_qs.filter(updated_at__date__gte=date_from)
+            if date_to:
+                org_qs = org_qs.filter(updated_at__date__lte=date_to)
+            for k in org_qs:
+                items.append({'type': 'organization', 'id': k.id, 'user': k.user, 'status': k.status, 'updated_at': k.updated_at})
+
+        items = sorted(items, key=lambda x: x['updated_at'], reverse=True)
+        paginator = Paginator(items, per_page)
+        context['page_obj'] = paginator.get_page(page)
+        context['columns'] = ['type', 'user', 'status', 'updated_at']
+
+    else:
+        raise Http404()
+
+    return render(request, 'cms/dashboard.html', context)
 def organizations(request):
     return render(request,"users/organizations.html")
 def payment(request):

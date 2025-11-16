@@ -1,0 +1,67 @@
+{% extends "base2.html" %}
+{% block title %}CMS Dashboard{% endblock %}
+{% block content %}
+<div class="max-w-7xl mx-auto">
+  <h1 class="text-2xl font-bold mb-4">CMS Dashboard</h1>
+  <div class="mb-4">
+    <a href="?model=users" class="px-3 py-1 rounded {{ 'bg-blue-600 text-white' if selected=='users' else 'bg-gray-100' }}">Users</a>
+    <a href="?model=jobs" class="px-3 py-1 rounded {{ 'bg-blue-600 text-white' if selected=='jobs' else 'bg-gray-100' }}">Jobs</a>
+    <a href="?model=applications" class="px-3 py-1 rounded {{ 'bg-blue-600 text-white' if selected=='applications' else 'bg-gray-100' }}">Applications</a>
+    <a href="?model=kyc" class="px-3 py-1 rounded {{ 'bg-blue-600 text-white' if selected=='kyc' else 'bg-gray-100' }}">KYC Records</a>
+  </div>
+
+  <div class="bg-white rounded shadow p-4">
+    <table class="w-full">
+      <thead>
+        <tr class="text-left">
+          {% for col in columns %}
+            <th class="p-2 font-semibold border-b">{{ col }}</th>
+          {% endfor %}
+          <th class="p-2 font-semibold border-b">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in page_obj %}
+          <tr class="hover:bg-gray-50">
+            {% if selected == 'users' %}
+              <td class="p-2">{{ item.username }}</td>
+              <td class="p-2">{{ item.email }}</td>
+              <td class="p-2">{{ item.user_type }}</td>
+              <td class="p-2">{{ item.is_kyc_verified }}</td>
+              <td class="p-2">{{ item.date_joined }}</td>
+              <td class="p-2"><a href="/admin/auth/user/{{ item.id }}/change/">Open</a></td>
+            {% elif selected == 'jobs' %}
+              <td class="p-2">{{ item.title }}</td>
+              <td class="p-2">{{ item.posted_by }}</td>
+              <td class="p-2">{{ item.created_at }}</td>
+              <td class="p-2">{{ item.deadline }}</td>
+              <td class="p-2"><a href="/admin/organization/job/{{ item.id }}/change/">Open</a></td>
+            {% elif selected == 'applications' %}
+              <td class="p-2">{{ item.job.title }}</td>
+              <td class="p-2">{{ item.applicant.username }}</td>
+              <td class="p-2">{{ item.status }}</td>
+              <td class="p-2">{{ item.created_at }}</td>
+              <td class="p-2"><a href="/admin/organization/application/{{ item.id }}/change/">Open</a></td>
+            {% elif selected == 'kyc' %}
+              <td class="p-2">{{ item.type }}</td>
+              <td class="p-2">{{ item.user.username }}</td>
+              <td class="p-2">{{ item.status }}</td>
+              <td class="p-2">{{ item.updated_at }}</td>
+              <td class="p-2"><a href="/admin/users/individualkyc/{{ item.id }}/change/">Open</a></td>
+            {% endif %}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <div class="mt-4">
+      {% if page_obj.has_previous %}
+        <a href="?model={{ selected }}&page={{ page_obj.previous_page_number }}" class="px-3 py-1 bg-gray-100 rounded">Previous</a>
+      {% endif %}
+      {% if page_obj.has_next %}
+        <a href="?model={{ selected }}&page={{ page_obj.next_page_number }}" class="px-3 py-1 bg-gray-100 rounded">Next</a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
