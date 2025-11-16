@@ -218,6 +218,14 @@ class OrgJobCreateView(LoginRequiredMixin, CreateView):
     template_name = "organization/post_job.html"
     success_url = reverse_lazy("organization:job-list")
 
+    def dispatch(self, request, *args, **kwargs):
+        # Check if organization has completed KYC
+        if not request.user.can_post_jobs():
+            from django.contrib import messages
+            messages.error(request, 'Please complete KYC verification to post jobs.')
+            return redirect('/users/kyc/')
+        return super().dispatch(request, *args, **kwargs)
+
     def form_valid(self, form):
         form.instance.posted_by = self.request.user
         return super().form_valid(form)

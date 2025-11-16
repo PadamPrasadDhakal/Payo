@@ -1,67 +1,222 @@
 {% extends "base2.html" %}
-{% block title %}CMS Dashboard{% endblock %}
+{% block title %}CMS Dashboard - JobsHaru{% endblock %}
 {% block content %}
-<div class="max-w-7xl mx-auto">
-  <h1 class="text-2xl font-bold mb-4">CMS Dashboard</h1>
-  <div class="mb-4">
-    <a href="?model=users" class="px-3 py-1 rounded {% if selected == 'users' %}bg-blue-600 text-white{% else %}bg-gray-100{% endif %}">Users</a>
-    <a href="?model=jobs" class="px-3 py-1 rounded {% if selected == 'jobs' %}bg-blue-600 text-white{% else %}bg-gray-100{% endif %}">Jobs</a>
-    <a href="?model=applications" class="px-3 py-1 rounded {% if selected == 'applications' %}bg-blue-600 text-white{% else %}bg-gray-100{% endif %}">Applications</a>
-    <a href="?model=kyc" class="px-3 py-1 rounded {% if selected == 'kyc' %}bg-blue-600 text-white{% else %}bg-gray-100{% endif %}">KYC Records</a>
-  </div>
 
-  <div class="bg-white rounded shadow p-4">
-    <table class="w-full">
-      <thead>
-        <tr class="text-left">
-          {% for col in columns %}
-            <th class="p-2 font-semibold border-b">{{ col }}</th>
-          {% endfor %}
-          <th class="p-2 font-semibold border-b">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for item in page_obj %}
-          <tr class="hover:bg-gray-50">
-            {% if selected == 'users' %}
-              <td class="p-2">{{ item.username }}</td>
-              <td class="p-2">{{ item.email }}</td>
-              <td class="p-2">{{ item.user_type }}</td>
-              <td class="p-2">{{ item.is_kyc_verified }}</td>
-              <td class="p-2">{{ item.date_joined }}</td>
-              <td class="p-2"><a href="/admin/auth/user/{{ item.id }}/change/">Open</a></td>
-            {% elif selected == 'jobs' %}
-              <td class="p-2">{{ item.title }}</td>
-              <td class="p-2">{{ item.posted_by }}</td>
-              <td class="p-2">{{ item.created_at }}</td>
-              <td class="p-2">{{ item.deadline }}</td>
-              <td class="p-2"><a href="/admin/organization/job/{{ item.id }}/change/">Open</a></td>
-            {% elif selected == 'applications' %}
-              <td class="p-2">{{ item.job.title }}</td>
-              <td class="p-2">{{ item.applicant.username }}</td>
-              <td class="p-2">{{ item.status }}</td>
-              <td class="p-2">{{ item.created_at }}</td>
-              <td class="p-2"><a href="/admin/organization/application/{{ item.id }}/change/">Open</a></td>
-            {% elif selected == 'kyc' %}
-              <td class="p-2">{{ item.type }}</td>
-              <td class="p-2">{{ item.user.username }}</td>
-              <td class="p-2">{{ item.status }}</td>
-              <td class="p-2">{{ item.updated_at }}</td>
-              <td class="p-2"><a href="/users/cms/kyc/{{ item.type }}/{{ item.id }}/">Open</a></td>
+<div class="min-h-screen bg-gray-50 py-6">
+  <div class="max-w-7xl mx-auto px-4">
+    <div class="mb-6">
+      <h1 class="text-3xl font-bold text-gray-900">CMS Dashboard</h1>
+      <p class="text-gray-600 mt-1">Manage users, jobs, applications, and KYC verifications</p>
+    </div>
+
+    <!-- Model Selector Tabs -->
+    <div class="bg-white rounded-lg shadow mb-6">
+      <div class="border-b border-gray-200">
+        <nav class="flex -mb-px">
+          <a href="?model=users" class="px-6 py-3 border-b-2 font-medium text-sm {% if selected == 'users' %}border-blue-500 text-blue-600{% else %}border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300{% endif %}">
+            Users
+          </a>
+          <a href="?model=jobs" class="px-6 py-3 border-b-2 font-medium text-sm {% if selected == 'jobs' %}border-blue-500 text-blue-600{% else %}border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300{% endif %}">
+            Jobs
+          </a>
+          <a href="?model=applications" class="px-6 py-3 border-b-2 font-medium text-sm {% if selected == 'applications' %}border-blue-500 text-blue-600{% else %}border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300{% endif %}">
+            Applications
+          </a>
+          <a href="?model=kyc" class="px-6 py-3 border-b-2 font-medium text-sm {% if selected == 'kyc' %}border-blue-500 text-blue-600{% else %}border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300{% endif %}">
+            KYC Records
+          </a>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="bg-white rounded-lg shadow p-4 mb-6">
+      <form method="get" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <input type="hidden" name="model" value="{{ selected }}" />
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+          <input type="text" name="search" value="{{ search }}" placeholder="Search..." class="w-full border rounded px-3 py-2" />
+        </div>
+
+        {% if selected == 'users' or selected == 'kyc' %}
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">User Type</label>
+          <select name="user_type" class="w-full border rounded px-3 py-2">
+            <option value="">All Types</option>
+            <option value="APP" {% if user_type == 'APP' %}selected{% endif %}>Applicant</option>
+            <option value="ORG" {% if user_type == 'ORG' %}selected{% endif %}>Organization</option>
+          </select>
+        </div>
+        {% endif %}
+
+        {% if selected == 'kyc' %}
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">KYC Type</label>
+          <select name="kyc_type" class="w-full border rounded px-3 py-2">
+            <option value="">All Types</option>
+            <option value="individual" {% if kyc_type == 'individual' %}selected{% endif %}>Individual</option>
+            <option value="organization" {% if kyc_type == 'organization' %}selected{% endif %}>Organization</option>
+          </select>
+        </div>
+        {% endif %}
+
+        {% if selected == 'users' %}
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">KYC Status</label>
+          <select name="status" class="w-full border rounded px-3 py-2">
+            <option value="">All</option>
+            <option value="kyc_verified" {% if status_filter == 'kyc_verified' %}selected{% endif %}>Verified</option>
+            <option value="kyc_unverified" {% if status_filter == 'kyc_unverified' %}selected{% endif %}>Unverified</option>
+          </select>
+        </div>
+        {% elif selected == 'applications' or selected == 'kyc' %}
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+          <select name="status" class="w-full border rounded px-3 py-2">
+            <option value="">All Statuses</option>
+            {% if selected == 'applications' %}
+              <option value="PD" {% if status_filter == 'PD' %}selected{% endif %}>Pending</option>
+              <option value="RV" {% if status_filter == 'RV' %}selected{% endif %}>Reviewing</option>
+              <option value="SL" {% if status_filter == 'SL' %}selected{% endif %}>Shortlisted</option>
+              <option value="SE" {% if status_filter == 'SE' %}selected{% endif %}>Selected</option>
+              <option value="RJ" {% if status_filter == 'RJ' %}selected{% endif %}>Rejected</option>
+              <option value="HD" {% if status_filter == 'HD' %}selected{% endif %}>Hired</option>
+            {% else %}
+              <option value="DRAFT" {% if status_filter == 'DRAFT' %}selected{% endif %}>Draft</option>
+              <option value="SUBMITTED" {% if status_filter == 'SUBMITTED' %}selected{% endif %}>Submitted</option>
+              <option value="VERIFIED" {% if status_filter == 'VERIFIED' %}selected{% endif %}>Verified</option>
+              <option value="REJECTED" {% if status_filter == 'REJECTED' %}selected{% endif %}>Rejected</option>
             {% endif %}
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+          </select>
+        </div>
+        {% endif %}
 
-    <div class="mt-4">
-      {% if page_obj.has_previous %}
-        <a href="?model={{ selected }}&page={{ page_obj.previous_page_number }}" class="px-3 py-1 bg-gray-100 rounded">Previous</a>
-      {% endif %}
-      {% if page_obj.has_next %}
-        <a href="?model={{ selected }}&page={{ page_obj.next_page_number }}" class="px-3 py-1 bg-gray-100 rounded">Next</a>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Date From</label>
+          <input type="date" name="date_from" value="{{ date_from }}" class="w-full border rounded px-3 py-2" />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Date To</label>
+          <input type="date" name="date_to" value="{{ date_to }}" class="w-full border rounded px-3 py-2" />
+        </div>
+
+        <div class="flex items-end gap-2">
+          <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Filter</button>
+          <a href="?model={{ selected }}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">Clear</a>
+        </div>
+      </form>
+    </div>
+
+    <!-- Data Table -->
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead class="bg-gray-50 border-b">
+            <tr>
+              {% for col in columns %}
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ col|title }}</th>
+              {% endfor %}
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            {% for item in page_obj %}
+              <tr class="hover:bg-gray-50">
+                {% if selected == 'users' %}
+                  <td class="px-6 py-4 whitespace-nowrap text-sm">{{ item.username }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm">{{ item.email }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm">
+                    <span class="px-2 py-1 text-xs rounded {% if item.user_type == 'APP' %}bg-blue-100 text-blue-800{% else %}bg-purple-100 text-purple-800{% endif %}">
+                      {{ item.get_user_type_display }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm">
+                    {% if item.is_kyc_verified %}
+                      <span class="px-2 py-1 text-xs rounded bg-green-100 text-green-800">✓ Verified</span>
+                    {% else %}
+                      <span class="px-2 py-1 text-xs rounded bg-yellow-100 text-yellow-800">Unverified</span>
+                    {% endif %}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ item.date_joined|date:"Y-m-d" }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm">
+                    <a href="/admin/users/user/{{ item.id }}/change/" class="text-blue-600 hover:underline">View</a>
+                  </td>
+
+                {% elif selected == 'jobs' %}
+                  <td class="px-6 py-4 text-sm">{{ item.title }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm">{{ item.posted_by.organization_name|default:item.posted_by.username }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ item.created_at|date:"Y-m-d" }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ item.deadline|date:"Y-m-d"|default:"No deadline" }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm">
+                    <a href="/admin/organization/job/{{ item.id }}/change/" class="text-blue-600 hover:underline">View</a>
+                  </td>
+
+                {% elif selected == 'applications' %}
+                  <td class="px-6 py-4 text-sm">{{ item.job.title }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm">{{ item.applicant.username }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm">
+                    <span class="px-2 py-1 text-xs rounded {{ item.get_status_color }}">{{ item.get_status_display }}</span>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ item.created_at|date:"Y-m-d" }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm">
+                    <a href="/admin/organization/application/{{ item.id }}/change/" class="text-blue-600 hover:underline">View</a>
+                  </td>
+
+                {% elif selected == 'kyc' %}
+                  <td class="px-6 py-4 whitespace-nowrap text-sm">
+                    <span class="px-2 py-1 text-xs rounded {% if item.type == 'individual' %}bg-blue-100 text-blue-800{% else %}bg-purple-100 text-purple-800{% endif %}">
+                      {{ item.type|title }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm">{{ item.user.username }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm">
+                    <span class="px-2 py-1 text-xs rounded 
+                      {% if item.status == 'VERIFIED' %}bg-green-100 text-green-800
+                      {% elif item.status == 'SUBMITTED' %}bg-blue-100 text-blue-800
+                      {% elif item.status == 'REJECTED' %}bg-red-100 text-red-800
+                      {% else %}bg-gray-100 text-gray-800{% endif %}">
+                      {{ item.status }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ item.updated_at|date:"Y-m-d H:i" }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm">
+                    <a href="/users/cms/kyc/{{ item.type }}/{{ item.id }}/" class="text-blue-600 hover:underline font-medium">Review</a>
+                  </td>
+                {% endif %}
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="{{ columns|length|add:1 }}" class="px-6 py-8 text-center text-gray-500">
+                  No records found
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      {% if page_obj.has_other_pages %}
+      <div class="bg-gray-50 px-6 py-3 flex items-center justify-between border-t">
+        <div class="text-sm text-gray-700">
+          Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        </div>
+        <div class="flex gap-2">
+          {% if page_obj.has_previous %}
+            <a href="?model={{ selected }}&page={{ page_obj.previous_page_number }}&search={{ search }}&status={{ status_filter }}&date_from={{ date_from }}&date_to={{ date_to }}&user_type={{ user_type }}&kyc_type={{ kyc_type }}" 
+               class="px-3 py-1 bg-white border rounded hover:bg-gray-50">Previous</a>
+          {% endif %}
+          {% if page_obj.has_next %}
+            <a href="?model={{ selected }}&page={{ page_obj.next_page_number }}&search={{ search }}&status={{ status_filter }}&date_from={{ date_from }}&date_to={{ date_to }}&user_type={{ user_type }}&kyc_type={{ kyc_type }}" 
+               class="px-3 py-1 bg-white border rounded hover:bg-gray-50">Next</a>
+          {% endif %}
+        </div>
+      </div>
       {% endif %}
     </div>
   </div>
 </div>
+
 {% endblock %}

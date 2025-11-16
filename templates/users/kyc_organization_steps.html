@@ -1,0 +1,201 @@
+<!-- STEP 1: Organization Basic Info -->
+<div id="step-1" class="kyc-step">
+  <h3 class="text-xl font-semibold mb-6 text-blue-600">Step 1 — Organization Information</h3>
+  
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div>
+      <label class="block text-sm font-medium mb-1">Organization Name <span class="text-red-500">*</span></label>
+      <input type="text" name="org_name" required class="w-full border rounded px-3 py-2" />
+    </div>
+    <div>
+      <label class="block text-sm font-medium mb-1">Registration Number <span class="text-red-500">*</span></label>
+      <input type="text" name="registration_number" required class="w-full border rounded px-3 py-2" />
+    </div>
+    <div>
+      <label class="block text-sm font-medium mb-1">Registration Date <span class="text-red-500">*</span></label>
+      <input type="date" name="registration_date" required class="w-full border rounded px-3 py-2" />
+    </div>
+    <div>
+      <label class="block text-sm font-medium mb-1">Organization Type <span class="text-red-500">*</span></label>
+      <select name="organization_type" required class="w-full border rounded px-3 py-2">
+        <option value="">Select Type</option>
+        <option value="Company">Company</option>
+        <option value="Firm">Firm</option>
+        <option value="NGO">NGO</option>
+        <option value="School">School</option>
+        <option value="Hospital">Hospital</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+    <div>
+      <label class="block text-sm font-medium mb-1">PAN/VAT Number <span class="text-red-500">*</span></label>
+      <input type="text" name="pan_vat_number" required pattern="[0-9]{9}" maxlength="9" class="w-full border rounded px-3 py-2" placeholder="9 digits" />
+    </div>
+    <div>
+      <label class="block text-sm font-medium mb-1">Industry Type <span class="text-red-500">*</span></label>
+      <input type="text" name="industry_type" required class="w-full border rounded px-3 py-2" placeholder="e.g., IT, Education, Healthcare" />
+    </div>
+    <div>
+      <label class="block text-sm font-medium mb-1">Contact Number <span class="text-red-500">*</span></label>
+      <input type="tel" name="contact_number" required pattern="[0-9]{10}" maxlength="10" class="w-full border rounded px-3 py-2" placeholder="98XXXXXXXX" />
+    </div>
+    <div>
+      <label class="block text-sm font-medium mb-1">Email Address <span class="text-red-500">*</span></label>
+      <input type="email" name="email_address" required class="w-full border rounded px-3 py-2" />
+    </div>
+    <div class="md:col-span-2">
+      <label class="block text-sm font-medium mb-1">Registered Office Address <span class="text-red-500">*</span></label>
+      <textarea name="registered_address" required rows="2" class="w-full border rounded px-3 py-2" placeholder="Full registered address"></textarea>
+    </div>
+    <div class="md:col-span-2">
+      <label class="block text-sm font-medium mb-1">Current Operating Address</label>
+      <textarea name="operating_address" rows="2" class="w-full border rounded px-3 py-2" placeholder="Leave blank if same as registered"></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 2: Documents Upload -->
+<div id="step-2" class="kyc-step hidden">
+  <h3 class="text-xl font-semibold mb-6 text-blue-600">Step 2 — Documents Upload</h3>
+  
+  <div class="space-y-4">
+    <p class="text-sm text-gray-600">All documents must be clear and readable. Max 5MB per file. Accepted formats: JPG, PNG, PDF</p>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-sm font-medium mb-1">Registration Certificate <span class="text-red-500">*</span></label>
+        <input type="file" name="registration_certificate" required accept="image/jpeg,image/png,application/pdf" class="w-full border rounded px-3 py-2" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-1">PAN/VAT Certificate <span class="text-red-500">*</span></label>
+        <input type="file" name="pan_vat_certificate" required accept="image/jpeg,image/png,application/pdf" class="w-full border rounded px-3 py-2" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-1">MOA/AA (Memorandum/Articles)</label>
+        <input type="file" name="moa_aa" accept="application/pdf" class="w-full border rounded px-3 py-2" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-1">Partnership Agreement (if applicable)</label>
+        <input type="file" name="partnership_agreement" accept="application/pdf" class="w-full border rounded px-3 py-2" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-1">Board Resolution (PDF)</label>
+        <input type="file" name="board_resolution" accept="application/pdf" class="w-full border rounded px-3 py-2" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-1">Office Address Verification <span class="text-red-500">*</span></label>
+        <input type="file" name="office_address_verification" required accept="image/jpeg,image/png,application/pdf" class="w-full border rounded px-3 py-2" />
+        <p class="text-xs text-gray-500 mt-1">Utility bill/Rent agreement</p>
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-1">Authorized Signatory Citizenship <span class="text-red-500">*</span></label>
+        <input type="file" name="signatory_citizenship" required accept="image/jpeg,image/png" class="w-full border rounded px-3 py-2" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-1">Authorized Signatory Photo <span class="text-red-500">*</span></label>
+        <input type="file" name="signatory_photo" required accept="image/jpeg,image/png" class="w-full border rounded px-3 py-2" />
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 3: Additional Verification & Declarations -->
+<div id="step-3" class="kyc-step hidden">
+  <h3 class="text-xl font-semibold mb-6 text-blue-600">Step 3 — Additional Verification & Declarations</h3>
+  
+  <div class="space-y-6">
+    <!-- Shareholders Section -->
+    <div>
+      <h4 class="font-semibold mb-3">Major Shareholders (Optional)</h4>
+      <div id="shareholders-container" class="space-y-2">
+        <div class="flex gap-2">
+          <input type="text" placeholder="Name" class="flex-1 border rounded px-3 py-2" data-shareholder="name" />
+          <input type="text" placeholder="%" class="w-20 border rounded px-3 py-2" data-shareholder="percentage" />
+          <input type="text" placeholder="Citizenship No." class="flex-1 border rounded px-3 py-2" data-shareholder="citizenship" />
+        </div>
+      </div>
+      <button type="button" onclick="addShareholder()" class="mt-2 text-sm text-blue-600 hover:underline">+ Add Another Shareholder</button>
+    </div>
+
+    <!-- Directors Section -->
+    <div>
+      <h4 class="font-semibold mb-3">Director(s) Information (Optional)</h4>
+      <div id="directors-container" class="space-y-2">
+        <div class="flex gap-2">
+          <input type="text" placeholder="Director Name" class="flex-1 border rounded px-3 py-2" data-director="name" />
+          <input type="text" placeholder="Contact" class="flex-1 border rounded px-3 py-2" data-director="contact" />
+        </div>
+      </div>
+      <button type="button" onclick="addDirector()" class="mt-2 text-sm text-blue-600 hover:underline">+ Add Another Director</button>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="md:col-span-2">
+        <label class="block text-sm font-medium mb-1">Authorized Person Declaration <span class="text-red-500">*</span></label>
+        <textarea name="authorized_person_declaration" required rows="3" class="w-full border rounded px-3 py-2" placeholder="I, [Name], as authorized representative, declare that..."></textarea>
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-1">Source of Funds <span class="text-red-500">*</span></label>
+        <input type="text" name="source_of_funds" required class="w-full border rounded px-3 py-2" placeholder="e.g., Business Revenue, Investment" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-1">Expected Monthly Transaction Volume <span class="text-red-500">*</span></label>
+        <select name="expected_monthly_transaction_volume" required class="w-full border rounded px-3 py-2">
+          <option value="">Select Range</option>
+          <option value="Below 1,000,000">Below Rs. 10,00,000</option>
+          <option value="1,000,000-5,000,000">Rs. 10,00,000 - 50,00,000</option>
+          <option value="5,000,000-10,000,000">Rs. 50,00,000 - 1,00,00,000</option>
+          <option value="Above 10,000,000">Above Rs. 1,00,00,000</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-1">Organization Stamp (Optional)</label>
+        <input type="file" name="organization_stamp" accept="image/jpeg,image/png" class="w-full border rounded px-3 py-2" />
+      </div>
+    </div>
+
+    <div class="space-y-3">
+      <div class="flex items-start gap-2">
+        <input type="checkbox" name="is_pep" id="is_pep_org" class="mt-1" />
+        <label for="is_pep_org" class="text-sm">Any director/shareholder is a Politically Exposed Person (PEP)</label>
+      </div>
+      <div class="flex items-start gap-2">
+        <input type="checkbox" name="is_fatca" id="is_fatca_org" class="mt-1" />
+        <label for="is_fatca_org" class="text-sm">Organization is subject to FATCA (Foreign Account Tax Compliance Act)</label>
+      </div>
+      <div class="flex items-start gap-2 p-4 bg-yellow-50 border border-yellow-200 rounded">
+        <input type="checkbox" name="declaration" id="declaration_org" required class="mt-1" />
+        <label for="declaration_org" class="text-sm font-medium">
+          <span class="text-red-500">*</span> I confirm that all information provided is true and accurate. I understand that providing false information may result in rejection or legal action.
+        </label>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function addShareholder() {
+  const container = document.getElementById('shareholders-container');
+  const div = document.createElement('div');
+  div.className = 'flex gap-2';
+  div.innerHTML = `
+    <input type="text" placeholder="Name" class="flex-1 border rounded px-3 py-2" data-shareholder="name" />
+    <input type="text" placeholder="%" class="w-20 border rounded px-3 py-2" data-shareholder="percentage" />
+    <input type="text" placeholder="Citizenship No." class="flex-1 border rounded px-3 py-2" data-shareholder="citizenship" />
+    <button type="button" onclick="this.parentElement.remove()" class="px-2 text-red-600">×</button>
+  `;
+  container.appendChild(div);
+}
+
+function addDirector() {
+  const container = document.getElementById('directors-container');
+  const div = document.createElement('div');
+  div.className = 'flex gap-2';
+  div.innerHTML = `
+    <input type="text" placeholder="Director Name" class="flex-1 border rounded px-3 py-2" data-director="name" />
+    <input type="text" placeholder="Contact" class="flex-1 border rounded px-3 py-2" data-director="contact" />
+    <button type="button" onclick="this.parentElement.remove()" class="px-2 text-red-600">×</button>
+  `;
+  container.appendChild(div);
+}
+</script>

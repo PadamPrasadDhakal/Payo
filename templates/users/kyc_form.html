@@ -1,116 +1,182 @@
 {% extends "base2.html" %}
-{% block title %}KYC - JobsHaru{% endblock %}
+{% load static %}
+{% block title %}Complete KYC - JobsHaru{% endblock %}
 {% block content %}
 
-<div class="max-w-3xl mx-auto bg-white p-8 rounded-xl shadow">
-  <h2 class="text-2xl font-bold mb-4">Complete KYC</h2>
-  <p class="text-sm text-gray-600 mb-6">This is a 3-step form. You can save progress and continue later.</p>
-
-  <div id="kyc-steps" class="space-y-6">
-    <div id="step-1" class="kyc-step">
-      <h3 class="font-semibold">Step 1 — Personal / Organization Details</h3>
-      <div class="mt-3">
-        <!-- minimal fields for demo -->
-        <label class="block mb-2">Full name / Organization name</label>
-        <input id="field-name" class="w-full border rounded px-3 py-2" />
+<div class="min-h-screen bg-gray-50 py-8">
+  <div class="max-w-4xl mx-auto px-4">
+    <!-- Progress Bar -->
+    <div class="mb-8">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-sm font-medium" id="step-indicator">Step 1 of 3</span>
+        <span class="text-sm text-gray-500">{{ kyc_type|title }} KYC</span>
       </div>
-      <div class="mt-3">
-        <label class="block mb-2">Contact mobile / Contact number</label>
-        <input id="field-contact" name="contact_mobile" class="w-full border rounded px-3 py-2" />
-      </div>
-      <div class="mt-4 flex gap-2 justify-between">
-        <button id="next-1" class="px-4 py-2 bg-blue-600 text-white rounded">Next</button>
+      <div class="w-full bg-gray-200 rounded-full h-2">
+        <div id="progress-bar" class="bg-blue-600 h-2 rounded-full transition-all" style="width: 33%"></div>
       </div>
     </div>
 
-    <div id="step-2" class="kyc-step hidden">
-      <h3 class="font-semibold">Step 2 — Identification & Documents</h3>
-      <div class="mt-3">
-        <label class="block mb-2">Citizenship / Registration number</label>
-        <input id="field-idnum" name="citizenship_number" class="w-full border rounded px-3 py-2" />
-      </div>
-      <div class="mt-3">
-        <label class="block mb-2">Upload document (demo)</label>
-        <input id="field-doc" name="id_document" type="file" class="w-full" />
-      </div>
-      <div class="mt-4 flex gap-2 justify-between">
-        <button id="prev-2" class="px-4 py-2 bg-gray-200 rounded">Previous</button>
-        <button id="next-2" class="px-4 py-2 bg-blue-600 text-white rounded">Next</button>
-      </div>
-    </div>
+    <div class="bg-white rounded-lg shadow-lg p-8">
+      <h2 class="text-3xl font-bold mb-2">Complete Your KYC Verification</h2>
+      <p class="text-gray-600 mb-8">Please fill all required fields. You can save and continue later.</p>
 
-    <div id="step-3" class="kyc-step hidden">
-      <h3 class="font-semibold">Step 3 — Financial & Declarations</h3>
-      <div class="mt-3">
-        <label class="block mb-2">Purpose of account</label>
-        <input id="field-purpose" name="purpose_of_account" class="w-full border rounded px-3 py-2" />
-      </div>
-      <div class="mt-4 flex gap-2 justify-between">
-        <button id="prev-3" class="px-4 py-2 bg-gray-200 rounded">Previous</button>
-        <button id="save-final" class="px-4 py-2 bg-green-600 text-white rounded">Save & Submit</button>
-      </div>
+      <!-- Error/Success Messages -->
+      <div id="message-box" class="hidden mb-6 p-4 rounded-lg"></div>
+
+      <form id="kyc-form" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        {% if kyc_type == 'individual' %}
+          {% include 'users/kyc_individual_steps.html' %}
+        {% else %}
+          {% include 'users/kyc_organization_steps.html' %}
+        {% endif %}
+
+        <!-- Navigation Buttons -->
+        <div class="mt-8 flex justify-between">
+          <button type="button" id="btn-prev" class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 hidden">
+            ← Previous
+          </button>
+          <div class="flex-1"></div>
+          <button type="button" id="btn-next" class="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700">
+            Next →
+          </button>
+          <button type="button" id="btn-submit" class="px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 hidden">
+            Submit for Review
+          </button>
+        </div>
+      </form>
     </div>
   </div>
-  <div id="kyc-status" class="mt-4 text-sm text-gray-600"></div>
 </div>
 
 <script>
 const kycType = '{{ kyc_type }}';
 let currentStep = 1;
+let kycId = null;
 
-function showStep(n){
-  document.querySelectorAll('.kyc-step').forEach(el=>el.classList.add('hidden'));
-  document.getElementById('step-'+n).classList.remove('hidden');
-  currentStep = n;
+function showStep(step) {
+  document.querySelectorAll('.kyc-step').forEach(el => el.classList.add('hidden'));
+  document.getElementById(`step-${step}`).classList.remove('hidden');
+  currentStep = step;
+  
+  document.getElementById('step-indicator').textContent = `Step ${step} of 3`;
+  document.getElementById('progress-bar').style.width = `${(step / 3) * 100}%`;
+  
+  document.getElementById('btn-prev').classList.toggle('hidden', step === 1);
+  document.getElementById('btn-next').classList.toggle('hidden', step === 3);
+  document.getElementById('btn-submit').classList.toggle('hidden', step !== 3);
+  
+  window.scrollTo(0, 0);
 }
 
-document.getElementById('next-1').addEventListener('click', ()=>{
-  // Save partial via API using FormData to support files
+function showMessage(msg, type = 'error') {
+  const box = document.getElementById('message-box');
+  box.className = `mb-6 p-4 rounded-lg ${type === 'error' ? 'bg-red-50 text-red-800 border border-red-200' : 'bg-green-50 text-green-800 border border-green-200'}`;
+  box.textContent = msg;
+  box.classList.remove('hidden');
+  setTimeout(() => box.classList.add('hidden'), 5000);
+}
+
+function validateStep(step) {
+  const stepEl = document.getElementById(`step-${step}`);
+  const required = stepEl.querySelectorAll('[required]');
+  for (let field of required) {
+    if (!field.value.trim()) {
+      showMessage(`Please fill all required fields in Step ${step}`);
+      field.focus();
+      return false;
+    }
+  }
+  return true;
+}
+
+function getFormData(step) {
   const fd = new FormData();
   fd.append('type', kycType);
-  fd.append('step', '1');
-  fd.append('full_name', document.getElementById('field-name').value);
-  fd.append('contact_mobile', document.getElementById('field-contact').value);
-
-  fetch('/api/kyc/', {method:'POST', body: fd, headers: {'X-CSRFToken': getCookie('csrftoken')}})
-    .then(r=>r.json()).then(d=>{ if(d.success){ document.getElementById('kyc-status').innerText = 'Saved step 1'; showStep(2);} else { document.getElementById('kyc-status').innerText = 'Error: '+JSON.stringify(d.errors||d); } }).catch(e=>console.error(e));
-});
-
-document.getElementById('prev-2').addEventListener('click', ()=> showStep(1));
-document.getElementById('next-2').addEventListener('click', ()=>{
-  // Save step 2 (may include file)
-  const fd = new FormData();
-  fd.append('type', kycType);
-  fd.append('step', '2');
-  fd.append('citizenship_number', document.getElementById('field-idnum').value);
-  const fileInput = document.getElementById('field-doc');
-  if(fileInput.files.length>0){ fd.append('id_document', fileInput.files[0]); }
-
-  fetch('/api/kyc/', {method:'POST', body: fd, headers: {'X-CSRFToken': getCookie('csrftoken')}})
-    .then(r=>r.json()).then(d=>{ if(d.success){ document.getElementById('kyc-status').innerText = 'Saved step 2'; showStep(3);} else { document.getElementById('kyc-status').innerText = 'Error: '+JSON.stringify(d.errors||d); } }).catch(e=>console.error(e));
-});
-document.getElementById('prev-3').addEventListener('click', ()=> showStep(2));
-
-document.getElementById('save-final').addEventListener('click', ()=>{
-  // Save step 3 then submit
-  const fd = new FormData();
-  fd.append('type', kycType);
-  fd.append('step', '3');
-  fd.append('purpose_of_account', document.getElementById('field-purpose').value);
-
-  fetch('/api/kyc/', {method:'POST', body: fd, headers: {'X-CSRFToken': getCookie('csrftoken')}})
-    .then(r=>r.json()).then(d=>{
-      if(!d.success){ document.getElementById('kyc-status').innerText = 'Error: '+JSON.stringify(d.errors||d); return; }
-      // Submit
-      fetch(`/api/kyc/${kycType}/${d.id}/submit/`, {method:'PATCH', headers: {'X-CSRFToken': getCookie('csrftoken')}})
-        .then(r=>r.json()).then(res=>{ document.getElementById('kyc-status').innerText = 'KYC submitted for review.'; })
-    }).catch(e=>console.error(e));
-});
+  fd.append('step', step);
+  
+  const stepEl = document.getElementById(`step-${step}`);
+  stepEl.querySelectorAll('input, select, textarea').forEach(field => {
+    if (field.type === 'file') {
+      if (field.files.length > 0) fd.append(field.name, field.files[0]);
+    } else if (field.type === 'checkbox') {
+      fd.append(field.name, field.checked);
+    } else if (field.value) {
+      fd.append(field.name, field.value);
+    }
+  });
+  return fd;
+}
 
 function getCookie(name) {
   const v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
   return v ? v[2] : null;
 }
+
+document.getElementById('btn-next').addEventListener('click', async () => {
+  if (!validateStep(currentStep)) return;
+  
+  const fd = getFormData(currentStep);
+  try {
+    const res = await fetch('/api/kyc/', {
+      method: 'POST',
+      body: fd,
+      headers: {'X-CSRFToken': getCookie('csrftoken')}
+    });
+    const data = await res.json();
+    
+    if (data.success) {
+      kycId = data.id;
+      showMessage(`Step ${currentStep} saved successfully!`, 'success');
+      showStep(currentStep + 1);
+    } else {
+      showMessage('Error: ' + JSON.stringify(data.errors || data.error));
+    }
+  } catch (e) {
+    showMessage('Network error. Please try again.');
+  }
+});
+
+document.getElementById('btn-prev').addEventListener('click', () => {
+  showStep(currentStep - 1);
+});
+
+document.getElementById('btn-submit').addEventListener('click', async () => {
+  if (!validateStep(3)) return;
+  
+  const fd = getFormData(3);
+  try {
+    const res = await fetch('/api/kyc/', {
+      method: 'POST',
+      body: fd,
+      headers: {'X-CSRFToken': getCookie('csrftoken')}
+    });
+    const data = await res.json();
+    
+    if (!data.success) {
+      showMessage('Error: ' + JSON.stringify(data.errors || data.error));
+      return;
+    }
+    
+    kycId = data.id;
+    
+    const submitRes = await fetch(`/api/kyc/${kycType}/${kycId}/submit/`, {
+      method: 'PATCH',
+      headers: {'X-CSRFToken': getCookie('csrftoken')}
+    });
+    const submitData = await submitRes.json();
+    
+    if (submitData.success) {
+      alert('✅ KYC submitted successfully! Our team will review it within 24-48 hours.');
+      window.location.href = '/users/dashboard/';
+    } else {
+      showMessage('Submission failed: ' + JSON.stringify(submitData.error));
+    }
+  } catch (e) {
+    showMessage('Network error. Please try again.');
+  }
+});
 
 showStep(1);
 </script>

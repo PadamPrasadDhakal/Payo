@@ -213,30 +213,31 @@ def applications_dashboard(request):
 @login_required
 def kyc_form_view(request):
     """Render the multi-step KYC form page. The frontend JS will call API endpoints to save steps and submit."""
-    # Determine which KYC type to show by user_type
     kyc_type = 'individual' if request.user.user_type == request.user.UserType.APPLICANT else 'organization'
-    return render(request, 'users/kyc_form.html', {'kyc_type': kyc_type})
+    
+    # Check if user already has KYC submitted/verified
+    kyc_status = request.user.get_kyc_status()
+    
+    context = {
+        'kyc_type': kyc_type,
+        'kyc_status': kyc_status,
+        'show_banner': request.user.needs_kyc_banner()
+    }
+    return render(request, 'users/kyc_form.html', context)
 
 
 @staff_member_required
 def cms_dashboard(request):
-    """Lightweight CMS dashboard that lists Users, Jobs, Applications and KYC records with basic filters.
-
-    Supports GET params: model (users|jobs|applications|kyc), search, status, date_from, date_to,
-    user_type, registration_number, kyc_type (individual|organization).
-    """
-    # Simple selector to choose which table to show
-    model = request.GET.get('model', 'users')
+    """CMS dashboard with Users, Jobs, Applications and KYC records with filters."""
+    model = request.GET.get('model', 'kyc')
     page = int(request.GET.get('page', 1))
     per_page = 20
 
-    # Common filters
     search = request.GET.get('search', '').strip()
     status_filter = request.GET.get('status', '').strip()
     date_from = request.GET.get('date_from', '').strip()
     date_to = request.GET.get('date_to', '').strip()
     user_type = request.GET.get('user_type', '').strip()
-    registration_number = request.GET.get('registration_number', '').strip()
     kyc_type = request.GET.get('kyc_type', '').strip()
 
     context = {
@@ -246,7 +247,6 @@ def cms_dashboard(request):
         'date_from': date_from,
         'date_to': date_to,
         'user_type': user_type,
-        'registration_number': registration_number,
         'kyc_type': kyc_type,
     }
 
@@ -298,7 +298,6 @@ def cms_dashboard(request):
         context['columns'] = ['job', 'applicant', 'status', 'created_at']
 
     elif model == 'kyc':
-        # Support filtering by type (individual/organization), status, date range, org name, registration number
         items = []
         if kyc_type in ('', 'individual'):
             ind_qs = IndividualKYC.objects.select_related('user').all().order_by('-updated_at')
@@ -311,7 +310,7 @@ def cms_dashboard(request):
             if date_to:
                 ind_qs = ind_qs.filter(updated_at__date__lte=date_to)
             for k in ind_qs:
-                items.append({'type': 'individual', 'id': k.id, 'user': k.user, 'status': k.status, 'updated_at': k.updated_at})
+                items.append({'type': 'individual', 'id': k.id, 'user': k.user, 'name': k.full_name or k.user.username, 'status': k.status, 'updated_at': k.updated_at})
 
         if kyc_type in ('', 'organization'):
             org_qs = OrganizationKYC.objects.select_related('user').all().order_by('-updated_at')
@@ -319,19 +318,17 @@ def cms_dashboard(request):
                 org_qs = org_qs.filter(status=status_filter)
             if search:
                 org_qs = org_qs.filter(Q(org_name__icontains=search) | Q(user__username__icontains=search) | Q(registration_number__icontains=search))
-            if registration_number:
-                org_qs = org_qs.filter(registration_number__icontains=registration_number)
             if date_from:
                 org_qs = org_qs.filter(updated_at__date__gte=date_from)
             if date_to:
                 org_qs = org_qs.filter(updated_at__date__lte=date_to)
             for k in org_qs:
-                items.append({'type': 'organization', 'id': k.id, 'user': k.user, 'status': k.status, 'updated_at': k.updated_at})
+                items.append({'type': 'organization', 'id': k.id, 'user': k.user, 'name': k.org_name or k.user.username, 'status': k.status, 'updated_at': k.updated_at})
 
         items = sorted(items, key=lambda x: x['updated_at'], reverse=True)
         paginator = Paginator(items, per_page)
         context['page_obj'] = paginator.get_page(page)
-        context['columns'] = ['type', 'user', 'status', 'updated_at']
+        context['columns'] = ['type', 'name', 'user', 'status', 'updated_at']
 
     else:
         raise Http404()
@@ -365,6 +362,15 @@ def apply_job(request):
                     'message': 'Please complete your profile before applying for jobs.',
                     'redirect_url': '/users/add-info/'
                 }, status=400)
+            
+            # KYC check: unverified users can only apply 2 jobs per day
+            if not request.user.is_kyc_verified:
+                if not request.user.can_apply_today():
+                    return JsonResponse({
+                        'error': 'Daily limit reached',
+                        'message': 'Unverified users can apply to only 2 jobs per day. Complete KYC to remove this limit.',
+                        'redirect_url': '/users/kyc/'
+                    }, status=429)
             
             data = json.loads(request.body)
             job_id = data.get('job_id')
