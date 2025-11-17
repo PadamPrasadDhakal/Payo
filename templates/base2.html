@@ -68,6 +68,15 @@
                 <!-- Right Actions -->
                 <div class="flex items-center gap-3">
                     {% if user.is_authenticated %}
+                        <!-- Notifications Bell -->
+                        <button onclick="openNotificationsModal()" class="relative inline-flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition" title="Notifications">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                            </svg>
+                            <span class="unread-count absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full hidden">0</span>
+                        </button>
+
                         <a href="/users/profile/" class="px-3 py-1.5 rounded-lg bg-primary text-white hover:bg-gray-700 transition font-medium shadow-sm">
                             View Profile
                         </a>
@@ -427,6 +436,39 @@
         document.body.appendChild(clearButton);
       }
     });
+    </script>
+    
+    <!-- Notification Badge Update Script -->
+    <script>
+    {% if user.is_authenticated %}
+    function updateNotificationBadge() {
+      fetch('{% url "users:notification_count_api" %}')
+        .then(response => response.json())
+        .then(data => {
+          const badge = document.querySelector('.unread-count');
+          if (data.unread_count > 0) {
+            badge.textContent = data.unread_count;
+            badge.classList.remove('hidden');
+          } else {
+            badge.classList.add('hidden');
+          }
+        })
+        .catch(err => console.log('Error fetching notification count:', err));
+    }
+    
+    // Update badge on page load
+    document.addEventListener('DOMContentLoaded', updateNotificationBadge);
+    
+    // Update badge every 30 seconds
+    setInterval(updateNotificationBadge, 30000);
+    
+    // Update badge when user returns to the page
+    document.addEventListener('visibilitychange', function() {
+      if (!document.hidden) {
+        updateNotificationBadge();
+      }
+    });
+    {% endif %}
     </script>
     {% endif %}
 </body>

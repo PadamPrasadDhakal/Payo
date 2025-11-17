@@ -107,11 +107,11 @@
     {% endif %}
     
     <div class="flex gap-4">
-      <a href="{% url 'kyc_profile' %}" class="inline-block px-6 py-3 rounded-lg bg-primary text-white hover:bg-purple-700 transition transform hover:scale-105 shadow">
+      <a href="{% url 'users:kyc_profile' %}" class="inline-block px-6 py-3 rounded-lg bg-primary text-white hover:bg-purple-700 transition transform hover:scale-105 shadow">
         View KYC Details
       </a>
       {% if not user.is_kyc_verified %}
-      <a href="{% url 'kyc_form' %}" class="inline-block px-6 py-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition transform hover:scale-105 shadow">
+      <a href="{% url 'users:kyc_form' %}" class="inline-block px-6 py-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition transform hover:scale-105 shadow">
         Start KYC Verification
       </a>
       {% endif %}
