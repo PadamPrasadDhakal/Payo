@@ -206,6 +206,38 @@ def org_dashboard(request):
         "job_count": job_count,
     })
 
+
+@login_required
+def org_profile(request):
+    """Organization profile view"""
+    if not request.user.is_organization:
+        messages.error(request, 'Only organizations can access this page.')
+        return redirect('/')
+    
+    org = request.user
+    
+    # Get statistics
+    jobs_count = Job.objects.filter(posted_by=org).count()
+    applications_count = Application.objects.filter(job__posted_by=org).count()
+    
+    # Get recent payments
+    recent_payments = Payment.objects.filter(organization=org).order_by('-created_at')[:5]
+    
+    # Get active subscription
+    active_subscription = Payment.objects.filter(
+        organization=org,
+        status='completed'
+    ).order_by('-subscription_end').first()
+    
+    context = {
+        'jobs_count': jobs_count,
+        'applications_count': applications_count,
+        'recent_payments': recent_payments,
+        'active_subscription': active_subscription,
+    }
+    
+    return render(request, "organization/org_profile.html", context)
+
 @login_required
 def org_jobs(request):
     org = request.user
