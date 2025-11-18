@@ -1,5 +1,6 @@
 from django import forms
 from .models import Job
+from users.models import User
 from PIL import Image
 
 class JobForm(forms.ModelForm):
@@ -29,3 +30,65 @@ class JobForm(forms.ModelForm):
             except Exception:
                 raise forms.ValidationError("Invalid image file.")
         return poster
+
+
+TAILWIND_INPUT = "w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600"
+
+
+class OrganizationProfileEditForm(forms.ModelForm):
+    """Form for editing organization profile details"""
+    
+    class Meta:
+        model = User
+        fields = ["organization_name", "organization_website", "organization_photo", "phone", "address"]
+        widgets = {
+            "organization_name": forms.TextInput(attrs={
+                "class": TAILWIND_INPUT,
+                "placeholder": "Organization Name",
+                "required": True
+            }),
+            "organization_website": forms.URLInput(attrs={
+                "class": TAILWIND_INPUT,
+                "placeholder": "https://example.com",
+                "required": False
+            }),
+            "phone": forms.TextInput(attrs={
+                "class": TAILWIND_INPUT,
+                "placeholder": "Phone Number",
+                "type": "tel"
+            }),
+            "address": forms.Textarea(attrs={
+                "class": TAILWIND_INPUT + " resize-none",
+                "placeholder": "Organization Address",
+                "rows": 3
+            }),
+            "organization_photo": forms.FileInput(attrs={
+                "class": "block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100",
+                "accept": "image/*"
+            }),
+        }
+        labels = {
+            "organization_name": "Organization Name",
+            "organization_website": "Website URL",
+            "organization_photo": "Logo/Organization Photo",
+            "phone": "Phone Number",
+            "address": "Address",
+        }
+
+    def clean_organization_photo(self):
+        photo = self.cleaned_data.get("organization_photo")
+        if photo:
+            # Check file size (max 5MB)
+            if photo.size > 5 * 1024 * 1024:
+                raise forms.ValidationError("Logo must be less than 5MB.")
+            # Check file type
+            valid_types = ["image/png", "image/jpeg", "image/jpg", "image/gif", "image/webp"]
+            if photo.content_type not in valid_types:
+                raise forms.ValidationError("Logo must be a valid image file (PNG, JPEG, JPG, GIF, or WebP).")
+        return photo
+
+    def clean_organization_website(self):
+        website = self.cleaned_data.get("organization_website")
+        if website and not (website.startswith("http://") or website.startswith("https://")):
+            raise forms.ValidationError("Website URL must start with http:// or https://")
+        return website

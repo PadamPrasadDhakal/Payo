@@ -1,0 +1,254 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}JobsHaru - Organization{% endblock %}</title>
+     
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="#">
+
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: '#6d28d9',
+              secondary: '#22c55e',
+              tertiary: '#ffff00',
+            }
+          }
+        }
+      }
+    </script>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-white min-h-screen text-gray-800">
+
+    <!-- Organization Navbar -->
+    <nav class="sticky top-0 z-50 bg-white/80 backdrop-blur-xl shadow-md border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex items-center justify-between h-16">
+                
+                <!-- Left Logo -->
+                <a href="/organization/profile/" class="text-xl font-extrabold tracking-tight text-primary hover:scale-105 transition-transform">
+                    JobsHaru
+                </a>
+                
+                <!-- Middle Menu -->
+                <div class="hidden md:flex items-center gap-8">
+                    <a href="/organization/jobs/" class="text-gray-700 hover:text-primary transition font-medium relative text-gray-700 hover:text-blue-600 font-medium transition-colors duration-300
+                 after:content-[''] after:absolute after:left-1/2 after:-bottom-1 after:w-0 after:h-[2px] 
+                 after:bg-blue-600 after:transition-all after:duration-300 after:ease-out 
+                 hover:after:w-full hover:after:left-0">My Jobs</a>
+                    <a href="/organization/applications/" class="text-gray-700 hover:text-primary transition font-medium relative text-gray-700 hover:text-blue-600 font-medium transition-colors duration-300
+                 after:content-[''] after:absolute after:left-1/2 after:-bottom-1 after:w-0 after:h-[2px] 
+                 after:bg-blue-600 after:transition-all after:duration-300 after:ease-out 
+                 hover:after:w-full hover:after:left-0">Applications</a>
+                    <a href="/organization/pricing/" class="text-gray-700 hover:text-primary transition font-medium relative text-gray-700 hover:text-blue-600 font-medium transition-colors duration-300
+                 after:content-[''] after:absolute after:left-1/2 after:-bottom-1 after:w-0 after:h-[2px] 
+                 after:bg-blue-600 after:transition-all after:duration-300 after:ease-out 
+                 hover:after:w-full hover:after:left-0">Plans</a>
+                </div>
+                
+                <!-- Right Actions -->
+                <div class="flex items-center gap-3">
+                    {% if user.is_authenticated %}
+                        <!-- Notifications Bell -->
+                        <button onclick="openNotificationsModal()" class="relative inline-flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition" title="Notifications">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                            </svg>
+                            <span class="unread-count absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full hidden">0</span>
+                        </button>
+
+                        <!-- Settings Dropdown -->
+                        <div>
+                            <details class="relative">
+                                <summary class="list-none cursor-pointer flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition">
+                                    <!-- Cog icon -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-700" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
+                                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.58-.91 3.395.905 2.485 2.485a1.724 1.724 0 0 0 1.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 0 0-1.066 2.573c.91 1.58-.905 3.395-2.485 2.485a1.724 1.724 0 0 0-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 0 0-2.573-1.066c-1.58.91-3.395-.905-2.485-2.485a1.724 1.724 0 0 0-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 0 0 1.066-2.573c-.91-1.58.905-3.395 2.485-2.485.98.565 2.205.21 2.573-1.066z" />
+                                        <circle cx="12" cy="12" r="3.25" stroke-width="1.75" />
+                                    </svg>
+                                </summary>
+
+                                <div class="absolute right-0 mt-2 w-56 rounded-xl border border-gray-200 bg-white shadow-lg overflow-hidden z-50">
+                                    <div class="py-1">
+                                        <a href="/organization/profile/" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+                                            View Profile
+                                        </a>
+                                        <a href="/organization/profile/edit/" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"></path></svg>
+                                            Edit Profile
+                                        </a>
+                                        <a href="/users/kyc/" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 3.062v6.756a3.066 3.066 0 01-3.062 3.062H7.041a3.065 3.065 0 01-3.063-3.062V6.517a3.066 3.066 0 012.812-3.062zM9 13a1 1 0 11-2 0 1 1 0 012 0zm3 0a1 1 0 11-2 0 1 1 0 012 0z" clip-rule="evenodd"></path></svg>
+                                            KYC Verification
+                                        </a>
+                                        <hr class="my-1 border-gray-200">
+                                        <a href="/organization/jobs/new/" class="flex items-center gap-2 px-4 py-2 text-sm text-green-600 hover:bg-green-50 font-semibold">
+                                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10.5 1.5H19a1 1 0 011 1v15a1 1 0 01-1 1H1a1 1 0 01-1-1V4.5a1 1 0 011-1h4V1.5a1 1 0 011-1h4zm0 2h-4v2h4v-2z"></path></svg>
+                                            Post New Job
+                                        </a>
+                                        <hr class="my-1 border-gray-200">
+                                        <a href="#" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                            Change Password
+                                        </a>
+                                        <a href="/users/notifications/" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                            All Notifications
+                                        </a>
+                                        <a href="#" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                            Help and Support
+                                        </a>
+                                        <hr class="my-1 border-gray-200">
+                                        <form method="post" action="/logout/">
+                                            {% csrf_token %}
+                                            <button type="submit" class="w-full text-left flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 font-semibold">
+                                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd"></path></svg>
+                                                Logout
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </details>
+                        </div>
+                    {% else %}
+                        <a href="/users/login/" class="px-3 py-1.5 rounded-lg border border-gray-300 hover:bg-gray-100 transition font-medium">
+                            Login
+                        </a>
+                        <a href="/users/signup/" class="px-3 py-1.5 rounded-lg bg-secondary text-white hover:bg-green-600 transition font-medium">
+                            Signup
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- KYC Banner (included for logged-in users who haven't completed KYC) -->
+    {% if user.is_authenticated and not user.is_kyc_verified %}
+      {% include 'includes/kyc_banner.html' %}
+    {% endif %}
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-16 border-t border-gray-200 bg-gray-50 py-8">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="grid md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <h3 class="font-bold text-lg mb-4">JobsHaru</h3>
+                    <p class="text-gray-600 text-sm">Your trusted job and internship platform</p>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Quick Links</h4>
+                    <ul class="space-y-2 text-sm text-gray-600">
+                        <li><a href="/organization/profile/" class="hover:text-primary transition">Dashboard</a></li>
+                        <li><a href="/organization/jobs/" class="hover:text-primary transition">My Jobs</a></li>
+                        <li><a href="/organization/pricing/" class="hover:text-primary transition">Plans</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Support</h4>
+                    <ul class="space-y-2 text-sm text-gray-600">
+                        <li><a href="#" class="hover:text-primary transition">Help Center</a></li>
+                        <li><a href="#" class="hover:text-primary transition">Contact Us</a></li>
+                        <li><a href="#" class="hover:text-primary transition">FAQ</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Legal</h4>
+                    <ul class="space-y-2 text-sm text-gray-600">
+                        <li><a href="#" class="hover:text-primary transition">Privacy Policy</a></li>
+                        <li><a href="#" class="hover:text-primary transition">Terms of Service</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-200 pt-8 text-center text-sm text-gray-600">
+                <p>&copy; 2024 JobsHaru. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Notification Modal JS (from base2.html) -->
+    <script>
+        // Load and update notifications
+        function updateNotificationBadge() {
+            fetch('/users/api/notification-count/', {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const badge = document.querySelector('.unread-count');
+                if (data.unread_count > 0) {
+                    badge.textContent = data.unread_count;
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        // Update badge on page load
+        updateNotificationBadge();
+        
+        // Update badge every 30 seconds
+        setInterval(updateNotificationBadge, 30000);
+
+        function openNotificationsModal() {
+            fetch('/users/notifications/', {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                }
+            })
+            .then(response => response.text())
+            .then(html => {
+                // Create modal
+                const modal = document.createElement('div');
+                modal.className = 'fixed inset-0 bg-black/50 z-50 flex items-center justify-center';
+                modal.onclick = function(e) {
+                    if (e.target === modal) {
+                        modal.remove();
+                    }
+                };
+                
+                modal.innerHTML = `
+                    <div class="bg-white rounded-2xl w-full max-w-2xl max-h-96 overflow-hidden flex flex-col">
+                        <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 flex items-center justify-between">
+                            <div>
+                                <h2 class="text-2xl font-bold">Notifications</h2>
+                                <p class="text-blue-100 text-sm">Stay updated with your latest activity</p>
+                            </div>
+                            <button onclick="this.closest('.fixed').remove()" class="text-white hover:bg-white/20 rounded-full p-2 transition">
+                                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                            </button>
+                        </div>
+                        <div class="overflow-y-auto flex-1 p-6">
+                            ${html}
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            })
+            .catch(error => console.error('Error loading notifications:', error));
+        }
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

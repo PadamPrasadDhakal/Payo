@@ -7,16 +7,11 @@ from organization.models import Job, Application
 
 def home_view(request):
     if request.user.is_authenticated:
-        if hasattr(request.user, 'user_type') and request.user.user_type == 'ORG':
-            # Show Applications per Job table on home page
-            jobs = Job.objects.filter(posted_by=request.user)
-            job_count = jobs.count()
-            applications_by_job = {job: job.applications.count() for job in jobs}
-            return render(request, "org_home.html", {
-                "job_count": job_count,
-                "applications_by_job": applications_by_job,
-            })
+        if request.user.is_organization():
+            # Organizations go to their profile/dashboard
+            return redirect('organization:profile')
         else:
+            # Applicants go to their dashboard
             return render(request, "dashboard.html")
     return render(request, "home.html")
 
@@ -43,11 +38,7 @@ def assessments(request):
 def profile(request):
     # Example: pass an empty list or your actual assessments queryset
     profile = []
-    return render(request, "users/profile.html", {"profile": profile}) 
-
-def plans(request):
-    plans = []
-    return render(request, "users/plan.html", {"plans": plans})
+    return render(request, "users/profile.html", {"profile": profile})
 def payment(request):
     payment = []
     return render(request, "users/payment.html", {"payment": payment})

@@ -220,6 +220,9 @@ def org_profile(request):
     jobs_count = Job.objects.filter(posted_by=org).count()
     applications_count = Application.objects.filter(job__posted_by=org).count()
     
+    # Get 3 most recent active job postings
+    recent_jobs = Job.objects.filter(posted_by=org).order_by('-created_at')[:3]
+    
     # Get recent payments
     recent_payments = Payment.objects.filter(organization=org).order_by('-created_at')[:5]
     
@@ -232,6 +235,7 @@ def org_profile(request):
     context = {
         'jobs_count': jobs_count,
         'applications_count': applications_count,
+        'recent_jobs': recent_jobs,
         'recent_payments': recent_payments,
         'active_subscription': active_subscription,
     }
@@ -458,4 +462,31 @@ def process_payment(request):
         return JsonResponse({'success': False, 'error': 'Invalid JSON'}, status=400)
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+@login_required
+def org_profile_edit(request):
+    """Edit organization profile"""
+    # Ensure only organizations can access this
+    if not request.user.is_organization():
+        return redirect('organization:profile')
+    
+    org = request.user
+    
+    if request.method == 'POST':
+        from .forms import OrganizationProfileEditForm
+        form = OrganizationProfileEditForm(request.POST, request.FILES, instance=org)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Organization profile updated successfully!')
+            return redirect('organization:profile')
+    else:
+        from .forms import OrganizationProfileEditForm
+        form = OrganizationProfileEditForm(instance=org)
+    
+    context = {
+        'form': form,
+        'org': org,
+    }
+    return render(request, 'organization/org_profile_edit.html', context)
 

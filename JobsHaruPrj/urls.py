@@ -2,11 +2,20 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.shortcuts import redirect
 
 from .views import *
 # from .views import organizations
 from django.views.generic import TemplateView
 from api.debug import debug_tokens
+
+
+def plans_redirect(request):
+    """Redirect /plans/ to organization pricing if logged in as organization, otherwise to home"""
+    if request.user.is_authenticated and request.user.is_organization():
+        return redirect('organization:pricing')
+    else:
+        return redirect('home')
 
 
 urlpatterns = [
@@ -26,7 +35,7 @@ urlpatterns = [
     path('internships/',internships, name='internships'),
     path('assessments/',assessments, name='assessments'),
     path('profile/',profile, name='profile'),
-    path('plans/',plans, name='plans'),
+    path('plans/', plans_redirect, name='plans'),
     path('payment/',payment, name='payment'),
     path('makecv/',include(("makecv.urls", "makecv"), namespace="makecv")),
     # path('makecv/',include(("makecv.urls", "makecv"), namespace="makecv")),

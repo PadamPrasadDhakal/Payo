@@ -1,0 +1,161 @@
+{% extends "org_base.html" %}
+{% block title %}Edit Organization Profile - JobsHaru{% endblock %}
+
+{% block content %}
+
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 py-12 px-4">
+  <div class="max-w-4xl mx-auto">
+    
+    <!-- Back Button & Header -->
+    <div class="mb-8">
+      <a href="{% url 'organization:profile' %}" class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-semibold mb-6 transition">
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"></path></svg>
+        Back to Profile
+      </a>
+      <h1 class="text-4xl font-extrabold text-gray-900 mb-2">Edit Organization Profile</h1>
+      <p class="text-gray-600">Update your organization information and logo</p>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+      <div class="mb-6 space-y-2">
+        {% for message in messages %}
+          <div class="p-4 rounded-lg {% if message.tags %}bg-{{ message.tags }}-50 text-{{ message.tags }}-800{% else %}bg-green-50 text-green-800{% endif %} border border-{% if message.tags %}{{ message.tags }}-200{% else %}green-200{% endif %}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <!-- Main Form Container -->
+    <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+      
+      <!-- Form Section -->
+      <form method="post" enctype="multipart/form-data" class="p-8 space-y-8">
+        {% csrf_token %}
+
+        <!-- Organization Logo Section -->
+        <div class="border-b border-gray-200 pb-8">
+          <h2 class="text-2xl font-bold text-gray-900 mb-6">Organization Logo</h2>
+          
+          <div class="grid md:grid-cols-3 gap-8">
+            <!-- Current Logo -->
+            <div class="md:col-span-1">
+              <label class="block text-sm font-semibold text-gray-700 mb-4">Current Logo</label>
+              {% if org.organization_photo %}
+                <div class="w-full aspect-square rounded-lg overflow-hidden border-2 border-gray-200 bg-gray-50 flex items-center justify-center">
+                  <img src="{{ org.organization_photo.url }}" alt="{{ org.organization_name }}" class="w-full h-full object-cover">
+                </div>
+              {% else %}
+                <div class="w-full aspect-square rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 flex items-center justify-center">
+                  <div class="text-center">
+                    <svg class="w-12 h-12 text-gray-400 mx-auto mb-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"></path>
+                    </svg>
+                    <p class="text-gray-500 text-sm">No logo</p>
+                  </div>
+                </div>
+              {% endif %}
+            </div>
+
+            <!-- Upload New Logo -->
+            <div class="md:col-span-2">
+              <label class="block text-sm font-semibold text-gray-700 mb-4">{{ form.organization_photo.label }}</label>
+              <div class="relative">
+                {{ form.organization_photo }}
+              </div>
+              {% if form.organization_photo.errors %}
+                <div class="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <p class="text-sm text-red-800">
+                    {% for error in form.organization_photo.errors %}
+                      {{ error }}<br>
+                    {% endfor %}
+                  </p>
+                </div>
+              {% endif %}
+              <p class="text-xs text-gray-500 mt-3">
+                <strong>Requirements:</strong> PNG, JPEG, JPG, GIF, or WebP • Max 5MB • Logo will be displayed on job postings and profile
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Organization Information Section -->
+        <div class="border-b border-gray-200 pb-8">
+          <h2 class="text-2xl font-bold text-gray-900 mb-6">Organization Information</h2>
+          
+          <div class="space-y-6">
+            <!-- Organization Name -->
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">{{ form.organization_name.label }}</label>
+              {{ form.organization_name }}
+              {% if form.organization_name.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.organization_name.errors.0 }}</p>
+              {% endif %}
+              <p class="text-xs text-gray-500 mt-2">Legal name of your organization as it appears in official documents</p>
+            </div>
+
+            <!-- Website -->
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">{{ form.organization_website.label }}</label>
+              {{ form.organization_website }}
+              {% if form.organization_website.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.organization_website.errors.0 }}</p>
+              {% endif %}
+              <p class="text-xs text-gray-500 mt-2">Must start with https:// (e.g., https://example.com)</p>
+            </div>
+
+            <!-- Address -->
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">{{ form.address.label }}</label>
+              {{ form.address }}
+              {% if form.address.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.address.errors.0 }}</p>
+              {% endif %}
+            </div>
+
+            <!-- Phone -->
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">{{ form.phone.label }}</label>
+              {{ form.phone }}
+              {% if form.phone.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.phone.errors.0 }}</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="flex gap-4 pt-4">
+          <button type="submit" class="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:shadow-lg transition font-semibold">
+            <svg class="w-5 h-5 inline mr-2" fill="currentColor" viewBox="0 0 20 20"><path d="M5.5 13a3.5 3.5 0 01-.369-6.98 4 4 0 117.753-1.3A4.5 4.5 0 1113.5 13H11V9.413l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13H5.5z"></path></svg>
+            Save Changes
+          </button>
+          <a href="{% url 'organization:profile' %}" class="flex-1 px-6 py-3 bg-gray-200 text-gray-900 rounded-lg hover:bg-gray-300 transition font-semibold text-center">
+            Cancel
+          </a>
+        </div>
+      </form>
+    </div>
+
+    <!-- Info Box -->
+    <div class="mt-8 p-6 bg-blue-50 border border-blue-200 rounded-lg">
+      <div class="flex gap-4">
+        <svg class="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M18 5v8a2 2 0 01-2 2h-5l-5 4v-4H4a2 2 0 01-2-2V5a2 2 0 012-2h12a2 2 0 012 2zm-11-1a1 1 0 11-2 0 1 1 0 012 0zM8 9a1 1 0 000 2h6a1 1 0 100-2H8zm0-2a1 1 0 110-2h6a1 1 0 110 2H8z" clip-rule="evenodd"></path>
+        </svg>
+        <div>
+          <h3 class="font-semibold text-blue-900 mb-1">Tips for a Great Profile</h3>
+          <ul class="text-sm text-blue-800 space-y-1">
+            <li>• Use a clear, professional organization logo</li>
+            <li>• Keep your organization name consistent across all platforms</li>
+            <li>• Update your website and contact info when they change</li>
+            <li>• Complete your profile to build trust with job applicants</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

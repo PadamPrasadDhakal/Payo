@@ -18,12 +18,14 @@ from .views import (
     payment_page,
     process_payment,
     org_profile,
+    org_profile_edit,
 )
 
 app_name = "organization"
 
 urlpatterns = [
     path("profile/", org_profile, name="profile"),
+    path("profile/edit/", org_profile_edit, name="profile-edit"),
     path("pricing/", TemplateView.as_view(template_name="organization_pricing.html"), name="pricing"),
     path("payment/", payment_page, name="payment"),
     path("api/process-payment/", process_payment, name="process-payment"),
@@ -41,4 +43,3 @@ urlpatterns = [
     path("match_resumes/", match_resumes, name="match-resumes"),
     path("users/logout/", lambda request: redirect('/users/logout/')),  # Redirect to users logout
 ]
-

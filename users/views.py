@@ -30,6 +30,13 @@ class UserLoginView(LoginView):
     authentication_form = LoginForm
     redirect_authenticated_user = True
 
+    def get_success_url(self):
+        """Redirect based on user type"""
+        if self.request.user.is_organization():
+            return '/organization/profile/'
+        else:
+            return '/users/dashboard/'
+
 
 class DashboardView(TemplateView):
     template_name = "dashboard.html"
@@ -58,7 +65,7 @@ def signup_applicant(request):
         if form.is_valid():
             user = form.save()
             login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-            return redirect("users:dashboard")
+            return redirect("users:add_info")
     else:
         form = ApplicantSignUpForm()
     return render(request, "users/job_signup.html", {"form": form})
@@ -70,7 +77,7 @@ def signup_organization(request):
         if form.is_valid():
             user = form.save()
             login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-            return redirect("users:dashboard")
+            return redirect("organization:profile")
     else:
         form = OrganizationSignUpForm()
     return render(request, "users/org_signup.html", {"form": form})
