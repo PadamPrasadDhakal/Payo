@@ -1,7 +1,83 @@
 from django.db import models
 from django.conf import settings
+from datetime import timedelta
+from django.utils import timezone
 
 # Create your models here.
+
+class Payment(models.Model):
+    PLAN_CHOICES = [
+        ('starter', 'Starter - NPR 1,000/month'),
+        ('growth', 'Growth - NPR 3,000/month'),
+        ('enterprise', 'Enterprise - NPR 7,000/month'),
+    ]
+    
+    PAYMENT_METHOD_CHOICES = [
+        ('esewa', 'eSewa'),
+        ('khalti', 'Khalti'),
+        ('credit_card', 'Credit Card'),
+    ]
+    
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('completed', 'Completed'),
+        ('failed', 'Failed'),
+        ('cancelled', 'Cancelled'),
+    ]
+    
+    organization = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="payments"
+    )
+    plan = models.CharField(max_length=20, choices=PLAN_CHOICES)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    transaction_id = models.CharField(max_length=255, blank=True, null=True)
+    
+    # Payment details
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    paid_at = models.DateTimeField(blank=True, null=True)
+    
+    # Subscription details
+    subscription_start = models.DateTimeField(blank=True, null=True)
+    subscription_end = models.DateTimeField(blank=True, null=True)
+    
+    class Meta:
+        app_label = 'organization'
+        db_table = 'organization_payment'
+        verbose_name = 'Organization Payment'
+        verbose_name_plural = 'Organization Payments'
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.organization.username} - {self.plan} - {self.get_status_display()}"
+    
+    def get_plan_price(self):
+        """Return price for the plan"""
+        prices = {
+            'starter': 1000,
+            'growth': 3000,
+            'enterprise': 7000,
+        }
+        return prices.get(self.plan, 0)
+    
+    def get_plan_display_name(self):
+        """Return readable plan name"""
+        names = {
+            'starter': 'Starter Plan',
+            'growth': 'Growth Plan',
+            'enterprise': 'Enterprise Plan',
+        }
+        return names.get(self.plan, 'Unknown Plan')
+    
+    def is_active_subscription(self):
+        """Check if subscription is active"""
+        if self.status != 'completed':
+            return False
+        if not self.subscription_end:
+            return False
+        return self.subscription_end > timezone.now()
 
 class Job(models.Model):
     JOB_TYPE_CHOICES = [

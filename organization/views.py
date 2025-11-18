@@ -4,7 +4,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView, DetailView, CreateView
 from .forms import JobForm
 from django.urls import reverse_lazy
-from .models import Job, Application
+from .models import Job, Application, Payment
 from django.db.models import Count, Max
 import PyPDF2
 import re
@@ -18,6 +18,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 import json
+from django.contrib import messages
 
 # Create your views here.
 
@@ -290,11 +291,139 @@ def update_application_status(request):
             'status_display': application.get_status_display(),
             'status_color': application.get_status_color()
         })
-        
     except json.JSONDecodeError:
         return JsonResponse({'error': 'Invalid JSON'}, status=400)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
 
+@login_required
+def payment_page(request):
+    """Payment page for organizations to purchase plans"""
+    # Only organizations can access this page
+    if not request.user.is_organization:
+        messages.error(request, 'Only organizations can purchase plans.')
+        return redirect('organization:pricing')
+    
+    plan = request.GET.get('plan', 'growth')
+    
+    # Validate plan
+    valid_plans = ['starter', 'growth', 'enterprise']
+    if plan not in valid_plans:
+        plan = 'growth'
+    
+    # Get plan details
+    plan_details = {
+        'starter': {
+            'name': 'Starter Plan',
+            'price': 1000,
+            'description': 'Perfect for small teams and startups',
+            'features': ['Up to 50 job postings', 'Basic analytics', 'Email support']
+        },
+        'growth': {
+            'name': 'Growth Plan',
+            'price': 3000,
+            'description': 'Ideal for growing companies',
+            'features': ['Unlimited job postings', 'Advanced analytics', 'Priority support', 'AI screening']
+        },
+        'enterprise': {
+            'name': 'Enterprise Plan',
+            'price': 7000,
+            'description': 'For large organizations',
+            'features': ['Everything in Growth', 'Custom integrations', 'Dedicated account manager', '24/7 support']
+        }
+    }
+    
+    selected_plan = plan_details.get(plan, plan_details['growth'])
+    
+    context = {
+        'plan': plan,
+        'selected_plan': selected_plan,
+        'all_plans': plan_details,
+    }
+    
+    return render(request, 'organization/payment.html', context)
+
+
+@login_required
+def process_payment(request):
+    """Process payment submission"""
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=400)
+    
+    if not request.user.is_organization:
+        return JsonResponse({'success': False, 'error': 'Only organizations can make payments'}, status=403)
+    
+    try:
+        data = json.loads(request.body)
+        plan = data.get('plan')
+        payment_method = data.get('payment_method')
+        
+        # Validate plan
+        valid_plans = ['starter', 'growth', 'enterprise']
+        if plan not in valid_plans:
+            return JsonResponse({'success': False, 'error': 'Invalid plan'}, status=400)
+        
+        # Validate payment method
+        valid_methods = ['esewa', 'khalti', 'credit_card']
+        if payment_method not in valid_methods:
+            return JsonResponse({'success': False, 'error': 'Invalid payment method'}, status=400)
+        
+        # Get payment details based on method
+        if payment_method == 'credit_card':
+            card_number = data.get('card_number', '').strip()
+            card_expiry = data.get('card_expiry', '').strip()
+            card_cvv = data.get('card_cvv', '').strip()
+            
+            # Basic validation
+            if not card_number or not card_expiry or not card_cvv:
+                return JsonResponse({'success': False, 'error': 'All credit card fields are required'}, status=400)
+            
+            if len(card_number) < 13:
+                return JsonResponse({'success': False, 'error': 'Invalid card number'}, status=400)
+        
+        else:  # esewa or khalti
+            user_id = data.get('user_id', '').strip()
+            password = data.get('password', '').strip()
+            
+            if not user_id or not password:
+                return JsonResponse({'success': False, 'error': f'{payment_method.capitalize()} ID and password are required'}, status=400)
+        
+        # Get plan price
+        prices = {'starter': 1000, 'growth': 3000, 'enterprise': 7000}
+        amount = prices.get(plan, 0)
+        
+        # Create payment record
+        payment = Payment.objects.create(
+            organization=request.user,
+            plan=plan,
+            amount=amount,
+            payment_method=payment_method,
+            status='pending',
+            transaction_id=f"TXN_{request.user.id}_{plan}_{timezone.now().timestamp()}"
+        )
+        
+        # Here you would integrate with actual payment gateway (Esewa, Khalti, Stripe)
+        # For now, we'll mark as completed
+        payment.status = 'completed'
+        payment.paid_at = timezone.now()
+        
+        # Set subscription dates
+        from datetime import timedelta
+        payment.subscription_start = timezone.now()
+        payment.subscription_end = timezone.now() + timedelta(days=30)  # 1 month subscription
+        
+        payment.save()
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Payment completed successfully!',
+            'payment_id': payment.id,
+            'redirect': '/organization/dashboard/'
+        })
+        
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'Invalid JSON'}, status=400)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
 

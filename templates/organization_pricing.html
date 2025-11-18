@@ -79,9 +79,15 @@
         </li>
       </ul>
       
-      <a href="/users/signup/organization/" class="w-full bg-gray-900 text-white py-3 px-6 rounded-xl font-semibold hover:bg-gray-800 transition-colors block text-center">
-        Get Started
-      </a>
+      {% if user.is_authenticated and user.is_organization %}
+        <a href="/organization/payment/?plan=starter" class="w-full bg-gray-900 text-white py-3 px-6 rounded-xl font-semibold hover:bg-gray-800 transition-colors block text-center">
+          Purchase Now
+        </a>
+      {% else %}
+        <a href="/users/signup/organization/" class="w-full bg-gray-900 text-white py-3 px-6 rounded-xl font-semibold hover:bg-gray-800 transition-colors block text-center">
+          Get Started
+        </a>
+      {% endif %}
     </div>
 
     <!-- Growth Plan (Popular) -->
@@ -140,9 +146,15 @@
         </li>
       </ul>
       
-      <a href="/users/signup/organization/" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 px-6 rounded-xl font-semibold hover:shadow-lg hover:-translate-y-1 transition-all duration-300 block text-center">
-        Start Free Trial
-      </a>
+      {% if user.is_authenticated and user.is_organization %}
+        <a href="/organization/payment/?plan=growth" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 px-6 rounded-xl font-semibold hover:shadow-lg hover:-translate-y-1 transition-all duration-300 block text-center">
+          Purchase Now
+        </a>
+      {% else %}
+        <a href="/users/signup/organization/" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 px-6 rounded-xl font-semibold hover:shadow-lg hover:-translate-y-1 transition-all duration-300 block text-center">
+          Start Free Trial
+        </a>
+      {% endif %}
     </div>
 
     <!-- Enterprise Plan -->
@@ -195,9 +207,15 @@
         </li>
       </ul>
       
-      <a href="/organization/contact/?plan=enterprise" class="w-full bg-gray-900 text-white py-3 px-6 rounded-xl font-semibold hover:bg-gray-800 transition-colors block text-center">
-        Contact Sales
-      </a>
+      {% if user.is_authenticated and user.is_organization %}
+        <a href="/organization/payment/?plan=enterprise" class="w-full bg-gray-900 text-white py-3 px-6 rounded-xl font-semibold hover:bg-gray-800 transition-colors block text-center">
+          Purchase Now
+        </a>
+      {% else %}
+        <a href="/organization/contact/?plan=enterprise" class="w-full bg-gray-900 text-white py-3 px-6 rounded-xl font-semibold hover:bg-gray-800 transition-colors block text-center">
+          Contact Sales
+        </a>
+      {% endif %}
     </div>
   </div>
 </section>
