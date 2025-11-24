@@ -1,4 +1,4 @@
-from django.contrib.auth import login
+from django.contrib.auth import login, authenticate
 from django.contrib.auth.views import LoginView, LogoutView
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
@@ -536,3 +536,33 @@ def notification_count_api(request):
     """API endpoint for getting unread notification count"""
     unread_count = request.user.notifications.filter(is_read=False).count()
     return JsonResponse({'unread_count': unread_count, 'success': True})
+
+
+def cms_login(request):
+    """CMS login page - only for staff/superusers"""
+    # If already logged in as staff, redirect to cms dashboard
+    if request.user.is_authenticated and request.user.is_staff:
+        return redirect('/admin/cms/')
+    
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        
+        user = authenticate(request, username=username, password=password)
+        
+        if user is not None and user.is_staff:
+            # Only allow staff/superusers to login to CMS
+            login(request, user)
+            messages.success(request, f'Welcome to CMS, {user.username}!')
+            return redirect('/admin/cms/')
+        else:
+            messages.error(request, 'Invalid credentials or insufficient permissions. Only CMS staff can login.')
+    
+    return render(request, 'admin/cms_login.html')
+
+
+def cms_logout(request):
+    """CMS logout - redirects to CMS login page"""
+    logout(request)
+    messages.success(request, 'You have been logged out successfully.')
+    return redirect('/admin/cms-login/')

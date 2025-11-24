@@ -19,8 +19,86 @@ class UserAdmin(DjangoUserAdmin):
                 )
             },
         ),
+        (
+            "CMS / Staff Access (Superuser Only)",
+            {
+                "fields": ("is_staff", "is_superuser", "groups", "user_permissions"),
+                "classes": ("collapse",),
+                "description": "⚠️ Only superusers can grant CMS access. Mark 'is_staff' to enable CMS admin access."
+            },
+        ),
     )
-    list_display = ("username", "email", "user_type", "is_staff", "is_active")
+    list_display = ("username", "email", "user_type", "is_staff_badge", "is_active")
+    
+    def is_staff_badge(self, obj):
+        """Display staff status with visual indicator"""
+        if obj.is_staff:
+            return '🔐 CMS Access'
+        return '—'
+    is_staff_badge.short_description = 'CMS Status'
+    
+    def get_fieldsets(self, request, obj=None):
+        """Hide CMS fieldset from non-superusers"""
+        fieldsets = super().get_fieldsets(request, obj)
+        
+        # If user is not superuser, hide the CMS fieldset
+        if not request.user.is_superuser:
+            fieldsets = tuple([fs for fs in fieldsets if fs[0] != "CMS / Staff Access (Superuser Only)"])
+        
+        return fieldsets
+    
+    def get_form(self, request, obj=None, **kwargs):
+        """Hide is_staff field from non-superusers"""
+        form = super().get_form(request, obj, **kwargs)
+        
+        if not request.user.is_superuser:
+            # Hide staff-related fields for non-superusers
+            if 'is_staff' in form.base_fields:
+                del form.base_fields['is_staff']
+            if 'is_superuser' in form.base_fields:
+                del form.base_fields['is_superuser']
+            if 'groups' in form.base_fields:
+                del form.base_fields['groups']
+            if 'user_permissions' in form.base_fields:
+                del form.base_fields['user_permissions']
+        
+        return form
+    
+    def has_add_permission(self, request):
+        """Only superusers can add users"""
+        return request.user.is_superuser
+    
+    def has_delete_permission(self, request, obj=None):
+        """Only superusers can delete users"""
+        return request.user.is_superuser
+    
+    def has_change_permission(self, request, obj=None):
+        """Superusers can change all users, staff can only view"""
+        if request.user.is_superuser:
+            return True
+        return request.user.is_staff  # Staff can at least view
+    
+    actions = ['make_cms_user', 'remove_cms_user']
+    
+    def make_cms_user(self, request, queryset):
+        """Action to grant CMS access - only for superusers"""
+        if not request.user.is_superuser:
+            self.message_user(request, '❌ Only superusers can grant CMS access.', level='error')
+            return
+        
+        updated = queryset.update(is_staff=True)
+        self.message_user(request, f'✓ {updated} user(s) now have CMS access.')
+    make_cms_user.short_description = '🔐 Grant CMS Access (Superuser Only)'
+    
+    def remove_cms_user(self, request, queryset):
+        """Action to revoke CMS access - only for superusers"""
+        if not request.user.is_superuser:
+            self.message_user(request, '❌ Only superusers can revoke CMS access.', level='error')
+            return
+        
+        updated = queryset.update(is_staff=False)
+        self.message_user(request, f'✓ {updated} user(s) CMS access removed.')
+    remove_cms_user.short_description = '🚫 Revoke CMS Access (Superuser Only)'
 
 from django.contrib import admin
 from .models import IndividualKYC, OrganizationKYC, KycAudit
