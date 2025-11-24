@@ -54,8 +54,10 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "allauth.account.middleware.AccountMiddleware",
-        # KYC enforcement middleware to block unverified orgs from posting
-        "users.middleware.KycEnforcementMiddleware",
+    # KYC enforcement middleware to block unverified orgs from posting
+    "users.middleware.KycEnforcementMiddleware",
+    # CMS redirect middleware to restrict staff users to admin/cms only
+    "users.middleware.CMSRedirectMiddleware",
 ]
 
 ROOT_URLCONF = "JobsHaruPrj.urls"

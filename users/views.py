@@ -21,6 +21,13 @@ from django.views import View
 from django.http import HttpResponseRedirect
 import json
 from django.contrib.admin.views.decorators import staff_member_required
+from django.http import Http404
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
+from django.db.models import Q
+from users.models import User, IndividualKYC, OrganizationKYC, Notification
+from organization.models import Job, Application
 from django.shortcuts import Http404
 from django.core.paginator import Paginator
 from users.models import IndividualKYC, OrganizationKYC, KycAudit, Notification
@@ -266,6 +273,7 @@ def kyc_form_view(request):
 
 
 @staff_member_required
+@staff_member_required(login_url='/admin/login/')
 def cms_dashboard(request):
     """CMS dashboard with Users, Jobs, Applications and KYC records with filters."""
     model = request.GET.get('model', 'kyc')

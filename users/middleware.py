@@ -30,3 +30,37 @@ class KycEnforcementMiddleware:
 
         response = self.get_response(request)
         return response
+
+
+class CMSRedirectMiddleware:
+    """
+    Middleware to restrict CMS staff users to admin/cms only.
+    When a CMS user tries to access any URL other than /admin/cms/, redirect them back.
+    """
+    
+    def __init__(self, get_response):
+        self.get_response = get_response
+        # CMS allowed paths
+        self.cms_allowed_paths = [
+            '/admin/cms/',
+            '/admin/login/',
+            '/admin/logout/',
+            '/admin/api/',
+            '/api/',  # Allow general APIs
+        ]
+    
+    def __call__(self, request):
+        # Check if user is staff (CMS user)
+        if request.user.is_authenticated and request.user.is_staff and not request.user.is_superuser:
+            # Get current path
+            current_path = request.path
+            
+            # Allow paths that are in the CMS allowed list
+            is_allowed = any(current_path.startswith(path) for path in self.cms_allowed_paths)
+            
+            # If path is not allowed and user is staff/CMS, redirect to admin/cms
+            if not is_allowed:
+                return redirect('/admin/cms/')
+        
+        response = self.get_response(request)
+        return response
