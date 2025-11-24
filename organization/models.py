@@ -25,6 +25,12 @@ class Payment(models.Model):
         ('cancelled', 'Cancelled'),
     ]
     
+    PREMIUM_STATUS_CHOICES = [
+        ('pending', 'Pending Approval'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+    ]
+    
     organization = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="payments"
     )
@@ -32,12 +38,14 @@ class Payment(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    premium_status = models.CharField(max_length=20, choices=PREMIUM_STATUS_CHOICES, default='pending')
     transaction_id = models.CharField(max_length=255, blank=True, null=True)
     
     # Payment details
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     paid_at = models.DateTimeField(blank=True, null=True)
+    premium_approved_at = models.DateTimeField(blank=True, null=True)
     
     # Subscription details
     subscription_start = models.DateTimeField(blank=True, null=True)

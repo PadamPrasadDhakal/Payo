@@ -19,6 +19,8 @@ from .views import (
     process_payment,
     org_profile,
     org_profile_edit,
+    approve_premium,
+    reject_premium,
 )
 
 app_name = "organization"
@@ -29,6 +31,8 @@ urlpatterns = [
     path("pricing/", TemplateView.as_view(template_name="organization_pricing.html"), name="pricing"),
     path("payment/", payment_page, name="payment"),
     path("api/process-payment/", process_payment, name="process-payment"),
+    path("api/approve-premium/", approve_premium, name="approve-premium"),
+    path("api/reject-premium/", reject_premium, name="reject-premium"),
     path("dashboard/", org_dashboard, name="dashboard"),
     path("jobs/", JobListView.as_view(), name="job-list"),
     path("jobs/new/", OrgJobCreateView.as_view(), name="post-job"),

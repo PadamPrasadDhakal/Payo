@@ -20,6 +20,7 @@ def plans_redirect(request):
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("admin/cms/", include(("users.cms_urls", "cms"), namespace="cms")),
     path("", home_view, name="home"),
     path("about/", TemplateView.as_view(template_name="about.html"), name="about"),
     path("contact/", TemplateView.as_view(template_name="contact.html"), name="contact"),

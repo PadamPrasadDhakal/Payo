@@ -232,12 +232,20 @@ def org_profile(request):
         status='completed'
     ).order_by('-subscription_end').first()
     
+    # Get latest payment with premium approval status
+    latest_payment = Payment.objects.filter(organization=org).order_by('-created_at').first()
+    is_premium_approved = latest_payment and latest_payment.premium_status == 'approved'
+    premium_status = latest_payment.premium_status if latest_payment else None
+    
     context = {
         'jobs_count': jobs_count,
         'applications_count': applications_count,
         'recent_jobs': recent_jobs,
         'recent_payments': recent_payments,
         'active_subscription': active_subscription,
+        'is_premium_approved': is_premium_approved,
+        'premium_status': premium_status,
+        'latest_payment': latest_payment,
     }
     
     return render(request, "organization/org_profile.html", context)
@@ -341,6 +349,11 @@ def payment_page(request):
         messages.error(request, 'Only organizations can purchase plans.')
         return redirect('organization:pricing')
     
+    # Check if organization has completed KYC verification (MANDATORY)
+    if not request.user.is_kyc_verified:
+        messages.error(request, 'KYC verification is mandatory before making payments. Please complete your KYC first.')
+        return redirect('users:kyc-verify')  # or appropriate KYC URL
+    
     plan = request.GET.get('plan', 'growth')
     
     # Validate plan
@@ -436,6 +449,7 @@ def process_payment(request):
             amount=amount,
             payment_method=payment_method,
             status='pending',
+            premium_status='pending',  # Set to pending for admin review
             transaction_id=f"TXN_{request.user.id}_{plan}_{timezone.now().timestamp()}"
         )
         
@@ -443,6 +457,7 @@ def process_payment(request):
         # For now, we'll mark as completed
         payment.status = 'completed'
         payment.paid_at = timezone.now()
+        payment.premium_status = 'pending'  # Awaiting admin approval
         
         # Set subscription dates
         from datetime import timedelta
@@ -489,4 +504,81 @@ def org_profile_edit(request):
         'org': org,
     }
     return render(request, 'organization/org_profile_edit.html', context)
+
+
+@login_required
+@require_POST
+def approve_premium(request):
+    """API endpoint for admins to approve premium requests (requires admin permission)"""
+    if not request.user.is_staff:
+        return JsonResponse({'success': False, 'error': 'Unauthorized'}, status=403)
+    
+    try:
+        data = json.loads(request.body)
+        payment_id = data.get('payment_id')
+        
+        if not payment_id:
+            return JsonResponse({'success': False, 'error': 'Missing payment_id'}, status=400)
+        
+        payment = get_object_or_404(Payment, id=payment_id)
+        
+        # Update premium status
+        payment.premium_status = 'approved'
+        payment.premium_approved_at = timezone.now()
+        payment.save()
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'Premium approved for {payment.organization.username}',
+            'payment_id': payment.id,
+            'premium_status': payment.premium_status
+        })
+        
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'Invalid JSON'}, status=400)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+@login_required
+@require_POST
+def reject_premium(request):
+    """API endpoint for admins to reject premium requests (requires admin permission)"""
+    if not request.user.is_staff:
+        return JsonResponse({'success': False, 'error': 'Unauthorized'}, status=403)
+    
+    try:
+        data = json.loads(request.body)
+        payment_id = data.get('payment_id')
+        reason = data.get('reason', 'No reason provided')
+        
+        if not payment_id:
+            return JsonResponse({'success': False, 'error': 'Missing payment_id'}, status=400)
+        
+        payment = get_object_or_404(Payment, id=payment_id)
+        
+        # Update premium status
+        payment.premium_status = 'rejected'
+        payment.save()
+        
+        # Create rejection notification for organization
+        from users.models import Notification
+        Notification.objects.create(
+            user=payment.organization,
+            title='Premium Request Rejected',
+            message=f'Your premium request for {payment.get_plan_display_name()} has been rejected. Reason: {reason}',
+            notification_type='GENERAL'
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'Premium rejected for {payment.organization.username}',
+            'payment_id': payment.id,
+            'premium_status': payment.premium_status
+        })
+        
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'Invalid JSON'}, status=400)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
