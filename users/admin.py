@@ -5,29 +5,28 @@ from .models import User
 
 @admin.register(User)
 class UserAdmin(DjangoUserAdmin):
-    fieldsets = DjangoUserAdmin.fieldsets + (
-        (
-            "Profile",
-            {
-                "fields": (
-                    "user_type",
-                    "organization_name",
-                    "organization_website",
-                    "resume",
-                    "skills",
-                    "experience",
-                )
-            },
-        ),
-        (
-            "CMS / Staff Access (Superuser Only)",
-            {
-                "fields": ("is_staff", "is_superuser", "groups", "user_permissions"),
-                "classes": ("collapse",),
-                "description": "⚠️ Only superusers can grant CMS access. Mark 'is_staff' to enable CMS admin access."
-            },
-        ),
+    # Build custom fieldsets to add Profile section
+    fieldsets = (
+        (None, {"fields": ("username", "password")}),
+        ("Personal info", {"fields": ("first_name", "last_name", "email")}),
+        ("Profile", {
+            "fields": (
+                "user_type",
+                "organization_name",
+                "organization_website",
+                "resume",
+                "skills",
+                "experience",
+            )
+        }),
+        ("Permissions", {
+            "fields": ("is_active", "is_staff", "is_superuser", "groups", "user_permissions"),
+            "classes": ("collapse",),
+            "description": "⚠️ Only superusers can grant CMS access. Mark 'is_staff' to enable CMS admin access."
+        }),
+        ("Important dates", {"fields": ("last_login", "date_joined")}),
     )
+    
     list_display = ("username", "email", "user_type", "is_staff_badge", "is_active")
     
     def is_staff_badge(self, obj):
@@ -39,13 +38,18 @@ class UserAdmin(DjangoUserAdmin):
     
     def get_fieldsets(self, request, obj=None):
         """Hide CMS fieldset from non-superusers"""
-        fieldsets = super().get_fieldsets(request, obj)
+        fieldsets = list(super().get_fieldsets(request, obj))
         
-        # If user is not superuser, hide the CMS fieldset
+        # If user is not superuser, remove staff fields from Permissions fieldset
         if not request.user.is_superuser:
-            fieldsets = tuple([fs for fs in fieldsets if fs[0] != "CMS / Staff Access (Superuser Only)"])
+            for i, (name, options) in enumerate(fieldsets):
+                if name == "Permissions":
+                    # Remove is_staff, is_superuser, groups, user_permissions from non-superusers
+                    fields = list(options.get("fields", ()))
+                    fields = [f for f in fields if f not in ["is_staff", "is_superuser", "groups", "user_permissions"]]
+                    fieldsets[i] = (name, {**options, "fields": tuple(fields)})
         
-        return fieldsets
+        return tuple(fieldsets)
     
     def get_form(self, request, obj=None, **kwargs):
         """Hide is_staff field from non-superusers"""
@@ -53,14 +57,9 @@ class UserAdmin(DjangoUserAdmin):
         
         if not request.user.is_superuser:
             # Hide staff-related fields for non-superusers
-            if 'is_staff' in form.base_fields:
-                del form.base_fields['is_staff']
-            if 'is_superuser' in form.base_fields:
-                del form.base_fields['is_superuser']
-            if 'groups' in form.base_fields:
-                del form.base_fields['groups']
-            if 'user_permissions' in form.base_fields:
-                del form.base_fields['user_permissions']
+            for field in ['is_staff', 'is_superuser', 'groups', 'user_permissions']:
+                if field in form.base_fields:
+                    del form.base_fields[field]
         
         return form
     

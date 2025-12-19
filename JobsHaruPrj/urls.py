@@ -8,6 +8,7 @@ from .views import *
 # from .views import organizations
 from django.views.generic import TemplateView
 from api.debug import debug_tokens
+from users.views import cms_login, cms_logout
 
 
 def plans_redirect(request):
@@ -19,6 +20,8 @@ def plans_redirect(request):
 
 
 urlpatterns = [
+    path("admin/cms-login/", cms_login, name="cms_login"),
+    path("admin/cms-logout/", cms_logout, name="cms_logout"),
     path("admin/cms/", include(("users.cms_urls", "cms"), namespace="cms")),
     path("admin/", admin.site.urls),
     path("", home_view, name="home"),

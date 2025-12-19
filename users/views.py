@@ -4,6 +4,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.views.generic import TemplateView
 from .forms_profile import ApplicantProfileEditForm
+from .forms import ChangePasswordForm
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.utils import timezone
@@ -144,6 +145,65 @@ def profile_edit(request):
     else:
         form = ApplicantProfileEditForm(instance=user)
     return render(request, "users/profile_edit.html", {"form": form})
+
+
+@login_required
+def change_password(request):
+    """View for changing user password"""
+    if request.method == "POST":
+        form = ChangePasswordForm(request.user, request.POST)
+        if form.is_valid():
+            try:
+                # Save the new password
+                user = form.save()
+                
+                # Refresh the user object from database to ensure changes are loaded
+                user.refresh_from_db()
+                
+                # Update the session to keep the user logged in
+                from django.contrib.auth import update_session_auth_hash
+                update_session_auth_hash(request, user)
+                
+                # Verify password was actually changed
+                if user.check_password(request.POST.get('new_password1')):
+                    print(f"✅ Password successfully changed for user: {user.email}")
+                    
+                    # Create fresh form after successful password change
+                    form = ChangePasswordForm(user)
+                    
+                    return render(request, "users/change_password.html", {
+                        "form": form,
+                        "success": True,
+                        "message": "✅ Password changed successfully! Your new password is now active. You will need to use your new password for your next login."
+                    })
+                else:
+                    print(f"❌ ERROR: Password verification failed after save for user: {user.email}")
+                    raise ValueError("Password verification failed after save")
+                    
+            except Exception as e:
+                print(f"❌ Exception during password change: {str(e)}")
+                return render(request, "users/change_password.html", {
+                    "form": form,
+                    "success": False,
+                    "error": True,
+                    "error_message": f"An error occurred while changing your password: {str(e)}"
+                })
+        else:
+            # Return form with errors
+            print(f"Form validation errors: {form.errors}")
+            for field, errors in form.errors.items():
+                for error in errors:
+                    print(f"  {field}: {error}")
+            
+            return render(request, "users/change_password.html", {
+                "form": form,
+                "success": False,
+                "error": True
+            })
+    else:
+        form = ChangePasswordForm(request.user)
+    
+    return render(request, "users/change_password.html", {"form": form})
 
 @login_required
 def dash_jobs(request):

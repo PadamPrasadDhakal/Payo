@@ -1,5 +1,6 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, SetPasswordForm
+from django.contrib.auth import get_user_model
 from .models import User
 
 
@@ -215,3 +216,68 @@ class GoogleUserCompleteProfileForm(forms.ModelForm):
         self.fields["internship"].widget.attrs.update({"placeholder": "Internship experience (optional)"})
 
 
+class ChangePasswordForm(forms.Form):
+    """Form for changing user password with old password verification"""
+    old_password = forms.CharField(
+        label="Current Password",
+        widget=forms.PasswordInput(attrs={
+            "class": TAILWIND_INPUT,
+            "placeholder": "Enter your current password",
+            "autocomplete": "current-password"
+        }),
+        required=True
+    )
+    new_password1 = forms.CharField(
+        label="New Password",
+        widget=forms.PasswordInput(attrs={
+            "class": TAILWIND_INPUT,
+            "placeholder": "Enter your new password",
+            "autocomplete": "new-password"
+        }),
+        required=True
+    )
+    new_password2 = forms.CharField(
+        label="Confirm New Password",
+        widget=forms.PasswordInput(attrs={
+            "class": TAILWIND_INPUT,
+            "placeholder": "Confirm your new password",
+            "autocomplete": "new-password"
+        }),
+        required=True
+    )
+
+    def __init__(self, user, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.user = user
+
+    def clean_old_password(self):
+        """Verify that the old password is correct"""
+        old_password = self.cleaned_data.get('old_password')
+        if not self.user.check_password(old_password):
+            raise forms.ValidationError(
+                "Your old password was entered incorrectly.",
+                code='password_incorrect',
+            )
+        return old_password
+
+    def clean(self):
+        """Verify that new passwords match"""
+        cleaned_data = super().clean()
+        new_password1 = cleaned_data.get('new_password1')
+        new_password2 = cleaned_data.get('new_password2')
+
+        if new_password1 and new_password2:
+            if new_password1 != new_password2:
+                raise forms.ValidationError(
+                    "The new passwords do not match.",
+                    code='password_mismatch',
+                )
+
+        return cleaned_data
+
+    def save(self):
+        """Save the new password to the database"""
+        password = self.cleaned_data['new_password1']
+        self.user.set_password(password)
+        self.user.save()
+        return self.user
