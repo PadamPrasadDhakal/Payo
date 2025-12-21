@@ -28,6 +28,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Q
 from users.models import User, IndividualKYC, OrganizationKYC, Notification
+from .decorators import applicant_required, organization_required
 from organization.models import Job, Application
 from django.shortcuts import Http404
 from django.core.paginator import Paginator
@@ -111,14 +112,10 @@ def google_signup_redirect(request):
         return redirect('users:dashboard')
 
 
-@login_required
+@applicant_required
 def add_info(request):
     """View for Google OAuth users to complete their profile"""
     user = request.user
-    
-    # Only allow applicant users who haven't completed their profile
-    if user.user_type != User.UserType.APPLICANT:
-        return redirect('users:dashboard')
     
     if request.method == "POST":
         form = GoogleUserCompleteProfileForm(request.POST, request.FILES, instance=user)
@@ -132,11 +129,9 @@ def add_info(request):
     return render(request, "users/add_info.html", {"form": form})
 
 
-@login_required
+@applicant_required
 def profile_edit(request):
     user = request.user
-    if user.user_type != user.UserType.APPLICANT:
-        return redirect("users:profile")
     if request.method == "POST":
         form = ApplicantProfileEditForm(request.POST, request.FILES, instance=user)
         if form.is_valid():
@@ -205,15 +200,13 @@ def change_password(request):
     
     return render(request, "users/change_password.html", {"form": form})
 
-@login_required
+@applicant_required
 def dash_jobs(request):
     return render(request, "users/dash_jobs.html")
 
-@login_required
+@applicant_required
 def applications_dashboard(request):
     """Dashboard for users to view their job applications"""
-    if request.user.is_organization():
-        return redirect('users:dashboard')
     
     # Get filter and search parameters
     search_query = request.GET.get('search', '').strip()

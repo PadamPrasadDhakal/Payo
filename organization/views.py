@@ -19,10 +19,11 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 import json
 from django.contrib import messages
+from users.decorators import organization_required, applicant_required
 
 # Create your views here.
 
-@login_required
+@organization_required
 def organization_list_view(request):
     # Only allow logged-in organizations to view their jobs list
     org = request.user
@@ -33,22 +34,32 @@ def organization_list_view(request):
     return render(request, "organization/organization_list.html", {"jobs": jobs})
 
 
-@method_decorator(login_required, name='dispatch')
-class JobListView(ListView):
+class JobListView(LoginRequiredMixin, ListView):
     model = Job
     context_object_name = "jobs"
     template_name = "organization/job_list.html"
     paginate_by = 20
 
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.user_type != 'ORG':
+            messages.warning(request, "⚠️ You don't have permission to access this page. This page is for organizations only.")
+            return redirect('/users/profile/')
+        return super().dispatch(request, *args, **kwargs)
+
     def get_queryset(self):
         # Only show jobs posted by the logged-in organization
         return Job.objects.filter(posted_by=self.request.user).order_by('-created_at')
 
-@method_decorator(login_required, name='dispatch')
-class JobDetailView(DetailView):
+class JobDetailView(LoginRequiredMixin, DetailView):
     model = Job
     context_object_name = "job"
     template_name = "organization/job_detail.html"
+    
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.user_type != 'ORG':
+            messages.warning(request, "⚠️ You don't have permission to access this page. This page is for organizations only.")
+            return redirect('/users/profile/')
+        return super().dispatch(request, *args, **kwargs)
     
     def get_object(self):
         job = super().get_object()
@@ -73,11 +84,17 @@ class JobCreateView(LoginRequiredMixin, CreateView):
     template_name = "organization/post_job.html"
     success_url = reverse_lazy("organization:job-list")
 
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.user_type != 'ORG':
+            messages.warning(request, "⚠️ You don't have permission to access this page. This page is for organizations only.")
+            return redirect('/users/profile/')
+        return super().dispatch(request, *args, **kwargs)
+
     def form_valid(self, form):
         form.instance.posted_by = self.request.user
         return super().form_valid(form)
 
-@login_required
+@applicant_required
 def apply_job(request, pk):
     job = get_object_or_404(Job, pk=pk)
     error = None
@@ -95,7 +112,7 @@ def apply_job(request, pk):
             return redirect("organization:job-detail", pk=pk)
     return render(request, "organization/apply_job.html", {"job": job, "error": error})
 
-@login_required
+@organization_required
 def applications_overview(request):
     jobs = (
         Job.objects.filter(posted_by=request.user)
@@ -104,7 +121,7 @@ def applications_overview(request):
     )
     return render(request, "organization/applications.html", {"jobs": jobs})
 
-@login_required
+@organization_required
 def application_detail(request, pk):
     job = get_object_or_404(Job, pk=pk, posted_by=request.user)
     applicants = job.applications.select_related("applicant").order_by("-created_at")
@@ -194,7 +211,7 @@ def match_resumes(request):
     # Send results to demo.html
     return render(request, "demo.html", {"results": results})
 
-@login_required
+@organization_required
 def org_dashboard(request):
     org = request.user
     jobs = Job.objects.filter(posted_by=org).order_by('-created_at')
@@ -207,7 +224,7 @@ def org_dashboard(request):
     })
 
 
-@login_required
+@organization_required
 def org_profile(request):
     """Organization profile view"""
     if not request.user.is_organization:
@@ -250,7 +267,7 @@ def org_profile(request):
     
     return render(request, "organization/org_profile.html", context)
 
-@login_required
+@organization_required
 def org_jobs(request):
     org = request.user
     jobs = Job.objects.filter(posted_by=org).order_by('-created_at')
@@ -264,9 +281,11 @@ class OrgJobCreateView(LoginRequiredMixin, CreateView):
     success_url = reverse_lazy("organization:job-list")
 
     def dispatch(self, request, *args, **kwargs):
+        if request.user.user_type != 'ORG':
+            messages.warning(request, "⚠️ You don't have permission to access this page. This page is for organizations only.")
+            return redirect('/users/profile/')
         # Check if organization has completed KYC
         if not request.user.can_post_jobs():
-            from django.contrib import messages
             messages.error(request, 'Please complete KYC verification to post jobs.')
             return redirect('/users/kyc/')
         return super().dispatch(request, *args, **kwargs)
@@ -341,14 +360,9 @@ def update_application_status(request):
         return JsonResponse({'error': str(e)}, status=500)
 
 
-@login_required
+@organization_required
 def payment_page(request):
     """Payment page for organizations to purchase plans"""
-    # Only organizations can access this page
-    if not request.user.is_organization:
-        messages.error(request, 'Only organizations can purchase plans.')
-        return redirect('organization:pricing')
-    
     # Check if organization has completed KYC verification (MANDATORY)
     if not request.user.is_kyc_verified:
         messages.error(request, 'KYC verification is mandatory before making payments. Please complete your KYC first.')
@@ -394,7 +408,7 @@ def payment_page(request):
     return render(request, 'organization/payment.html', context)
 
 
-@login_required
+@organization_required
 def process_payment(request):
     """Process payment submission"""
     if request.method != 'POST':
@@ -479,13 +493,9 @@ def process_payment(request):
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
 
-@login_required
+@organization_required
 def org_profile_edit(request):
     """Edit organization profile"""
-    # Ensure only organizations can access this
-    if not request.user.is_organization():
-        return redirect('organization:profile')
-    
     org = request.user
     
     if request.method == 'POST':
