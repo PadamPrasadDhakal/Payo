@@ -34,13 +34,36 @@ class JobForm(forms.ModelForm):
 
 TAILWIND_INPUT = "w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600"
 
+INDUSTRY_CHOICES = [
+    ('', 'Select Industry'),
+    ('technology', 'Technology & IT'),
+    ('finance', 'Finance & Banking'),
+    ('healthcare', 'Healthcare & Medical'),
+    ('education', 'Education & Training'),
+    ('manufacturing', 'Manufacturing'),
+    ('retail', 'Retail & E-commerce'),
+    ('hospitality', 'Hospitality & Tourism'),
+    ('construction', 'Construction & Real Estate'),
+    ('marketing', 'Marketing & Advertising'),
+    ('consulting', 'Consulting & Professional Services'),
+    ('media', 'Media & Entertainment'),
+    ('nonprofit', 'Non-profit & NGO'),
+    ('government', 'Government & Public Sector'),
+    ('agriculture', 'Agriculture & Food'),
+    ('energy', 'Energy & Utilities'),
+    ('transportation', 'Transportation & Logistics'),
+    ('telecommunications', 'Telecommunications'),
+    ('legal', 'Legal Services'),
+    ('other', 'Other'),
+]
+
 
 class OrganizationProfileEditForm(forms.ModelForm):
     """Form for editing organization profile details"""
     
     class Meta:
         model = User
-        fields = ["organization_name", "organization_website", "organization_photo", "phone", "address"]
+        fields = ["organization_name", "organization_website", "organization_industry", "organization_photo", "phone", "address"]
         widgets = {
             "organization_name": forms.TextInput(attrs={
                 "class": TAILWIND_INPUT,
@@ -51,6 +74,10 @@ class OrganizationProfileEditForm(forms.ModelForm):
                 "class": TAILWIND_INPUT,
                 "placeholder": "https://example.com",
                 "required": False
+            }),
+            "organization_industry": forms.Select(choices=INDUSTRY_CHOICES, attrs={
+                "class": TAILWIND_INPUT,
+                "required": True
             }),
             "phone": forms.TextInput(attrs={
                 "class": TAILWIND_INPUT,
@@ -70,6 +97,7 @@ class OrganizationProfileEditForm(forms.ModelForm):
         labels = {
             "organization_name": "Organization Name",
             "organization_website": "Website URL",
+            "organization_industry": "Industry/Field",
             "organization_photo": "Logo/Organization Photo",
             "phone": "Phone Number",
             "address": "Address",

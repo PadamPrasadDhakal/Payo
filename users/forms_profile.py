@@ -13,6 +13,38 @@ class ApplicantProfileEditForm(forms.ModelForm):
         ("PhD", "PhD"),
         ("Other", "Other"),
     ]
+    
+    INDUSTRY_CHOICES = [
+        ('', 'Select Industry/Field'),
+        ('technology', 'Technology & IT'),
+        ('finance', 'Finance & Banking'),
+        ('healthcare', 'Healthcare & Medical'),
+        ('education', 'Education & Training'),
+        ('manufacturing', 'Manufacturing'),
+        ('retail', 'Retail & E-commerce'),
+        ('hospitality', 'Hospitality & Tourism'),
+        ('construction', 'Construction & Real Estate'),
+        ('marketing', 'Marketing & Advertising'),
+        ('consulting', 'Consulting & Professional Services'),
+        ('media', 'Media & Entertainment'),
+        ('nonprofit', 'Non-profit & NGO'),
+        ('government', 'Government & Public Sector'),
+        ('agriculture', 'Agriculture & Food'),
+        ('energy', 'Energy & Utilities'),
+        ('transportation', 'Transportation & Logistics'),
+        ('telecommunications', 'Telecommunications'),
+        ('legal', 'Legal Services'),
+        ('other', 'Other'),
+    ]
+    
+    EXPERIENCE_LEVEL_CHOICES = [
+        ('', 'Select Experience Level'),
+        ('entry', 'Entry Level'),
+        ('intermediate', 'Intermediate'),
+        ('senior', 'Senior'),
+        ('expert', 'Expert'),
+    ]
+    
     profile_photo = forms.ImageField(required=False)
     education_qualification = forms.ChoiceField(choices=EDUCATION_QUALIFICATIONS, required=False)
     education_institute = forms.CharField(required=False)
@@ -22,11 +54,19 @@ class ApplicantProfileEditForm(forms.ModelForm):
     speciality = forms.CharField(required=False)
     hobby = forms.CharField(required=False)
     internship = forms.CharField(required=False)
+    industry_field = forms.ChoiceField(choices=INDUSTRY_CHOICES, required=False)
+    experience_level = forms.ChoiceField(choices=EXPERIENCE_LEVEL_CHOICES, required=False)
+    tagline = forms.CharField(max_length=200, required=False)
+    bio = forms.CharField(widget=forms.Textarea, required=False)
 
     class Meta:
         model = User
         fields = [
             "profile_photo",
+            "tagline",
+            "bio",
+            "industry_field",
+            "experience_level",
             "skills",
             "education_qualification",
             "education_institute",
@@ -53,3 +93,5 @@ class ApplicantProfileEditForm(forms.ModelForm):
         self.fields["speciality"].widget.attrs.update({"placeholder": "Speciality (optional)"})
         self.fields["hobby"].widget.attrs.update({"placeholder": "Hobby (optional)"})
         self.fields["internship"].widget.attrs.update({"placeholder": "Internship experience (optional)"})
+        self.fields["tagline"].widget.attrs.update({"placeholder": "Professional tagline or headline (e.g., Full Stack Developer | AI Enthusiast)"})
+        self.fields["bio"].widget.attrs.update({"placeholder": "Tell potential employers about yourself, your skills, and your career goals...", "rows": "4"})

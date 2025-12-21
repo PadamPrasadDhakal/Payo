@@ -21,6 +21,9 @@ from .views import (
     org_profile_edit,
     approve_premium,
     reject_premium,
+    top_users_list,
+    top_user_detail,
+    express_interest,
 )
 
 app_name = "organization"
@@ -46,4 +49,8 @@ urlpatterns = [
     path("classify/", classify, name="classify"),
     path("match_resumes/", match_resumes, name="match-resumes"),
     path("users/logout/", lambda request: redirect('/users/logout/')),  # Redirect to users logout
+    # Top Users Feature
+    path("top-users/", top_users_list, name="top-users"),
+    path("top-users/<int:user_id>/", top_user_detail, name="top-user-detail"),
+    path("top-users/<int:user_id>/express-interest/", express_interest, name="express-interest"),
 ]

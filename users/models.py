@@ -19,6 +19,7 @@ class User(AbstractUser):
     organization_name = models.CharField(max_length=255, blank=True)
     organization_website = models.URLField(blank=True)
     organization_photo = models.ImageField(upload_to="organization_photos/", blank=True, null=True)
+    organization_industry = models.CharField(max_length=100, blank=True, help_text="Organization's primary industry/field")
     
     # Common fields for all users
     phone = models.CharField(max_length=10, blank=True, null=True)
@@ -38,6 +39,19 @@ class User(AbstractUser):
     hobby = models.CharField(max_length=255, blank=True)
     experience = models.TextField(blank=True)
     internship = models.TextField(blank=True)
+    
+    # Employee ranking and rating fields
+    employee_ranking = models.IntegerField(default=0, db_index=True, help_text="User ranking score based on profile completeness and achievements")
+    profile_rating = models.DecimalField(max_digits=3, decimal_places=2, default=0.00, db_index=True, help_text="User rating out of 5.0")
+    industry_field = models.CharField(max_length=100, blank=True, help_text="Primary industry/field of expertise")
+    experience_level = models.CharField(max_length=50, blank=True, choices=[
+        ('entry', 'Entry Level'),
+        ('intermediate', 'Intermediate'),
+        ('senior', 'Senior'),
+        ('expert', 'Expert')
+    ])
+    tagline = models.CharField(max_length=200, blank=True, help_text="Professional tagline or headline")
+    bio = models.TextField(blank=True, help_text="Professional bio/summary")
 
     # Token system fields
     tokens_left = models.IntegerField(default=7)
@@ -104,7 +118,15 @@ class User(AbstractUser):
             
             # Cap at reasonable maximum
             self.profile_score = min(score, 1000)
-            self.save(update_fields=['profile_score'])
+            
+            # Update employee_ranking (same as profile_score for now)
+            self.employee_ranking = self.profile_score
+            
+            # Calculate profile rating (0.0 to 5.0 based on score)
+            # Max score of 1000 = 5.0 rating
+            self.profile_rating = min(5.0, (self.profile_score / 1000) * 5.0)
+            
+            self.save(update_fields=['profile_score', 'employee_ranking', 'profile_rating'])
         
         return self.profile_score
 

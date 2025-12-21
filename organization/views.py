@@ -592,3 +592,116 @@ def reject_premium(request):
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
+
+# ==================== TOP USERS FEATURE ====================
+
+@organization_required
+def top_users_list(request):
+    """Display top-ranked users filtered by organization's industry"""
+    org = request.user
+    
+    # Check if organization has set their industry
+    if not org.organization_industry:
+        messages.warning(request, "Please complete your organization profile and set your industry to view top users.")
+        return redirect('organization:profile-edit')
+    
+    # Get filter parameters
+    limit = int(request.GET.get('limit', 25))
+    experience_level = request.GET.get('experience_level', '')
+    skills_filter = request.GET.get('skills', '')
+    location_filter = request.GET.get('location', '')
+    min_rating = request.GET.get('min_rating', '')
+    
+    # Base queryset - only applicants with matching industry
+    from users.models import User
+    users = User.objects.filter(
+        user_type=User.UserType.APPLICANT,
+        industry_field=org.organization_industry
+    ).select_related().order_by('-employee_ranking')
+    
+    # Apply filters
+    if experience_level:
+        users = users.filter(experience_level=experience_level)
+    
+    if skills_filter:
+        users = users.filter(skills__icontains=skills_filter)
+    
+    if location_filter:
+        users = users.filter(address__icontains=location_filter)
+    
+    if min_rating:
+        try:
+            min_rating_val = float(min_rating)
+            users = users.filter(profile_rating__gte=min_rating_val)
+        except ValueError:
+            pass
+    
+    # Limit results
+    users = users[:limit]
+    
+    # Get available experience levels for filter dropdown
+    experience_levels = [
+        ('entry', 'Entry Level'),
+        ('intermediate', 'Intermediate'),
+        ('senior', 'Senior'),
+        ('expert', 'Expert')
+    ]
+    
+    context = {
+        'users': users,
+        'experience_levels': experience_levels,
+        'current_filters': {
+            'limit': limit,
+            'experience_level': experience_level,
+            'skills': skills_filter,
+            'location': location_filter,
+            'min_rating': min_rating,
+        }
+    }
+    
+    return render(request, 'organization/top_users_list.html', context)
+
+
+@organization_required
+def top_user_detail(request, user_id):
+    """Display detailed profile of a top user (no resume access)"""
+    from users.models import User
+    
+    # Get the user profile
+    profile_user = get_object_or_404(User, id=user_id, user_type=User.UserType.APPLICANT)
+    
+    # Check if user belongs to organization's industry
+    if profile_user.industry_field != request.user.organization_industry:
+        messages.warning(request, "This user is not in your organization's industry.")
+        return redirect('organization:top-users')
+    
+    context = {
+        'profile_user': profile_user,
+    }
+    
+    return render(request, 'organization/top_user_detail.html', context)
+
+
+@organization_required
+@require_POST
+def express_interest(request, user_id):
+    """Allow organization to express interest in a top user"""
+    from users.models import User, Notification
+    
+    profile_user = get_object_or_404(User, id=user_id, user_type=User.UserType.APPLICANT)
+    
+    # Create notification for the user
+    Notification.objects.create(
+        user=profile_user,
+        title='Organization Interested in Your Profile',
+        message=f'{request.user.organization_name or request.user.username} has expressed interest in your profile. They may reach out with opportunities!',
+        notification_type='GENERAL'
+    )
+    
+    # Create notification for organization (confirmation)
+    messages.success(request, f"Interest expressed in {profile_user.get_full_name() or profile_user.username}'s profile!")
+    
+    return JsonResponse({
+        'success': True,
+        'message': 'Interest expressed successfully!'
+    })

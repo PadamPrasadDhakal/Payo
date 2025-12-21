@@ -44,6 +44,10 @@
                  after:content-[''] after:absolute after:left-1/2 after:-bottom-1 after:w-0 after:h-[2px] 
                  after:bg-blue-600 after:transition-all after:duration-300 after:ease-out 
                  hover:after:w-full hover:after:left-0">Internships</a>
+                    <a href="/organization/top-users/" class="text-gray-700 hover:text-primary transition font-medium relative text-gray-700 hover:text-blue-600 font-medium transition-colors duration-300
+                 after:content-[''] after:absolute after:left-1/2 after:-bottom-1 after:w-0 after:h-[2px] 
+                 after:bg-blue-600 after:transition-all after:duration-300 after:ease-out 
+                 hover:after:w-full hover:after:left-0">Top Users</a>
                     <a href="/organizations/" class="text-gray-700 hover:text-primary transition font-medium relative text-gray-700 hover:text-blue-600 font-medium transition-colors duration-300
                  after:content-[''] after:absolute after:left-1/2 after:-bottom-1 after:w-0 after:h-[2px] 
                  after:bg-blue-600 after:transition-all after:duration-300 after:ease-out 
@@ -61,6 +65,13 @@
                             </svg>
                             <span class="unread-count absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full hidden">0</span>
                         </button>
+
+                        <a href="{% url 'organization:top-users' %}" class="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700 transition font-semibold shadow-md hover:shadow-lg flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                            </svg>
+                            View Rankings
+                        </a>
 
                         <a href="/organization/profile/" class="px-3 py-1.5 rounded-lg bg-primary text-white hover:bg-gray-700 transition font-medium shadow-sm">
                             View Profile
