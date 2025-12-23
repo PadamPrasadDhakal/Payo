@@ -1,3 +1,4 @@
+{% load form_tags %}
 <!-- Close Button -->
 <div class="flex justify-between items-start mb-6">
     <h2 class="text-3xl font-bold text-gray-900">User Profile</h2>
@@ -33,7 +34,7 @@
         <!-- Rating Section -->
         <div class="flex items-center gap-4 mb-3">
             <div class="flex items-center gap-2">
-                {% with profile_user.profile_rating|floatformat:1 as rating %}
+                {% with profile_user.calculated_rating|floatformat:1 as rating %}
                 {% for i in "12345" %}
                     {% if forloop.counter <= rating|add:"0" %}
                     <svg class="w-6 h-6 text-yellow-400 fill-current" viewBox="0 0 20 20">
@@ -47,9 +48,9 @@
                 {% endfor %}
                 {% endwith %}
             </div>
-            <span class="text-xl font-bold text-gray-900">{{ profile_user.profile_rating|floatformat:1 }}</span>
+            <span class="text-xl font-bold text-gray-900">{{ profile_user.calculated_rating|floatformat:1 }}</span>
             <span class="text-gray-500">|</span>
-            <span class="text-gray-600">Ranking Score: <strong>{{ profile_user.employee_ranking }}</strong></span>
+            <span class="text-gray-600">Profile Score: <strong>{{ profile_user.profile_score }}</strong></span>
         </div>
         
         <!-- Experience Level Badge -->

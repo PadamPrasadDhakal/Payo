@@ -343,6 +343,49 @@ def update_application_status(request):
                 elif new_status == 'HD' and old_status != 'HD':  # First time hired
                     applicant.increment_achievement('hired')
         
+        # Create notifications for applicant based on status change
+        from users.models import Notification
+        
+        notification_configs = {
+            'SL': {
+                'type': 'APP_SHORTLISTED',
+                'title': '🎯 You\'ve been Shortlisted!',
+                'message': f'Great news! You\'ve been shortlisted for the position of {application.job.title} at {application.job.posted_by.organization_name or "the company"}.',
+            },
+            'SE': {
+                'type': 'APP_SELECTED',
+                'title': '🎉 You\'ve been Selected!',
+                'message': f'Congratulations! You\'ve been selected for {application.job.title} at {application.job.posted_by.organization_name or "the company"}. They will contact you soon.',
+            },
+            'HD': {
+                'type': 'APP_HIRED',
+                'title': '🎊 You\'re Hired!',
+                'message': f'Amazing! You\'ve been hired for {application.job.title} at {application.job.posted_by.organization_name or "the company"}. Welcome aboard!',
+            },
+            'RJ': {
+                'type': 'APP_REJECTED',
+                'title': 'Application Update',
+                'message': f'Your application for {application.job.title} was not successful this time. Keep applying - the right opportunity is waiting for you!',
+            },
+            'RV': {
+                'type': 'APP_REVIEWED',
+                'title': '👀 Application Under Review',
+                'message': f'Your application for {application.job.title} is now being reviewed by {application.job.posted_by.organization_name or "the organization"}.',
+            },
+        }
+        
+        # Only send notification if status actually changed
+        if old_status != new_status and new_status in notification_configs:
+            config = notification_configs[new_status]
+            Notification.objects.create(
+                user=applicant,
+                title=config['title'],
+                message=config['message'],
+                notification_type=config['type'],
+                related_id=application.id,
+                action_url=f'/users/applications/?highlight={application.id}'
+            )
+        
         # Log the update for debugging
         print(f"Status updated for application {application.id}: {old_status} -> {new_status} at {application.reviewed_at}")
         
@@ -612,12 +655,19 @@ def top_users_list(request):
     location_filter = request.GET.get('location', '')
     min_rating = request.GET.get('min_rating', '')
     
-    # Base queryset - only applicants with matching industry
+    # Base queryset - try to filter by matching industry first
     from users.models import User
     users = User.objects.filter(
         user_type=User.UserType.APPLICANT,
         industry_field=org.organization_industry
     ).select_related().order_by('-employee_ranking')
+    
+    # If no users in organization's industry, show all users ordered by rating
+    if not users.exists():
+        users = User.objects.filter(
+            user_type=User.UserType.APPLICANT
+        ).select_related().order_by('-profile_score')
+        messages.info(request, "No users found in your industry. Showing all top users across all industries.")
     
     # Apply filters
     if experience_level:
@@ -632,12 +682,18 @@ def top_users_list(request):
     if min_rating:
         try:
             min_rating_val = float(min_rating)
-            users = users.filter(profile_rating__gte=min_rating_val)
+            # Calculate rating from profile_score (divide by 100, max 5.0)
+            min_score = min(min_rating_val * 100, 500)
+            users = users.filter(profile_score__gte=min_score)
         except ValueError:
             pass
     
     # Limit results
-    users = users[:limit]
+    users_list = list(users[:limit])
+    
+    # Add calculated rating to each user (profile_score / 100, max 5.0)
+    for user in users_list:
+        user.calculated_rating = min(user.profile_score / 100, 5.0)
     
     # Get available experience levels for filter dropdown
     experience_levels = [
@@ -648,7 +704,7 @@ def top_users_list(request):
     ]
     
     context = {
-        'users': users,
+        'users': users_list,
         'experience_levels': experience_levels,
         'current_filters': {
             'limit': limit,
@@ -670,10 +726,13 @@ def top_user_detail(request, user_id):
     # Get the user profile
     profile_user = get_object_or_404(User, id=user_id, user_type=User.UserType.APPLICANT)
     
-    # Check if user belongs to organization's industry
-    if profile_user.industry_field != request.user.organization_industry:
-        messages.warning(request, "This user is not in your organization's industry.")
-        return redirect('organization:top-users')
+    # Add calculated rating (profile_score / 100, max 5.0)
+    profile_user.calculated_rating = min(profile_user.profile_score / 100, 5.0)
+    
+    # Check if user belongs to organization's industry (optional check, allow all if no match)
+    # if profile_user.industry_field != request.user.organization_industry:
+    #     messages.warning(request, "This user is not in your organization's industry.")
+    #     return redirect('organization:top-users')
     
     context = {
         'profile_user': profile_user,

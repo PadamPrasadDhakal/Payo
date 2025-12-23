@@ -96,7 +96,7 @@
                   </span>
                 </td>
                 <td class="px-4 py-3 text-sm text-gray-500">{{ item.updated_at|date:"Y-m-d H:i" }}</td>
-                <td class="px-4 py-3 text-sm"><a href="/users/cms/kyc/{{ item.type }}/{{ item.id }}/" class="text-blue-600 hover:underline font-medium">Review</a></td>
+                <td class="px-4 py-3 text-sm"><a href="/admin/cms/kyc/{{ item.type }}/{{ item.id }}/" class="text-blue-600 hover:underline font-medium">Review</a></td>
               {% endif %}
             </tr>
           {% empty %}

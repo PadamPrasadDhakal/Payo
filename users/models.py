@@ -324,13 +324,34 @@ class KycAudit(models.Model):
 
 class Notification(models.Model):
     NOTIFICATION_TYPES = (
+        # KYC Related
         ('KYC_VERIFIED', 'KYC Verified'),
         ('KYC_REJECTED', 'KYC Rejected'),
         ('KYC_SUBMITTED', 'KYC Submitted'),
         ('KYC_MORE_INFO', 'KYC Request More Info'),
-        ('JOB_APPLICATION', 'Job Application'),
-        ('JOB_SHORTLIST', 'Job Shortlist'),
-        ('JOB_OFFER', 'Job Offer'),
+        
+        # Application Status (Applicant Side)
+        ('APP_SUBMITTED', 'Application Submitted'),
+        ('APP_REVIEWED', 'Application Reviewed'),
+        ('APP_SHORTLISTED', 'Application Shortlisted'),
+        ('APP_SELECTED', 'Application Selected'),
+        ('APP_HIRED', 'Application Hired'),
+        ('APP_REJECTED', 'Application Rejected'),
+        
+        # Job Related
+        ('JOB_POSTED', 'Job Posted'),
+        ('JOB_MATCHED', 'Job Matched'),
+        
+        # Organization Side
+        ('NEW_APPLICATION', 'New Application Received'),
+        ('INTEREST_RECEIVED', 'Interest Received'),
+        ('PROFILE_VIEWED', 'Profile Viewed'),
+        
+        # Communication
+        ('MESSAGE_RECEIVED', 'Message Received'),
+        
+        # System
+        ('SYSTEM_ANNOUNCEMENT', 'System Announcement'),
         ('GENERAL', 'General Notification'),
     )
     
@@ -342,6 +363,7 @@ class Notification(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     related_id = models.IntegerField(blank=True, null=True, help_text="ID of related KYC/Job/Application")
+    action_url = models.CharField(max_length=500, blank=True, null=True, help_text="URL to redirect when notification is clicked")
     
     class Meta:
         ordering = ['-created_at']
@@ -352,4 +374,43 @@ class Notification(models.Model):
     
     def __str__(self):
         return f"{self.user.username} - {self.title}"
+    
+    def get_icon(self):
+        """Return icon class/emoji for notification type"""
+        icons = {
+            'KYC_VERIFIED': '✅',
+            'KYC_REJECTED': '❌',
+            'KYC_SUBMITTED': '📝',
+            'KYC_MORE_INFO': 'ℹ️',
+            'APP_SUBMITTED': '📤',
+            'APP_REVIEWED': '👀',
+            'APP_SHORTLISTED': '⭐',
+            'APP_SELECTED': '🎉',
+            'APP_HIRED': '🎊',
+            'APP_REJECTED': '❌',
+            'JOB_POSTED': '💼',
+            'JOB_MATCHED': '🎯',
+            'NEW_APPLICATION': '📥',
+            'INTEREST_RECEIVED': '💚',
+            'PROFILE_VIEWED': '👁️',
+            'MESSAGE_RECEIVED': '💬',
+            'SYSTEM_ANNOUNCEMENT': '📢',
+            'GENERAL': '🔔',
+        }
+        return icons.get(self.notification_type, '🔔')
+    
+    def get_color_class(self):
+        """Return Tailwind color class for notification type"""
+        colors = {
+            'KYC_VERIFIED': 'bg-green-50 border-green-500',
+            'KYC_REJECTED': 'bg-red-50 border-red-500',
+            'APP_SHORTLISTED': 'bg-purple-50 border-purple-500',
+            'APP_SELECTED': 'bg-green-50 border-green-500',
+            'APP_HIRED': 'bg-emerald-50 border-emerald-500',
+            'APP_REJECTED': 'bg-red-50 border-red-500',
+            'NEW_APPLICATION': 'bg-blue-50 border-blue-500',
+            'INTEREST_RECEIVED': 'bg-pink-50 border-pink-500',
+            'SYSTEM_ANNOUNCEMENT': 'bg-yellow-50 border-yellow-500',
+        }
+        return colors.get(self.notification_type, 'bg-gray-50 border-gray-300')
 

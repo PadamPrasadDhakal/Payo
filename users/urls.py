@@ -17,7 +17,7 @@ from .views import (
     google_signup_redirect,
     add_info
 )
-from .views import kyc_form_view, kyc_profile, notifications, notification_count_api
+from .views import kyc_form_view, kyc_profile, notifications, notification_count_api, notifications_api
 
 
 urlpatterns = [
@@ -41,6 +41,7 @@ urlpatterns = [
     path("profile/kyc/", kyc_profile, name="kyc_profile"),
     path("notifications/", notifications, name="notifications"),
     path("api/notifications/unread-count/", notification_count_api, name="notification_count_api"),
+    path("api/notifications/recent/", notifications_api, name="notifications_api"),
 ]
 
 

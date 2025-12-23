@@ -110,7 +110,7 @@
                 <!-- Rating (Prominent) -->
                 <div class="mb-4 flex items-center gap-2">
                     <div class="flex items-center">
-                        {% with user.profile_rating|floatformat:1 as rating %}
+                        {% with user.calculated_rating|floatformat:1 as rating %}
                         {% for i in "12345" %}
                             {% if forloop.counter <= rating|add:"0" %}
                             <svg class="w-5 h-5 text-yellow-400 fill-current" viewBox="0 0 20 20">
@@ -124,8 +124,8 @@
                         {% endfor %}
                         {% endwith %}
                     </div>
-                    <span class="font-bold text-gray-900">{{ user.profile_rating|floatformat:1 }}</span>
-                    <span class="text-sm text-gray-500">(Rank: {{ user.employee_ranking }})</span>
+                    <span class="font-bold text-gray-900">{{ user.calculated_rating|floatformat:1 }}</span>
+                    <span class="text-sm text-gray-500">(Score: {{ user.profile_score }})</span>
                 </div>
 
                 <!-- Experience Level -->

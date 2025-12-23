@@ -1,0 +1,273 @@
+<!-- Notification Popup Container -->
+<div id="notificationPopupContainer" class="fixed top-4 right-4 z-[9999] space-y-3" style="max-width: 400px;">
+    <!-- Popups will be dynamically inserted here -->
+</div>
+
+<style>
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+.notification-popup {
+    animation: slideIn 0.4s ease-out;
+}
+
+.notification-popup.closing {
+    animation: slideOut 0.3s ease-in;
+}
+
+.notification-popup:hover .progress-bar {
+    animation-play-state: paused !important;
+}
+
+@keyframes shrink {
+    from {
+        width: 100%;
+    }
+    to {
+        width: 0%;
+    }
+}
+
+.progress-bar {
+    animation: shrink 5s linear;
+}
+</style>
+
+<script>
+// Popup notification system
+const NotificationPopupSystem = {
+    container: null,
+    queue: [],
+    activePopups: 0,
+    maxPopups: 3,
+    lastCheckTime: null,
+    pollingInterval: null,
+    
+    init() {
+        this.container = document.getElementById('notificationPopupContainer');
+        if (!this.container) {
+            console.error('Notification popup container not found');
+            return;
+        }
+        
+        // Start polling for new notifications every 10 seconds
+        this.startPolling();
+        
+        // Check for notifications immediately
+        this.checkNewNotifications();
+    },
+    
+    startPolling() {
+        // Poll every 10 seconds
+        this.pollingInterval = setInterval(() => {
+            this.checkNewNotifications();
+        }, 10000);
+    },
+    
+    stopPolling() {
+        if (this.pollingInterval) {
+            clearInterval(this.pollingInterval);
+            this.pollingInterval = null;
+        }
+    },
+    
+    async checkNewNotifications() {
+        try {
+            const url = new URL('{% url "users:notifications_api" %}', window.location.origin);
+            if (this.lastCheckTime) {
+                url.searchParams.append('last_check', this.lastCheckTime);
+            }
+            
+            const response = await fetch(url.toString());
+            const data = await response.json();
+            
+            if (data.success && data.notifications && data.notifications.length > 0) {
+                // Show popups for new notifications
+                data.notifications.forEach(notification => {
+                    this.showPopup(notification);
+                });
+            }
+            
+            // Update last check time
+            this.lastCheckTime = new Date().toISOString();
+            
+        } catch (error) {
+            console.error('Error checking notifications:', error);
+        }
+    },
+    
+    showPopup(notification) {
+        // Add to queue if too many active popups
+        if (this.activePopups >= this.maxPopups) {
+            this.queue.push(notification);
+            return;
+        }
+        
+        this.activePopups++;
+        
+        // Create popup element
+        const popup = this.createPopupElement(notification);
+        this.container.appendChild(popup);
+        
+        // Auto-dismiss after 5 seconds
+        const autoDismissTimer = setTimeout(() => {
+            this.dismissPopup(popup);
+        }, 5000);
+        
+        // Store timer on element for pause/resume on hover
+        popup.dataset.timer = autoDismissTimer;
+        
+        // Pause timer on hover
+        popup.addEventListener('mouseenter', () => {
+            clearTimeout(autoDismissTimer);
+            const progressBar = popup.querySelector('.progress-bar');
+            if (progressBar) {
+                progressBar.style.animationPlayState = 'paused';
+            }
+        });
+        
+        // Resume/dismiss on mouse leave
+        popup.addEventListener('mouseleave', () => {
+            this.dismissPopup(popup);
+        });
+    },
+    
+    createPopupElement(notification) {
+        const popup = document.createElement('div');
+        popup.className = 'notification-popup bg-white rounded-lg shadow-2xl overflow-hidden border-l-4 cursor-pointer';
+        popup.dataset.notificationId = notification.id;
+        
+        // Set border color based on type
+        const colorClasses = {
+            'APP_SHORTLISTED': 'border-purple-500',
+            'APP_SELECTED': 'border-green-500',
+            'APP_HIRED': 'border-emerald-500',
+            'APP_REJECTED': 'border-red-500',
+            'KYC_VERIFIED': 'border-green-500',
+            'KYC_REJECTED': 'border-red-500',
+            'NEW_APPLICATION': 'border-blue-500',
+            'INTEREST_RECEIVED': 'border-pink-500',
+            'SYSTEM_ANNOUNCEMENT': 'border-yellow-500',
+        };
+        popup.classList.add(colorClasses[notification.type] || 'border-gray-500');
+        
+        popup.innerHTML = `
+            <div class="p-4">
+                <div class="flex items-start gap-3">
+                    <div class="text-2xl flex-shrink-0">${notification.icon}</div>
+                    <div class="flex-1 min-w-0">
+                        <h4 class="font-bold text-gray-900 mb-1 text-sm leading-tight">${this.escapeHtml(notification.title)}</h4>
+                        <p class="text-gray-700 text-xs leading-relaxed">${this.escapeHtml(notification.message)}</p>
+                        <p class="text-gray-500 text-xs mt-2">${this.formatTime(notification.created_at)}</p>
+                    </div>
+                    <button onclick="NotificationPopupSystem.dismissPopupById(${notification.id})" 
+                            class="text-gray-400 hover:text-gray-600 flex-shrink-0 p-1">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="h-1 bg-gray-200">
+                <div class="progress-bar h-full bg-gradient-to-r from-blue-500 to-blue-600"></div>
+            </div>
+        `;
+        
+        // Click handler to navigate
+        popup.addEventListener('click', (e) => {
+            if (e.target.tagName !== 'BUTTON' && !e.target.closest('button')) {
+                if (notification.action_url) {
+                    window.location.href = notification.action_url;
+                } else {
+                    window.location.href = '{% url "users:notifications" %}';
+                }
+            }
+        });
+        
+        return popup;
+    },
+    
+    dismissPopup(popupElement) {
+        if (!popupElement || popupElement.classList.contains('closing')) return;
+        
+        popupElement.classList.add('closing');
+        
+        setTimeout(() => {
+            if (popupElement.parentNode) {
+                popupElement.parentNode.removeChild(popupElement);
+            }
+            this.activePopups--;
+            
+            // Show next in queue if any
+            if (this.queue.length > 0) {
+                const nextNotification = this.queue.shift();
+                this.showPopup(nextNotification);
+            }
+        }, 300);
+    },
+    
+    dismissPopupById(notificationId) {
+        const popup = this.container.querySelector(`[data-notification-id="${notificationId}"]`);
+        if (popup) {
+            this.dismissPopup(popup);
+        }
+    },
+    
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    },
+    
+    formatTime(isoString) {
+        const date = new Date(isoString);
+        const now = new Date();
+        const diffMs = now - date;
+        const diffMins = Math.floor(diffMs / 60000);
+        
+        if (diffMins < 1) return 'Just now';
+        if (diffMins < 60) return `${diffMins}m ago`;
+        
+        const diffHours = Math.floor(diffMins / 60);
+        if (diffHours < 24) return `${diffHours}h ago`;
+        
+        return date.toLocaleDateString();
+    }
+};
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', () => {
+    {% if user.is_authenticated %}
+    NotificationPopupSystem.init();
+    {% endif %}
+});
+
+// Stop polling when page is hidden (save resources)
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        NotificationPopupSystem.stopPolling();
+    } else {
+        NotificationPopupSystem.startPolling();
+        NotificationPopupSystem.checkNewNotifications(); // Check immediately when returning
+    }
+});
+</script>

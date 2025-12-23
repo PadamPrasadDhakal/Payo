@@ -545,10 +545,22 @@ def kyc_profile(request):
 
 @login_required
 def notifications(request):
-    """Display all user notifications with pagination"""
+    """Display all user notifications with pagination and filtering"""
     all_notifications = request.user.notifications.all()
     
-    # Mark as read if requested
+    # Filter by type if provided
+    notif_type = request.GET.get('type', '')
+    if notif_type:
+        all_notifications = all_notifications.filter(notification_type=notif_type)
+    
+    # Filter by read/unread if provided
+    read_status = request.GET.get('status', '')
+    if read_status == 'unread':
+        all_notifications = all_notifications.filter(is_read=False)
+    elif read_status == 'read':
+        all_notifications = all_notifications.filter(is_read=True)
+    
+    # Handle AJAX requests
     if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         action = request.POST.get('action')
         
@@ -566,19 +578,43 @@ def notifications(request):
             except Notification.DoesNotExist:
                 return JsonResponse({'error': 'Notification not found'}, status=404)
         
+        elif action == 'delete':
+            notification_id = request.POST.get('notification_id')
+            try:
+                notif = Notification.objects.get(id=notification_id, user=request.user)
+                notif.delete()
+                return JsonResponse({'message': 'Notification deleted', 'success': True})
+            except Notification.DoesNotExist:
+                return JsonResponse({'error': 'Notification not found'}, status=404)
+        
+        elif action == 'delete_all_read':
+            deleted_count = request.user.notifications.filter(is_read=True).count()
+            request.user.notifications.filter(is_read=True).delete()
+            return JsonResponse({
+                'message': f'{deleted_count} read notifications deleted',
+                'success': True,
+                'deleted_count': deleted_count
+            })
+        
         return JsonResponse({'error': 'Invalid action'}, status=400)
     
     # Pagination for GET request
-    paginator = Paginator(all_notifications, 10)
+    paginator = Paginator(all_notifications, 15)
     page_number = request.GET.get('page', 1)
     notifications_page = paginator.get_page(page_number)
     
     # Count unread
-    unread_count = all_notifications.filter(is_read=False).count()
+    unread_count = request.user.notifications.filter(is_read=False).count()
+    
+    # Get notification types for filtering
+    notification_types = Notification.NOTIFICATION_TYPES
     
     context = {
         'notifications': notifications_page,
         'unread_count': unread_count,
+        'notification_types': notification_types,
+        'current_type': notif_type,
+        'current_status': read_status,
         'title': 'Notifications'
     }
     return render(request, 'users/notifications.html', context)
@@ -589,6 +625,48 @@ def notification_count_api(request):
     """API endpoint for getting unread notification count"""
     unread_count = request.user.notifications.filter(is_read=False).count()
     return JsonResponse({'unread_count': unread_count, 'success': True})
+
+
+@login_required
+def notifications_api(request):
+    """API endpoint for getting recent notifications (for popup)"""
+    # Get the last time the user checked notifications (from session or request)
+    last_check = request.GET.get('last_check', None)
+    
+    if last_check:
+        try:
+            from datetime import datetime
+            last_check_dt = datetime.fromisoformat(last_check.replace('Z', '+00:00'))
+            new_notifications = request.user.notifications.filter(
+                created_at__gt=last_check_dt,
+                is_read=False
+            ).order_by('-created_at')[:5]
+        except (ValueError, TypeError):
+            new_notifications = request.user.notifications.filter(is_read=False).order_by('-created_at')[:5]
+    else:
+        # Return latest 5 unread notifications
+        new_notifications = request.user.notifications.filter(is_read=False).order_by('-created_at')[:5]
+    
+    notifications_data = [
+        {
+            'id': notif.id,
+            'title': notif.title,
+            'message': notif.message,
+            'type': notif.notification_type,
+            'icon': notif.get_icon(),
+            'is_read': notif.is_read,
+            'created_at': notif.created_at.isoformat(),
+            'action_url': notif.action_url or '',
+        }
+        for notif in new_notifications
+    ]
+    
+    return JsonResponse({
+        'success': True,
+        'notifications': notifications_data,
+        'count': len(notifications_data),
+        'total_unread': request.user.notifications.filter(is_read=False).count()
+    })
 
 
 def cms_login(request):
