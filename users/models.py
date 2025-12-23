@@ -24,7 +24,6 @@ class User(AbstractUser):
     # Common fields for all users
     phone = models.CharField(max_length=10, blank=True, null=True)
     address = models.CharField(max_length=255, blank=True, null=True)
-    official_name = models.CharField(max_length=255, blank=True,null=True)
     
     # Applicant-specific fields
     profile_photo = models.ImageField(upload_to="profile_photos/", blank=True, null=True)

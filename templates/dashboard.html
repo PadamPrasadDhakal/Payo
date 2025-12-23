@@ -6,7 +6,7 @@
 {% block content %}
 <div class="max-w-6xl mx-auto">
     <!-- Profile Completion Notification for Google OAuth Users -->
-    {% if user.user_type == 'APP' and not user.official_name %}
+    {% if user.user_type == 'APP' and not user.phone %}
     <div class="bg-yellow-100 border-l-4 border-yellow-500 p-6 mb-8 rounded-lg shadow-md">
         <div class="flex items-center">
             <div class="flex-shrink-0">

@@ -8,7 +8,7 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
         """Redirect Google OAuth users to profile completion if needed"""
         user = request.user
         
-        if user.user_type == User.UserType.APPLICANT and not user.official_name:
+        if user.user_type == User.UserType.APPLICANT and not user.phone:
             return reverse('users:add_info')
         else:
             return reverse('users:dashboard')
@@ -17,7 +17,7 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
         """Redirect existing Google OAuth users"""
         user = request.user
         
-        if user.user_type == User.UserType.APPLICANT and not user.official_name:
+        if user.user_type == User.UserType.APPLICANT and not user.phone:
             return reverse('users:add_info')
         else:
             return reverse('users:dashboard')

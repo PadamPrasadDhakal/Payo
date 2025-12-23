@@ -25,14 +25,6 @@
       </div>
       
       <div class="space-y-1">
-        <label class="text-sm font-medium">{{ form.official_name.label }}</label>
-        {{ form.official_name }}
-        {% if form.official_name.errors %}
-          <p class="text-sm text-red-600">{{ form.official_name.errors|striptags }}</p>
-        {% endif %}
-      </div>
-      
-      <div class="space-y-1">
         <label class="text-sm font-medium">{{ form.phone.label }}</label>
         {{ form.phone }}
         {% if form.phone.errors %}
@@ -50,7 +42,7 @@
       
       <!-- Rest of the fields -->
       {% for field in form %}
-        {% if field.name != 'username' and field.name != 'email' and field.name != 'official_name' and field.name != 'phone' and field.name != 'address' %}
+        {% if field.name != 'username' and field.name != 'email' and field.name != 'phone' and field.name != 'address' %}
         <div class="space-y-1">
           <label class="text-sm font-medium">{{ field.label }}</label>
           {{ field }}

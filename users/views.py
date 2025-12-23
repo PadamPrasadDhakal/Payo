@@ -103,7 +103,7 @@ def google_signup_redirect(request):
     user = request.user
     
     # Check if user is coming from Google OAuth and needs to complete profile
-    if user.user_type == User.UserType.APPLICANT and not user.official_name:
+    if user.user_type == User.UserType.APPLICANT and not user.phone:
         return redirect('users:add_info')
     elif user.user_type == User.UserType.APPLICANT:
         return redirect('users:dashboard')
@@ -456,7 +456,7 @@ def apply_job(request):
     if request.method == "POST":
         try:
             # Check if user has completed their profile (especially for Google OAuth users)
-            if request.user.user_type == User.UserType.APPLICANT and not request.user.official_name:
+            if request.user.user_type == User.UserType.APPLICANT and not request.user.phone:
                 return JsonResponse({
                     'error': 'Profile incomplete', 
                     'message': 'Please complete your profile before applying for jobs.',

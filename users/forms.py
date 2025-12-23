@@ -85,7 +85,6 @@ class ApplicantSignUpForm(UserCreationForm):
             field.widget.attrs.update({"class": css})
         self.fields["username"].widget.attrs.update({"placeholder": "Username"})
         self.fields["email"].widget.attrs.update({"placeholder": "Email"})
-        self.fields["official_name"].widget.attrs.update({"placeholder": "Full Name"})
         self.fields["phone"].widget.attrs.update({"placeholder": "Phone Number"})
         self.fields["address"].widget.attrs.update({"placeholder": "Address"})
         self.fields["password1"].widget.attrs.update({"placeholder": "Password"})
@@ -99,7 +98,6 @@ class ApplicantSignUpForm(UserCreationForm):
 
 
 class OrganizationSignUpForm(UserCreationForm):
-    official_name = forms.CharField(max_length=255, required=False)
     phone = forms.CharField(max_length=20, required=False)
     address = forms.CharField(widget=forms.Textarea(attrs={'rows': 3}), required=False)
     
@@ -108,7 +106,6 @@ class OrganizationSignUpForm(UserCreationForm):
         fields = (
             "username",
             "email",
-            "official_name",
             "phone",
             "address",
             "password1",
@@ -130,7 +127,6 @@ class OrganizationSignUpForm(UserCreationForm):
             field.widget.attrs.update({"class": TAILWIND_INPUT})
         self.fields["username"].widget.attrs.update({"placeholder": "Organization username"})
         self.fields["email"].widget.attrs.update({"placeholder": "Email"})
-        self.fields["official_name"].widget.attrs.update({"placeholder": "Official Organization Name"})
         self.fields["phone"].widget.attrs.update({"placeholder": "Contact Phone"})
         self.fields["address"].widget.attrs.update({"placeholder": "Organization Address"})
         self.fields["password1"].widget.attrs.update({"placeholder": "Password"})
@@ -165,7 +161,6 @@ class GoogleUserCompleteProfileForm(forms.ModelForm):
     class Meta:
         model = User
         fields = (
-            "official_name",
             "phone",
             "address",
             "profile_photo",
@@ -205,7 +200,6 @@ class GoogleUserCompleteProfileForm(forms.ModelForm):
             if getattr(field.widget, 'input_type', '') == 'file':
                 css = "block w-full text-sm text-gray-700 border border-gray-300 rounded-md cursor-pointer bg-white px-3 py-2"
             field.widget.attrs.update({"class": css})
-        self.fields["official_name"].widget.attrs.update({"placeholder": "Full Name"})
         self.fields["phone"].widget.attrs.update({"placeholder": "Phone Number"})
         self.fields["address"].widget.attrs.update({"placeholder": "Address"})
         self.fields["education_institute"].widget.attrs.update({"placeholder": "Institute name"})
