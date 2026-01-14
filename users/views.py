@@ -74,7 +74,7 @@ def signup_applicant(request):
         if form.is_valid():
             user = form.save()
             login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-            return redirect("users:add_info")
+            return redirect("home")
     else:
         form = ApplicantSignUpForm()
     return render(request, "users/job_signup.html", {"form": form})
@@ -97,18 +97,50 @@ def profile(request):
     return render(request, "users/profile.html")
 
 
+def profile_detail(request, user_id):
+    """View to display any user's profile (organization or applicant)"""
+    user = get_object_or_404(User, id=user_id)
+    
+    context = {
+        'profile_user': user,
+    }
+    
+    # Add organization-specific data
+    if user.is_organization():
+        context['total_jobs'] = user.jobs.count()
+        context['recent_jobs'] = user.jobs.order_by('-created_at')[:5]
+        
+        # Add follower count if OrganizationFollow model exists
+        try:
+            from organization.models import OrganizationFollow
+            context['follower_count'] = OrganizationFollow.objects.filter(
+                organization=user,
+                is_active=True
+            ).count()
+            
+            # Check if current user follows this organization
+            if request.user.is_authenticated and request.user.user_type == 'APP':
+                context['is_following'] = OrganizationFollow.objects.filter(
+                    user=request.user,
+                    organization=user,
+                    is_active=True
+                ).exists()
+        except ImportError:
+            pass
+    
+    return render(request, "users/profile_detail.html", context)
+
+
 @login_required
 def google_signup_redirect(request):
-    """Redirect view for Google OAuth users to complete their profile"""
+    """Redirect view for Google OAuth users"""
     user = request.user
     
-    # Check if user is coming from Google OAuth and needs to complete profile
-    if user.user_type == User.UserType.APPLICANT and not user.phone:
-        return redirect('users:add_info')
-    elif user.user_type == User.UserType.APPLICANT:
-        return redirect('users:dashboard')
+    # Redirect based on user type
+    if user.user_type == User.UserType.APPLICANT:
+        return redirect('home')
     else:
-        # If user is not an applicant, redirect to dashboard
+        # If user is organization, redirect to dashboard
         return redirect('users:dashboard')
 
 

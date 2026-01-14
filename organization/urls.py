@@ -24,6 +24,9 @@ from .views import (
     top_users_list,
     top_user_detail,
     express_interest,
+    organizations_directory,
+    follow_organization,
+    unfollow_organization,
 )
 
 app_name = "organization"
@@ -49,6 +52,12 @@ urlpatterns = [
     path("classify/", classify, name="classify"),
     path("match_resumes/", match_resumes, name="match-resumes"),
     path("users/logout/", lambda request: redirect('/users/logout/')),  # Redirect to users logout
+    
+    # Organization Follow System URLs
+    path("directory/", organizations_directory, name="organizations-directory"),
+    path("follow/<int:org_id>/", follow_organization, name="follow-organization"),
+    path("unfollow/<int:org_id>/", unfollow_organization, name="unfollow-organization"),
+    
     # Top Users Feature
     path("top-users/", top_users_list, name="top-users"),
     path("top-users/<int:user_id>/", top_user_detail, name="top-user-detail"),

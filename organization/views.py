@@ -4,8 +4,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView, DetailView, CreateView
 from .forms import JobForm
 from django.urls import reverse_lazy
-from .models import Job, Application, Payment
-from django.db.models import Count, Max
+from .models import Job, Application, Payment, OrganizationFollow
+from django.db.models import Count, Max, Q, Exists, OuterRef
 import PyPDF2
 import re
 import nltk
@@ -20,6 +20,9 @@ from django.views.decorators.http import require_POST
 import json
 from django.contrib import messages
 from users.decorators import organization_required, applicant_required
+from users.models import User
+from django.core.paginator import Paginator
+from django.db.models.functions import Lower
 
 # Create your views here.
 
@@ -764,3 +767,212 @@ def express_interest(request, user_id):
         'success': True,
         'message': 'Interest expressed successfully!'
     })
+
+
+# ==================== ORGANIZATION FOLLOW SYSTEM VIEWS ====================
+
+def organizations_directory(request):
+    """
+    Display all organizations in a directory/list view.
+    Accessible to both logged-in and logged-out users (applicants only).
+    Organizations trying to access this page will be redirected.
+    """
+    # Check if user is an organization and redirect them
+    if request.user.is_authenticated and request.user.user_type == 'ORG':
+        messages.warning(request, "⚠️ Organizations cannot access the organizations directory. This feature is for job seekers only.")
+        return redirect('org_dashboard')
+    
+    # Get all organization users
+    organizations = User.objects.filter(user_type='ORG')
+    
+    # Annotate with follower count
+    organizations = organizations.annotate(
+        follower_count=Count('followers', filter=Q(followers__is_active=True))
+    )
+    
+    # If user is logged in and is an applicant, annotate with follow status
+    if request.user.is_authenticated and request.user.user_type == 'APP':
+        organizations = organizations.annotate(
+            is_followed=Exists(
+                OrganizationFollow.objects.filter(
+                    user=request.user,
+                    organization=OuterRef('pk'),
+                    is_active=True
+                )
+            )
+        )
+    
+    # Search functionality
+    search_query = request.GET.get('search', '').strip()
+    if search_query:
+        organizations = organizations.filter(
+            Q(organization_name__icontains=search_query) |
+            Q(username__icontains=search_query) |
+            Q(organization_industry__icontains=search_query)
+        )
+    
+    # Filter by industry
+    industry_filter = request.GET.get('industry', '').strip()
+    if industry_filter:
+        organizations = organizations.filter(organization_industry__iexact=industry_filter)
+    
+    # Filter by location
+    location_filter = request.GET.get('location', '').strip()
+    if location_filter:
+        organizations = organizations.filter(address__icontains=location_filter)
+    
+    # Get distinct industries and locations for filter options
+    all_industries = User.objects.filter(
+        user_type='ORG', 
+        organization_industry__isnull=False
+    ).exclude(organization_industry='').values_list(
+        'organization_industry', flat=True
+    ).distinct().order_by('organization_industry')
+    
+    all_locations = User.objects.filter(
+        user_type='ORG',
+        address__isnull=False
+    ).exclude(address='').values_list(
+        'address', flat=True
+    ).distinct().order_by('address')
+    
+    # Order by follower count (most followed first), then by name
+    organizations = organizations.order_by('-follower_count', 'organization_name')
+    
+    # Pagination - 20 organizations per page
+    paginator = Paginator(organizations, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'page_obj': page_obj,
+        'organizations': page_obj.object_list,
+        'search_query': search_query,
+        'industry_filter': industry_filter,
+        'location_filter': location_filter,
+        'all_industries': all_industries,
+        'all_locations': all_locations,
+        'total_count': paginator.count,
+    }
+    
+    return render(request, 'organization/organizations_directory.html', context)
+
+
+@login_required
+@require_POST
+def follow_organization(request, org_id):
+    """
+    Follow an organization (AJAX endpoint).
+    Only applicants can follow organizations.
+    """
+    # Check if user is an applicant
+    if request.user.user_type != 'APP':
+        return JsonResponse({
+            'success': False,
+            'error': 'Only job seekers can follow organizations.'
+        }, status=403)
+    
+    # Get the organization
+    try:
+        organization = User.objects.get(id=org_id, user_type='ORG')
+    except User.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'error': 'Organization not found.'
+        }, status=404)
+    
+    # Check if already following
+    existing_follow = OrganizationFollow.objects.filter(
+        user=request.user,
+        organization=organization
+    ).first()
+    
+    if existing_follow:
+        if existing_follow.is_active:
+            return JsonResponse({
+                'success': False,
+                'error': 'You are already following this organization.'
+            }, status=400)
+        else:
+            # Reactivate the follow
+            existing_follow.is_active = True
+            existing_follow.followed_at = timezone.now()
+            existing_follow.save()
+    else:
+        # Create new follow relationship
+        OrganizationFollow.objects.create(
+            user=request.user,
+            organization=organization,
+            is_active=True
+        )
+    
+    # Get updated follower count
+    follower_count = OrganizationFollow.objects.filter(
+        organization=organization,
+        is_active=True
+    ).count()
+    
+    messages.success(request, f'✓ You are now following {organization.organization_name or organization.username}!')
+    
+    return JsonResponse({
+        'success': True,
+        'message': f'You are now following {organization.organization_name or organization.username}',
+        'follower_count': follower_count,
+        'is_following': True
+    })
+
+
+@login_required
+@require_POST
+def unfollow_organization(request, org_id):
+    """
+    Unfollow an organization (AJAX endpoint).
+    Only applicants can unfollow organizations.
+    """
+    # Check if user is an applicant
+    if request.user.user_type != 'APP':
+        return JsonResponse({
+            'success': False,
+            'error': 'Only job seekers can unfollow organizations.'
+        }, status=403)
+    
+    # Get the organization
+    try:
+        organization = User.objects.get(id=org_id, user_type='ORG')
+    except User.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'error': 'Organization not found.'
+        }, status=404)
+    
+    # Get the follow relationship
+    try:
+        follow = OrganizationFollow.objects.get(
+            user=request.user,
+            organization=organization,
+            is_active=True
+        )
+        # Deactivate instead of delete to maintain history
+        follow.is_active = False
+        follow.save()
+        
+        # Get updated follower count
+        follower_count = OrganizationFollow.objects.filter(
+            organization=organization,
+            is_active=True
+        ).count()
+        
+        messages.success(request, f'You have unfollowed {organization.organization_name or organization.username}')
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'You have unfollowed {organization.organization_name or organization.username}',
+            'follower_count': follower_count,
+            'is_following': False
+        })
+        
+    except OrganizationFollow.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'error': 'You are not following this organization.'
+        }, status=400)

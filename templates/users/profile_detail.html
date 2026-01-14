@@ -1,0 +1,868 @@
+{% extends "base2.html" %}
+{% load static %}
+
+{% block title %}{{ profile_user.organization_name|default:profile_user.username }} - Profile{% endblock %}
+
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+* {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+body {
+    background-color: #f0f2f5;
+}
+
+.profile-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Cover Photo Section - Facebook Style */
+.cover-photo-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    height: 380px;
+    border-radius: 0 0 8px 8px;
+    position: relative;
+    overflow: hidden;
+}
+
+.cover-photo-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Profile Info Card - Facebook Style */
+.profile-info-card {
+    background: white;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    margin-top: -80px;
+    position: relative;
+    z-index: 10;
+}
+
+.profile-header {
+    padding: 24px 24px 0 24px;
+}
+
+.profile-photo-wrapper {
+    display: flex;
+    align-items: flex-end;
+    gap: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #e4e6eb;
+}
+
+.profile-photo {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    border: 5px solid white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    object-fit: cover;
+    background: white;
+    margin-top: -110px;
+}
+
+.profile-photo-placeholder {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    border: 5px solid white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 64px;
+    font-weight: 700;
+    color: white;
+    margin-top: -110px;
+}
+
+.profile-name-section {
+    flex: 1;
+    padding-bottom: 16px;
+}
+
+.profile-name {
+    font-size: 32px;
+    font-weight: 700;
+    color: #050505;
+    margin: 0 0 4px 0;
+    line-height: 1.2;
+}
+
+.profile-meta {
+    color: #65676b;
+    font-size: 15px;
+    margin: 4px 0;
+}
+
+.profile-stats {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.stat-item {
+    color: #65676b;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.stat-number {
+    color: #050505;
+    font-weight: 700;
+}
+
+/* Action Buttons - Facebook Style */
+.profile-actions {
+    padding: 12px 24px;
+    border-bottom: 1px solid #e4e6eb;
+    display: flex;
+    gap: 8px;
+}
+
+.btn-primary-action {
+    background: #1877f2;
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-primary-action:hover {
+    background: #166fe5;
+}
+
+.btn-secondary-action {
+    background: #e4e6eb;
+    color: #050505;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-secondary-action:hover {
+    background: #d8dadf;
+}
+
+.btn-following {
+    background: #e7f3ff;
+    color: #1877f2;
+}
+
+.btn-following:hover {
+    background: #d0e7ff;
+}
+
+/* Navigation Tabs - Facebook Style */
+.profile-nav {
+    padding: 0 24px;
+    display: flex;
+    gap: 8px;
+}
+
+.nav-tab {
+    padding: 16px 16px;
+    font-weight: 600;
+    font-size: 15px;
+    color: #65676b;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+}
+
+.nav-tab.active {
+    color: #1877f2;
+    border-bottom-color: #1877f2;
+}
+
+.nav-tab:hover:not(.active) {
+    background: #f2f3f5;
+    border-radius: 8px 8px 0 0;
+}
+
+/* Content Section */
+.profile-content {
+    display: grid;
+    grid-template-columns: 2fr 3fr;
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.profile-sidebar, .profile-main {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    padding: 16px;
+}
+
+.section-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #050505;
+    margin-bottom: 16px;
+}
+
+.info-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 8px;
+    border-radius: 8px;
+    transition: background 0.2s;
+}
+
+.info-row:hover {
+    background: #f2f3f5;
+}
+
+.info-icon {
+    width: 24px;
+    height: 24px;
+    color: #65676b;
+    flex-shrink: 0;
+}
+
+.info-content {
+    flex: 1;
+}
+
+.info-label {
+    font-size: 13px;
+    color: #65676b;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.info-value {
+    font-size: 15px;
+    color: #050505;
+    margin-top: 4px;
+}
+
+.info-value a {
+    color: #1877f2;
+    text-decoration: none;
+}
+
+.info-value a:hover {
+    text-decoration: underline;
+}
+
+/* Job Cards - Facebook Style */
+.job-card {
+    background: white;
+    border: 1px solid #e4e6eb;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 12px;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.job-card:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-color: #1877f2;
+}
+
+.job-title {
+    font-size: 17px;
+    font-weight: 600;
+    color: #050505;
+    margin-bottom: 8px;
+}
+
+.job-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    font-size: 13px;
+    color: #65676b;
+    margin-bottom: 8px;
+}
+
+.job-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.job-description {
+    font-size: 15px;
+    color: #050505;
+    line-height: 1.5;
+    margin-top: 12px;
+}
+
+.view-all-btn {
+    background: #f0f2f5;
+    color: #1877f2;
+    border: none;
+    padding: 12px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 15px;
+    width: 100%;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.view-all-btn:hover {
+    background: #e4e6eb;
+}
+
+/* Loading Animation */
+@keyframes spin {
+    100% { transform: rotate(360deg); }
+}
+
+.btn-loading {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.btn-loading i.fa-spinner {
+    animation: spin 1s linear infinite;
+}
+
+/* Toast Notifications */
+.toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 1000;
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateX(-50%) translateY(100px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+    }
+}
+
+.toast.success {
+    border-left: 4px solid #42b72a;
+}
+
+.toast.error {
+    border-left: 4px solid #f02849;
+}
+
+.toast-icon {
+    font-size: 20px;
+}
+
+.toast.success .toast-icon {
+    color: #42b72a;
+}
+
+.toast.error .toast-icon {
+    color: #f02849;
+}
+
+.toast-message {
+    font-size: 15px;
+    color: #050505;
+    font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .profile-content {
+        grid-template-columns: 1fr;
+    }
+    
+    .cover-photo-section {
+        height: 250px;
+    }
+    
+    .profile-photo, .profile-photo-placeholder {
+        width: 120px;
+        height: 120px;
+        margin-top: -60px;
+    }
+    
+    .profile-name {
+        font-size: 24px;
+    }
+    
+    .profile-actions {
+        flex-wrap: wrap;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <!-- Cover Photo -->
+    <div class="cover-photo-section"></div>
+    
+    <!-- Profile Info Card -->
+    <div class="profile-info-card">
+        <!-- Profile Header -->
+        <div class="profile-header">
+            <div class="profile-photo-wrapper">
+                <!-- Profile Photo -->
+                {% if profile_user.is_organization %}
+                    {% if profile_user.organization_photo %}
+                        <img src="{{ profile_user.organization_photo.url }}" 
+                             alt="{{ profile_user.organization_name }}" 
+                             class="profile-photo">
+                    {% else %}
+                        <div class="profile-photo-placeholder">
+                            {{ profile_user.organization_name|first|upper }}
+                        </div>
+                    {% endif %}
+                {% else %}
+                    {% if profile_user.profile_photo %}
+                        <img src="{{ profile_user.profile_photo.url }}" 
+                             alt="{{ profile_user.username }}" 
+                             class="profile-photo">
+                    {% else %}
+                        <div class="profile-photo-placeholder">
+                            {{ profile_user.username|first|upper }}
+                        </div>
+                    {% endif %}
+                {% endif %}
+                
+                <!-- Name and Stats -->
+                <div class="profile-name-section">
+                    <h1 class="profile-name">
+                        {% if profile_user.is_organization %}
+                            {{ profile_user.organization_name|default:profile_user.username }}
+                        {% else %}
+                            {{ profile_user.get_full_name|default:profile_user.username }}
+                        {% endif %}
+                    </h1>
+                    
+                    {% if profile_user.is_organization and follower_count is not None %}
+                        <div class="profile-stats">
+                            <span class="stat-item">
+                                <span class="stat-number follower-count-{{ profile_user.id }}">{{ follower_count }}</span> 
+                                Follower{{ follower_count|pluralize }}
+                            </span>
+                            <span class="stat-item">•</span>
+                            <span class="stat-item">
+                                <span class="stat-number">{{ total_jobs|default:0 }}</span> 
+                                Job{{ total_jobs|pluralize }}
+                            </span>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="profile-actions">
+            {% if profile_user.is_organization and user.is_authenticated and user.user_type == 'APP' %}
+                {% if is_following %}
+                    <button class="btn-secondary-action btn-following" 
+                            data-org-id="{{ profile_user.id }}"
+                            onclick="unfollowOrganization({{ profile_user.id }})">
+                        <i class="fas fa-check"></i>
+                        <span>Following</span>
+                    </button>
+                {% else %}
+                    <button class="btn-primary-action" 
+                            data-org-id="{{ profile_user.id }}"
+                            onclick="followOrganization({{ profile_user.id }})">
+                        <i class="fas fa-plus"></i>
+                        <span>Follow</span>
+                    </button>
+                {% endif %}
+                <button class="btn-secondary-action">
+                    <i class="fas fa-envelope"></i>
+                    <span>Message</span>
+                </button>
+                <button class="btn-secondary-action">
+                    <i class="fas fa-share"></i>
+                    <span>Share</span>
+                </button>
+            {% elif profile_user.is_organization and not user.is_authenticated %}
+                <button class="btn-primary-action" onclick="handleLoginRequired()">
+                    <i class="fas fa-lock"></i>
+                    <span>Follow</span>
+                </button>
+                <button class="btn-secondary-action" onclick="handleLoginRequired()">
+                    <i class="fas fa-envelope"></i>
+                    <span>Message</span>
+                </button>
+            {% endif %}
+        </div>
+        
+        <!-- Navigation Tabs -->
+        <div class="profile-nav">
+            <div class="nav-tab active">
+                <i class="fas fa-th-large mr-2"></i> Posts
+            </div>
+            <div class="nav-tab">
+                <i class="fas fa-briefcase mr-2"></i> Jobs
+            </div>
+            <div class="nav-tab">
+                <i class="fas fa-info-circle mr-2"></i> About
+            </div>
+        </div>
+    </div>
+    
+    <!-- Content -->
+    <div class="profile-content">
+        <!-- Sidebar -->
+        <div class="profile-sidebar">
+            <!-- About Section -->
+            <div class="mb-4">
+                <h2 class="section-title">About</h2>
+                
+                {% if profile_user.bio %}
+                    <div class="info-row">
+                        <i class="fas fa-align-left info-icon"></i>
+                        <div class="info-content">
+                            <div class="info-value">{{ profile_user.bio }}</div>
+                        </div>
+                    </div>
+                {% endif %}
+                
+                {% if profile_user.is_organization and profile_user.organization_industry %}
+                    <div class="info-row">
+                        <i class="fas fa-industry info-icon"></i>
+                        <div class="info-content">
+                            <div class="info-label">Industry</div>
+                            <div class="info-value">{{ profile_user.organization_industry }}</div>
+                        </div>
+                    </div>
+                {% endif %}
+                
+                {% if profile_user.address %}
+                    <div class="info-row">
+                        <i class="fas fa-map-marker-alt info-icon"></i>
+                        <div class="info-content">
+                            <div class="info-label">Location</div>
+                            <div class="info-value">{{ profile_user.address }}</div>
+                        </div>
+                    </div>
+                {% endif %}
+                
+                {% if profile_user.email %}
+                    <div class="info-row">
+                        <i class="fas fa-envelope info-icon"></i>
+                        <div class="info-content">
+                            <div class="info-label">Email</div>
+                            <div class="info-value">
+                                <a href="mailto:{{ profile_user.email }}">{{ profile_user.email }}</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+                
+                {% if profile_user.phone %}
+                    <div class="info-row">
+                        <i class="fas fa-phone info-icon"></i>
+                        <div class="info-content">
+                            <div class="info-label">Phone</div>
+                            <div class="info-value">{{ profile_user.phone }}</div>
+                        </div>
+                    </div>
+                {% endif %}
+                
+                {% if profile_user.organization_website %}
+                    <div class="info-row">
+                        <i class="fas fa-globe info-icon"></i>
+                        <div class="info-content">
+                            <div class="info-label">Website</div>
+                            <div class="info-value">
+                                <a href="{{ profile_user.organization_website }}" target="_blank">
+                                    {{ profile_user.organization_website }}
+                                    <i class="fas fa-external-link-alt ml-1" style="font-size: 12px;"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="profile-main">
+            {% if profile_user.is_organization %}
+                <h2 class="section-title">Recent Jobs</h2>
+                
+                {% if recent_jobs %}
+                    {% for job in recent_jobs %}
+                        <div class="job-card" onclick="window.location.href='/jobs/{{ job.id }}/'">
+                            <div class="job-title">{{ job.title }}</div>
+                            <div class="job-meta">
+                                <span class="job-meta-item">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    {{ job.location|default:"Remote" }}
+                                </span>
+                                <span class="job-meta-item">
+                                    <i class="fas fa-briefcase"></i>
+                                    {{ job.get_job_type_display }}
+                                </span>
+                                {% if job.salary %}
+                                    <span class="job-meta-item">
+                                        <i class="fas fa-dollar-sign"></i>
+                                        {{ job.salary }}
+                                    </span>
+                                {% endif %}
+                                <span class="job-meta-item">
+                                    <i class="fas fa-clock"></i>
+                                    {{ job.created_at|timesince }} ago
+                                </span>
+                            </div>
+                            {% if job.description %}
+                                <div class="job-description">
+                                    {{ job.description|truncatewords:30 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                    
+                    {% if total_jobs > 5 %}
+                        <button class="view-all-btn" onclick="window.location.href='/jobs/?org={{ profile_user.id }}'">
+                            View All {{ total_jobs }} Jobs
+                        </button>
+                    {% endif %}
+                {% else %}
+                    <div style="text-align: center; padding: 40px 20px; color: #65676b;">
+                        <i class="fas fa-briefcase" style="font-size: 48px; margin-bottom: 16px;"></i>
+                        <p style="font-size: 17px; font-weight: 600;">No jobs posted yet</p>
+                        <p style="font-size: 15px; margin-top: 8px;">Check back later for new opportunities</p>
+                    </div>
+                {% endif %}
+            {% else %}
+                <div style="text-align: center; padding: 40px 20px; color: #65676b;">
+                    <i class="fas fa-user" style="font-size: 48px; margin-bottom: 16px;"></i>
+                    <p style="font-size: 17px; font-weight: 600;">User Profile</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+// CSRF Token
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+const csrftoken = getCookie('csrftoken');
+
+// Toast Notification
+function showToast(type, message) {
+    // Remove existing toasts
+    const existingToasts = document.querySelectorAll('.toast');
+    existingToasts.forEach(toast => toast.remove());
+    
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} toast-icon"></i>
+        <div class="toast-message">${message}</div>
+        <button onclick="this.parentElement.remove()" style="background: none; border: none; cursor: pointer; color: #65676b; padding: 0 0 0 12px;">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.remove();
+    }, 5000);
+}
+
+// Follow Organization
+function followOrganization(orgId) {
+    const button = document.querySelector(`button[data-org-id="${orgId}"]`);
+    if (!button) return;
+    
+    const originalHTML = button.innerHTML;
+    button.classList.add('btn-loading');
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Following...</span>';
+    button.disabled = true;
+    
+    fetch(`/organizations/follow/${orgId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrftoken,
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            button.classList.remove('btn-primary-action', 'btn-loading');
+            button.classList.add('btn-secondary-action', 'btn-following');
+            button.innerHTML = '<i class="fas fa-check"></i><span>Following</span>';
+            button.onclick = function() { unfollowOrganization(orgId); };
+            button.disabled = false;
+            
+            // Update follower count
+            const followerCountElement = document.querySelector(`.follower-count-${orgId}`);
+            if (followerCountElement && data.follower_count !== undefined) {
+                followerCountElement.textContent = data.follower_count;
+            }
+            
+            showToast('success', data.message || 'Successfully followed organization');
+        } else {
+            button.classList.remove('btn-loading');
+            button.innerHTML = originalHTML;
+            button.disabled = false;
+            showToast('error', data.error || 'Failed to follow organization');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        button.classList.remove('btn-loading');
+        button.innerHTML = originalHTML;
+        button.disabled = false;
+        showToast('error', 'An error occurred. Please try again.');
+    });
+}
+
+// Unfollow Organization
+function unfollowOrganization(orgId) {
+    const button = document.querySelector(`button[data-org-id="${orgId}"]`);
+    if (!button) return;
+    
+    const originalHTML = button.innerHTML;
+    button.classList.add('btn-loading');
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Unfollowing...</span>';
+    button.disabled = true;
+    
+    fetch(`/organizations/unfollow/${orgId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrftoken,
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            button.classList.remove('btn-secondary-action', 'btn-following', 'btn-loading');
+            button.classList.add('btn-primary-action');
+            button.innerHTML = '<i class="fas fa-plus"></i><span>Follow</span>';
+            button.onclick = function() { followOrganization(orgId); };
+            button.disabled = false;
+            
+            // Update follower count
+            const followerCountElement = document.querySelector(`.follower-count-${orgId}`);
+            if (followerCountElement && data.follower_count !== undefined) {
+                followerCountElement.textContent = data.follower_count;
+            }
+            
+            showToast('success', data.message || 'Successfully unfollowed organization');
+        } else {
+            button.classList.remove('btn-loading');
+            button.innerHTML = originalHTML;
+            button.disabled = false;
+            showToast('error', data.error || 'Failed to unfollow organization');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        button.classList.remove('btn-loading');
+        button.innerHTML = originalHTML;
+        button.disabled = false;
+        showToast('error', 'An error occurred. Please try again.');
+    });
+}
+
+// Handle Login Required
+function handleLoginRequired() {
+    showToast('error', 'Please log in to follow organizations');
+    setTimeout(() => {
+        window.location.href = '/users/login/?next={{ request.path }}';
+    }, 1500);
+}
+
+// Message Button (placeholder)
+document.querySelectorAll('.btn-secondary-action').forEach(btn => {
+    if (btn.textContent.includes('Message')) {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            showToast('error', 'Messaging feature coming soon!');
+        });
+    }
+});
+
+// Share Button (placeholder)
+document.querySelectorAll('.btn-secondary-action').forEach(btn => {
+    if (btn.textContent.includes('Share')) {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (navigator.share) {
+                navigator.share({
+                    title: '{{ profile_user.organization_name|default:profile_user.username }}',
+                    url: window.location.href
+                }).then(() => {
+                    showToast('success', 'Shared successfully!');
+                }).catch(() => {
+                    copyToClipboard(window.location.href);
+                });
+            } else {
+                copyToClipboard(window.location.href);
+            }
+        });
+    }
+});
+
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        showToast('success', 'Link copied to clipboard!');
+    }).catch(() => {
+        showToast('error', 'Failed to copy link');
+    });
+}
+</script>
+
+{% endblock %}

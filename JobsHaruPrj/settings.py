@@ -13,7 +13,7 @@ SECRET_KEY = os.environ.get(
 DEBUG = os.environ.get("DJANGO_DEBUG", "1") == "1"
 
 import os
-ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost,*").split(",")
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost,192.168.18.134,*").split(",")
 
 INSTALLED_APPS = [
     # Django default apps
@@ -156,3 +156,10 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@jobsharu.local')
 CONTACT_EMAIL = os.getenv('CONTACT_EMAIL', 'support@jobsharu.local')
+
+# Django REST Framework Configuration
+REST_FRAMEWORK = {
+    'DEFAULT_THROTTLE_RATES': {
+        'unverified_apply': '2/day',  # Unverified users can apply to 2 jobs per day
+    }
+}

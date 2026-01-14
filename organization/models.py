@@ -2,6 +2,7 @@ from django.db import models
 from django.conf import settings
 from datetime import timedelta
 from django.utils import timezone
+from django.core.exceptions import ValidationError
 
 # Create your models here.
 
@@ -87,6 +88,49 @@ class Payment(models.Model):
             return False
         return self.subscription_end > timezone.now()
 
+class OrganizationFollow(models.Model):
+    """
+    Model to track which applicants follow which organizations.
+    Only applicants can follow organizations.
+    """
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.CASCADE, 
+        related_name="following_organizations",
+        limit_choices_to={'user_type': 'APP'}  # Only applicants can follow
+    )
+    organization = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.CASCADE, 
+        related_name="followers",
+        limit_choices_to={'user_type': 'ORG'}  # Can only follow organizations
+    )
+    followed_at = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True, help_text="Whether the follow relationship is active")
+    
+    class Meta:
+        unique_together = ('user', 'organization')
+        ordering = ['-followed_at']
+        indexes = [
+            models.Index(fields=['user', 'is_active']),
+            models.Index(fields=['organization', 'is_active']),
+        ]
+    
+    def clean(self):
+        """Validate that user is applicant and organization is organization"""
+        if self.user.user_type != 'APP':
+            raise ValidationError('Only applicants can follow organizations')
+        if self.organization.user_type != 'ORG':
+            raise ValidationError('Can only follow organization accounts')
+    
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+    
+    def __str__(self):
+        return f"{self.user.username} follows {self.organization.organization_name or self.organization.username}"
+
+
 class Job(models.Model):
     JOB_TYPE_CHOICES = [
         ("FT", "Full Time"),
@@ -141,7 +185,6 @@ class Job(models.Model):
         return max(0, delta.days)
 
 class Application(models.Model):
-    resume = models.FileField(upload_to="applications/resumes/", blank=True, null=True)
     class Status(models.TextChoices):
         PENDING = "PD", "Pending"
         REVIEWING = "RV", "Reviewing"
@@ -156,7 +199,7 @@ class Application(models.Model):
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="org_applications"
     )
     cover_letter = models.TextField(blank=True)
-    # resume field removed
+    resume = models.FileField(upload_to="applications/resumes/", blank=True, null=True)
     status = models.CharField(max_length=2, choices=Status.choices, default=Status.PENDING)
     created_at = models.DateTimeField(auto_now_add=True)
     reviewed_at = models.DateTimeField(blank=True, null=True)
