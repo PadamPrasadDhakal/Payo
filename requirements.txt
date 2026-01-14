@@ -11,3 +11,4 @@ pytz
 numpy
 scipy
 djangorestframework
+django-crontab

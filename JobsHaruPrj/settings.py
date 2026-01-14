@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     "crispy_forms",
     "crispy_bootstrap4",
     "rest_framework",
+    # "django_crontab",  # Uncomment after installing: pip install django-crontab
     
     # Authentication
     'allauth',
@@ -163,3 +164,8 @@ REST_FRAMEWORK = {
         'unverified_apply': '2/day',  # Unverified users can apply to 2 jobs per day
     }
 }
+
+# Cron Jobs Configuration - Reset tokens daily at midnight
+CRONJOBS = [
+    ('0 0 * * *', 'django.core.management.call_command', ['reset_daily_tokens'], {'verbosity': 2}),
+]
