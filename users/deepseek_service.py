@@ -5,12 +5,12 @@ import requests
 import json
 import random
 from typing import List, Dict, Any
-
+import .env as env
 
 class DeepSeekQuestionGenerator:
     """Generate dynamic MCQ questions based on user skills and experience"""
     
-    def __init__(self, api_key: str = "sk-8621b35578914df287cfc2206cca725b"):
+    def __init__(self, api_key: str = env.apikey_deepseek):
         self.api_key = api_key
         self.api_url = "https://api.deepseek.com/v1/chat/completions"
         self.question_bank = self._build_question_bank()
