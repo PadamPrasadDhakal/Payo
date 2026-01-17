@@ -1,16 +1,22 @@
 """
 DeepSeek API Integration for Dynamic Assessment Question Generation
 """
+# from pyglet import env
 import requests
 import json
 import random
 from typing import List, Dict, Any
-import .env as env
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+api_key = os.getenv('apikey_deepseek')
 
 class DeepSeekQuestionGenerator:
     """Generate dynamic MCQ questions based on user skills and experience"""
     
-    def __init__(self, api_key: str = env.apikey_deepseek):
+    def __init__(self, api_key: str = api_key):
         self.api_key = api_key
         self.api_url = "https://api.deepseek.com/v1/chat/completions"
         self.question_bank = self._build_question_bank()
