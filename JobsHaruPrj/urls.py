@@ -38,6 +38,7 @@ urlpatterns = [
     path('organizations/', organizations, name='organizations'),
     path('internships/',internships, name='internships'),
     path('assessments/',assessments, name='assessments'),
+    path('assessments/submit/', submit_assessment, name='submit_assessment'),
     path('profile/',profile, name='profile'),
     path('plans/', plans_redirect, name='plans'),
     path('payment/',payment, name='payment'),

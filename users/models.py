@@ -413,3 +413,44 @@ class Notification(models.Model):
         }
         return colors.get(self.notification_type, 'bg-gray-50 border-gray-300')
 
+
+class Assessment(models.Model):
+    """Store user assessment results"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='assessments')
+    skill_focus = models.CharField(max_length=255, help_text="Primary skills tested")
+    total_questions = models.IntegerField(default=10)
+    correct_answers = models.IntegerField(default=0)
+    wrong_answers = models.IntegerField(default=0)
+    total_time_seconds = models.IntegerField(help_text="Total time taken in seconds")
+    score = models.DecimalField(max_digits=6, decimal_places=2, help_text="Final calculated score")
+    questions_data = models.JSONField(help_text="JSON containing questions, answers, and user responses")
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        
+    def __str__(self):
+        return f"{self.user.username} - {self.skill_focus} - {self.score}%"
+    
+    def get_percentage(self):
+        """Calculate percentage score"""
+        if self.total_questions > 0:
+            return round((self.correct_answers / self.total_questions) * 100, 2)
+        return 0
+    
+    def get_grade(self):
+        """Get letter grade based on score"""
+        percentage = self.get_percentage()
+        if percentage >= 90:
+            return 'A+'
+        elif percentage >= 80:
+            return 'A'
+        elif percentage >= 70:
+            return 'B'
+        elif percentage >= 60:
+            return 'C'
+        elif percentage >= 50:
+            return 'D'
+        else:
+            return 'F'
+

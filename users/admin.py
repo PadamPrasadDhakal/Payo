@@ -100,7 +100,24 @@ class UserAdmin(DjangoUserAdmin):
     remove_cms_user.short_description = '🚫 Revoke CMS Access (Superuser Only)'
 
 from django.contrib import admin
-from .models import IndividualKYC, OrganizationKYC, KycAudit
+from .models import IndividualKYC, OrganizationKYC, KycAudit, Assessment
+
+
+@admin.register(Assessment)
+class AssessmentAdmin(admin.ModelAdmin):
+    list_display = ("user", "skill_focus", "score", "get_grade", "total_questions", "correct_answers", "created_at")
+    list_filter = ("created_at", "score")
+    search_fields = ("user__username", "user__email", "skill_focus")
+    readonly_fields = ("user", "skill_focus", "total_questions", "correct_answers", "wrong_answers", 
+                      "total_time_seconds", "score", "questions_data", "created_at")
+    
+    def has_add_permission(self, request):
+        """Prevent manual creation of assessments"""
+        return False
+    
+    def has_delete_permission(self, request, obj=None):
+        """Only superusers can delete assessments"""
+        return request.user.is_superuser
 
 
 @admin.register(IndividualKYC)

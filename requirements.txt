@@ -12,3 +12,4 @@ numpy
 scipy
 djangorestframework
 django-crontab
+requests

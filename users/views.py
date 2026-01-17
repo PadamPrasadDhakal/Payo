@@ -27,7 +27,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Q
-from users.models import User, IndividualKYC, OrganizationKYC, Notification
+from users.models import User, IndividualKYC, OrganizationKYC, Notification, Assessment
 from .decorators import applicant_required, organization_required
 from organization.models import Job, Application
 from django.shortcuts import Http404
@@ -94,7 +94,12 @@ def signup_organization(request):
 
 @login_required
 def profile(request):
-    return render(request, "users/profile.html")
+    # Get user's latest assessments
+    latest_assessments = Assessment.objects.filter(user=request.user).order_by('-created_at')[:3]
+    
+    return render(request, "users/profile.html", {
+        'latest_assessments': latest_assessments
+    })
 
 
 def profile_detail(request, user_id):
