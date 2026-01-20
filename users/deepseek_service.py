@@ -1,8 +1,8 @@
 """
-DeepSeek API Integration for Dynamic Assessment Question Generation
+Dynamic Assessment Question Generation using Google Gemini API (FREE)
+Generates questions in real-time based on user's actual skills and experience
+NO STORED QUESTIONS - Everything is generated dynamically by AI
 """
-# from pyglet import env
-import requests
 import json
 import random
 from typing import List, Dict, Any
@@ -11,761 +11,350 @@ import os
 
 load_dotenv()
 
-api_key = os.getenv('apikey_deepseek')
+# Try to import Google Gemini
+try:
+    import google.generativeai as genai
+    GEMINI_AVAILABLE = True
+except ImportError:
+    GEMINI_AVAILABLE = False
+    print("WARNING: google-generativeai not installed. Run: pip install google-generativeai")
+
+# Get API key - use a free Gemini API key
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', '')
+
 
 class DeepSeekQuestionGenerator:
-    """Generate dynamic MCQ questions based on user skills and experience"""
+    """
+    Generate DYNAMIC MCQ questions using Google Gemini API (FREE)
+    Questions are generated in real-time based on user's specific skills
+    NO DATABASE STORAGE - Fresh questions every time
+    """
     
-    def __init__(self, api_key: str = api_key):
-        self.api_key = api_key
-        self.api_url = "https://api.deepseek.com/v1/chat/completions"
-        self.question_bank = self._build_question_bank()
+    def __init__(self, api_key: str = None):
+        self.api_key = api_key or GEMINI_API_KEY
+        self.model = None
         
+        if GEMINI_AVAILABLE and self.api_key:
+            try:
+                genai.configure(api_key=self.api_key)
+                self.model = genai.GenerativeModel('gemini-1.5-flash')
+                print("✓ Gemini API initialized successfully")
+            except Exception as e:
+                print(f"✗ Gemini API initialization failed: {e}")
+                self.model = None
+        else:
+            if not GEMINI_AVAILABLE:
+                print("✗ google-generativeai package not installed")
+            if not self.api_key:
+                print("✗ No GEMINI_API_KEY found in environment")
+    
     def generate_questions(self, skills: str, experience: str, experience_level: str, num_questions: int = 10) -> List[Dict[str, Any]]:
         """
-        Generate MCQ questions based on user profile
+        Generate MCQ questions DYNAMICALLY using AI based on user's actual skills
         
         Args:
-            skills: Comma-separated skills
-            experience: User's experience text
+            skills: User's skills (e.g., "python, C, django")
+            experience: User's experience description
             experience_level: entry/intermediate/senior/expert
             num_questions: Number of questions to generate
             
         Returns:
-            List of question dictionaries with question, options, and correct answer
+            List of dynamically generated questions specific to user's skills
         """
         
-        # Use dynamic question selection based on user profile
-        print(f"INFO: Generating questions for skills: {skills}, level: {experience_level}")
-        return self._get_dynamic_questions(skills, experience_level, num_questions)
+        print(f"\n{'='*60}")
+        print(f"GENERATING DYNAMIC QUESTIONS")
+        print(f"Skills: {skills}")
+        print(f"Experience Level: {experience_level}")
+        print(f"Number of Questions: {num_questions}")
+        print(f"{'='*60}\n")
         
-        # Original API code (commented out until valid API key is provided)
-        """
-        # Prepare the prompt
+        if not self.model:
+            print("ERROR: AI model not available - using skill-based fallback")
+            return self._generate_skill_based_questions(skills, experience_level, num_questions)
+        
+        # Create prompt for the specific skills
         prompt = self._create_prompt(skills, experience, experience_level, num_questions)
         
         try:
-            # Make API request
-            response = requests.post(
-                self.api_url,
-                headers={
-                    "Content-Type": "application/json",
-                    "Authorization": f"Bearer {self.api_key}"
-                },
-                json={
-                    "model": "deepseek-chat",
-                    "messages": [
-                        {
-                            "role": "system",
-                            "content": "You are an expert technical interviewer who creates precise, relevant MCQ questions for skill assessment. Always respond with valid JSON only."
-                        },
-                        {
-                            "role": "user",
-                            "content": prompt
-                        }
-                    ],
-                    "temperature": 0.7,
-                    "max_tokens": 2000
-                },
-                timeout=30
-            )
+            # Generate questions using Gemini AI
+            print("Calling Gemini API...")
+            response = self.model.generate_content(prompt)
             
-            if response.status_code == 200:
-                result = response.json()
-                content = result['choices'][0]['message']['content']
+            if response and response.text:
+                print(f"Got response from Gemini ({len(response.text)} chars)")
+                # Parse the AI response
+                questions = self._parse_questions(response.text)
                 
-                # Parse the JSON response
-                questions = self._parse_questions(content)
-                if questions and len(questions) > 0:
-                    return questions[:num_questions]  # Ensure we return exactly num_questions
+                if questions and len(questions) >= num_questions:
+                    print(f"✓ SUCCESS: Generated {len(questions)} dynamic questions for: {skills}")
+                    return questions[:num_questions]
+                elif questions and len(questions) > 0:
+                    print(f"⚠ PARTIAL: Got {len(questions)} questions, needed {num_questions}")
+                    # Generate more if needed
+                    more_needed = num_questions - len(questions)
+                    more_questions = self._generate_more_questions(skills, experience_level, more_needed)
+                    questions.extend(more_questions)
+                    return questions[:num_questions]
                 else:
-                    print("DeepSeek API returned no valid questions, using fallback")
-                    return self._get_fallback_questions(skills, num_questions)
+                    print("⚠ WARNING: Could not parse AI response, retrying...")
+                    return self._retry_generation(skills, experience_level, num_questions)
             else:
-                print(f"DeepSeek API Error: {response.status_code} - {response.text}")
-                return self._get_fallback_questions(skills, num_questions)
+                print("⚠ WARNING: Empty AI response")
+                return self._retry_generation(skills, experience_level, num_questions)
                 
         except Exception as e:
-            print(f"Error generating questions: {str(e)}")
-            return self._get_fallback_questions(skills, num_questions)
-        """
+            print(f"✗ ERROR: AI generation failed: {str(e)}")
+            return self._retry_generation(skills, experience_level, num_questions)
     
     def _create_prompt(self, skills: str, experience: str, experience_level: str, num_questions: int) -> str:
-        """Create a detailed prompt for question generation"""
+        """Create prompt for dynamic question generation"""
         
-        difficulty_mapping = {
-            'entry': 'beginner to intermediate',
-            'intermediate': 'intermediate',
-            'senior': 'intermediate to advanced',
-            'expert': 'advanced'
+        difficulty_map = {
+            'entry': 'basic/beginner - focus on fundamental concepts',
+            'intermediate': 'intermediate - include practical applications',
+            'senior': 'advanced - include complex scenarios',
+            'expert': 'expert/challenging - include deep technical knowledge'
         }
-        difficulty = difficulty_mapping.get(experience_level, 'intermediate')
+        difficulty = difficulty_map.get(experience_level.lower(), 'intermediate')
         
-        prompt = f"""Generate {num_questions} multiple-choice questions for a technical assessment.
+        prompt = f"""You are an expert assessment creator. Generate exactly {num_questions} multiple choice questions (MCQs) for a professional skill assessment.
 
-User Profile:
-- Skills: {skills or 'General IT/Programming'}
-- Experience Level: {experience_level or 'intermediate'}
-- Experience: {experience[:200] if experience else 'General software development'}
+TARGET USER'S SKILLS: {skills}
+EXPERIENCE LEVEL: {experience_level} ({difficulty})
 
-Requirements:
-1. Questions should be at {difficulty} difficulty level
-2. Focus primarily on the listed skills
-3. Include practical scenario-based questions
-4. Each question must have exactly 4 options (A, B, C, D)
+STRICT REQUIREMENTS:
+1. Create questions ONLY about these specific skills: {skills}
+2. Each skill mentioned should have questions about it
+3. Questions must match {difficulty} difficulty level
+4. Each question MUST have exactly 4 options labeled A, B, C, D
 5. Only ONE option should be correct
-6. Questions should be clear and unambiguous
+6. Include a mix of theoretical and practical questions
+7. Questions should be clear and professional
 
-Response Format (MUST be valid JSON):
+OUTPUT FORMAT - Return ONLY this JSON (no markdown, no explanation, no code blocks):
 {{
   "questions": [
     {{
-      "question": "Question text here?",
+      "question": "Your specific question about {skills}?",
       "options": {{
-        "A": "Option A text",
-        "B": "Option B text",
-        "C": "Option C text",
-        "D": "Option D text"
+        "A": "First option",
+        "B": "Second option",
+        "C": "Third option",
+        "D": "Fourth option"
       }},
-      "correct_answer": "A",
-      "explanation": "Brief explanation why this is correct"
+      "correct_answer": "B",
+      "explanation": "Why option B is correct"
     }}
   ]
 }}
 
-Generate exactly {num_questions} questions and respond ONLY with the JSON object."""
-        
+NOW GENERATE {num_questions} QUESTIONS SPECIFICALLY ABOUT: {skills}
+
+Remember: Output ONLY valid JSON, nothing else. No markdown formatting."""
+
         return prompt
     
     def _parse_questions(self, content: str) -> List[Dict[str, Any]]:
-        """Parse the API response and extract questions"""
+        """Parse AI response to extract questions"""
         try:
-            # Try to find JSON in the content
+            # Clean up the response
             content = content.strip()
             
             # Remove markdown code blocks if present
-            if content.startswith('```json'):
-                content = content[7:]
-            if content.startswith('```'):
-                content = content[3:]
-            if content.endswith('```'):
-                content = content[:-3]
+            if '```json' in content:
+                content = content.split('```json')[1].split('```')[0]
+            elif '```' in content:
+                parts = content.split('```')
+                for part in parts:
+                    if '{' in part and 'questions' in part:
+                        content = part
+                        break
             
             content = content.strip()
+            
+            # Find JSON object
+            start = content.find('{')
+            end = content.rfind('}') + 1
+            if start != -1 and end > start:
+                content = content[start:end]
             
             # Parse JSON
             data = json.loads(content)
             
             if isinstance(data, dict) and 'questions' in data:
-                return data['questions']
+                questions = data['questions']
+                # Validate each question has required fields
+                valid_questions = []
+                for q in questions:
+                    if all(key in q for key in ['question', 'options', 'correct_answer']):
+                        valid_questions.append(q)
+                return valid_questions
             elif isinstance(data, list):
                 return data
-            else:
-                print("Unexpected response format")
-                return []
-                
+            
+            return []
+            
         except json.JSONDecodeError as e:
             print(f"JSON parsing error: {e}")
-            print(f"Content: {content}")
+            print(f"Content preview: {content[:300]}...")
             return []
     
-    def _get_fallback_questions(self, skills: str, num_questions: int = 10) -> List[Dict[str, Any]]:
-        """Return fallback questions if API fails"""
+    def _retry_generation(self, skills: str, experience_level: str, num_questions: int) -> List[Dict[str, Any]]:
+        """Retry with simpler prompt"""
+        print("Retrying with simplified prompt...")
         
-        fallback = [
-            {
-                "question": "What does API stand for in software development?",
-                "options": {
-                    "A": "Application Programming Interface",
-                    "B": "Advanced Programming Integration",
-                    "C": "Automated Process Interface",
-                    "D": "Application Process Integration"
-                },
-                "correct_answer": "A",
-                "explanation": "API stands for Application Programming Interface"
-            },
-            {
-                "question": "Which of the following is NOT a valid HTTP method?",
-                "options": {
-                    "A": "GET",
-                    "B": "POST",
-                    "C": "FETCH",
-                    "D": "DELETE"
-                },
-                "correct_answer": "C",
-                "explanation": "FETCH is not a standard HTTP method"
-            },
-            {
-                "question": "What is the time complexity of binary search?",
-                "options": {
-                    "A": "O(n)",
-                    "B": "O(log n)",
-                    "C": "O(n²)",
-                    "D": "O(1)"
-                },
-                "correct_answer": "B",
-                "explanation": "Binary search has O(log n) time complexity"
-            },
-            {
-                "question": "In Object-Oriented Programming, what does 'inheritance' mean?",
-                "options": {
-                    "A": "Creating multiple instances of a class",
-                    "B": "A class acquiring properties from another class",
-                    "C": "Hiding internal implementation details",
-                    "D": "Grouping related functions together"
-                },
-                "correct_answer": "B",
-                "explanation": "Inheritance allows a class to acquire properties and methods from parent class"
-            },
-            {
-                "question": "Which database type is MongoDB?",
-                "options": {
-                    "A": "Relational Database",
-                    "B": "NoSQL Document Database",
-                    "C": "Graph Database",
-                    "D": "Time-Series Database"
-                },
-                "correct_answer": "B",
-                "explanation": "MongoDB is a NoSQL document-oriented database"
-            },
-            {
-                "question": "What is the purpose of 'git commit' command?",
-                "options": {
-                    "A": "Upload changes to remote repository",
-                    "B": "Save changes to local repository",
-                    "C": "Create a new branch",
-                    "D": "Merge two branches"
-                },
-                "correct_answer": "B",
-                "explanation": "git commit saves changes to the local repository"
-            },
-            {
-                "question": "In Python, which keyword is used to define a function?",
-                "options": {
-                    "A": "function",
-                    "B": "define",
-                    "C": "def",
-                    "D": "func"
-                },
-                "correct_answer": "C",
-                "explanation": "Python uses 'def' keyword to define functions"
-            },
-            {
-                "question": "What does CSS stand for?",
-                "options": {
-                    "A": "Creative Style Sheets",
-                    "B": "Cascading Style Sheets",
-                    "C": "Computer Style Sheets",
-                    "D": "Colorful Style Sheets"
-                },
-                "correct_answer": "B",
-                "explanation": "CSS stands for Cascading Style Sheets"
-            },
-            {
-                "question": "Which of the following is a JavaScript framework?",
-                "options": {
-                    "A": "Django",
-                    "B": "Flask",
-                    "C": "React",
-                    "D": "Laravel"
-                },
-                "correct_answer": "C",
-                "explanation": "React is a JavaScript library/framework for building user interfaces"
-            },
-            {
-                "question": "What is the default port for HTTP?",
-                "options": {
-                    "A": "21",
-                    "B": "80",
-                    "C": "443",
-                    "D": "8080"
-                },
-                "correct_answer": "B",
-                "explanation": "HTTP uses port 80 by default"
-            }
+        simple_prompt = f"""Generate {num_questions} MCQ questions about: {skills}
+
+Each question format:
+- question: the question text
+- options: A, B, C, D options
+- correct_answer: the letter of correct answer
+- explanation: why it's correct
+
+Return as JSON array:
+{{"questions": [{{"question": "...", "options": {{"A": "...", "B": "...", "C": "...", "D": "..."}}, "correct_answer": "A", "explanation": "..."}}]}}
+
+Create {num_questions} questions about {skills} NOW. Output only JSON."""
+
+        try:
+            if self.model:
+                response = self.model.generate_content(simple_prompt)
+                if response and response.text:
+                    questions = self._parse_questions(response.text)
+                    if questions:
+                        print(f"✓ Retry successful: got {len(questions)} questions")
+                        return questions[:num_questions]
+        except Exception as e:
+            print(f"Retry failed: {e}")
+        
+        # Final fallback - generate skill-based questions
+        return self._generate_skill_based_questions(skills, experience_level, num_questions)
+    
+    def _generate_more_questions(self, skills: str, experience_level: str, num_needed: int) -> List[Dict[str, Any]]:
+        """Generate additional questions"""
+        prompt = f"""Generate {num_needed} more MCQ questions about {skills} at {experience_level} level.
+Return JSON: {{"questions": [{{"question": "...", "options": {{"A": "...", "B": "...", "C": "...", "D": "..."}}, "correct_answer": "A", "explanation": "..."}}]}}"""
+        
+        try:
+            if self.model:
+                response = self.model.generate_content(prompt)
+                if response and response.text:
+                    return self._parse_questions(response.text)
+        except:
+            pass
+        return []
+    
+    def _generate_skill_based_questions(self, skills: str, experience_level: str, num_questions: int) -> List[Dict[str, Any]]:
+        """Generate questions based on specific skills when API fails"""
+        print(f"Generating skill-based fallback questions for: {skills}")
+        
+        skills_list = [s.strip().lower() for s in skills.split(',')]
+        questions = []
+        
+        # Create skill-specific questions
+        for skill in skills_list:
+            skill_qs = self._get_skill_questions(skill.strip(), experience_level)
+            questions.extend(skill_qs)
+        
+        # If not enough, add more
+        while len(questions) < num_questions:
+            for skill in skills_list:
+                more = self._get_additional_questions(skill.strip())
+                questions.extend(more)
+                if len(questions) >= num_questions:
+                    break
+        
+        random.shuffle(questions)
+        return questions[:num_questions]
+    
+    def _get_skill_questions(self, skill: str, level: str) -> List[Dict[str, Any]]:
+        """Get questions for a specific skill"""
+        skill = skill.lower().strip()
+        
+        # Python questions
+        if 'python' in skill:
+            return [
+                {"question": "What is the output of print(type([]))?", "options": {"A": "<class 'list'>", "B": "<class 'array'>", "C": "<class 'tuple'>", "D": "<class 'dict'>"}, "correct_answer": "A", "explanation": "[] creates an empty list in Python"},
+                {"question": "Which keyword is used to define a function in Python?", "options": {"A": "function", "B": "def", "C": "define", "D": "func"}, "correct_answer": "B", "explanation": "Python uses 'def' keyword to define functions"},
+                {"question": "What is a Python decorator?", "options": {"A": "A design pattern", "B": "A function that modifies another function", "C": "A class method", "D": "A variable type"}, "correct_answer": "B", "explanation": "Decorators modify or extend function behavior"},
+                {"question": "Which method adds an element to the end of a list?", "options": {"A": "add()", "B": "insert()", "C": "append()", "D": "push()"}, "correct_answer": "C", "explanation": "append() adds to the end of a list"},
+                {"question": "What does 'self' refer to in a Python class?", "options": {"A": "The class itself", "B": "The current instance", "C": "A global variable", "D": "The parent class"}, "correct_answer": "B", "explanation": "'self' refers to the current instance of the class"},
+                {"question": "How do you create a virtual environment in Python?", "options": {"A": "python -m venv env", "B": "python create env", "C": "pip install env", "D": "python --env create"}, "correct_answer": "A", "explanation": "python -m venv creates a virtual environment"},
+            ]
+        
+        # C programming questions
+        elif skill == 'c' or skill == 'c programming':
+            return [
+                {"question": "What is the correct way to declare a pointer in C?", "options": {"A": "int p;", "B": "int *p;", "C": "pointer int p;", "D": "int &p;"}, "correct_answer": "B", "explanation": "* is used to declare pointers in C"},
+                {"question": "Which header file is required for printf()?", "options": {"A": "stdlib.h", "B": "string.h", "C": "stdio.h", "D": "conio.h"}, "correct_answer": "C", "explanation": "stdio.h contains printf and scanf functions"},
+                {"question": "What does malloc() return?", "options": {"A": "Integer", "B": "Void pointer", "C": "Character", "D": "Nothing"}, "correct_answer": "B", "explanation": "malloc returns a void pointer to allocated memory"},
+                {"question": "What is the size of char in C?", "options": {"A": "1 byte", "B": "2 bytes", "C": "4 bytes", "D": "Depends on compiler"}, "correct_answer": "A", "explanation": "char is always 1 byte in C"},
+                {"question": "Which operator is used to access structure members through pointer?", "options": {"A": ".", "B": "->", "C": "*", "D": "&"}, "correct_answer": "B", "explanation": "-> is used for pointer to structure member access"},
+                {"question": "What is the correct syntax for a for loop in C?", "options": {"A": "for (i = 0; i < n; i++)", "B": "for i in range(n)", "C": "for (i < n; i++)", "D": "for each i in n"}, "correct_answer": "A", "explanation": "C uses initialization; condition; increment format"},
+            ]
+        
+        # Django questions
+        elif 'django' in skill:
+            return [
+                {"question": "What command creates a new Django project?", "options": {"A": "django new project", "B": "django-admin startproject", "C": "python manage.py create", "D": "django init"}, "correct_answer": "B", "explanation": "django-admin startproject creates a new project"},
+                {"question": "What is Django's ORM?", "options": {"A": "Object-Relational Mapping", "B": "Online Resource Manager", "C": "Object Request Model", "D": "Open Resource Module"}, "correct_answer": "A", "explanation": "ORM maps Python objects to database tables"},
+                {"question": "Which file contains Django URL patterns?", "options": {"A": "views.py", "B": "models.py", "C": "urls.py", "D": "settings.py"}, "correct_answer": "C", "explanation": "urls.py contains URL routing patterns"},
+                {"question": "What is a Django migration?", "options": {"A": "Moving to a new server", "B": "Database schema version control", "C": "Code backup", "D": "User data transfer"}, "correct_answer": "B", "explanation": "Migrations track and apply database schema changes"},
+                {"question": "What does manage.py runserver do?", "options": {"A": "Runs tests", "B": "Starts development server", "C": "Creates migrations", "D": "Collects static files"}, "correct_answer": "B", "explanation": "runserver starts Django's development web server"},
+                {"question": "What is a Django view?", "options": {"A": "A database table", "B": "A function handling web requests", "C": "An HTML template", "D": "A CSS file"}, "correct_answer": "B", "explanation": "Views are functions/classes that handle HTTP requests and return responses"},
+            ]
+        
+        # JavaScript questions
+        elif 'javascript' in skill or 'js' in skill:
+            return [
+                {"question": "What is the correct way to declare a variable in modern JavaScript?", "options": {"A": "var x = 5;", "B": "let x = 5;", "C": "const x = 5;", "D": "Both B and C are preferred"}, "correct_answer": "D", "explanation": "let and const are preferred over var in modern JS"},
+                {"question": "What does '===' operator do in JavaScript?", "options": {"A": "Assigns value", "B": "Compares value only", "C": "Compares value and type", "D": "Compares reference"}, "correct_answer": "C", "explanation": "=== checks both value and type equality"},
+                {"question": "What is a Promise in JavaScript?", "options": {"A": "A guaranteed return value", "B": "An object representing eventual completion/failure of async operation", "C": "A type of loop", "D": "A function declaration"}, "correct_answer": "B", "explanation": "Promises handle asynchronous operations"},
+            ]
+        
+        # React questions
+        elif 'react' in skill:
+            return [
+                {"question": "What is JSX in React?", "options": {"A": "A database query language", "B": "JavaScript XML - syntax extension", "C": "A testing framework", "D": "A build tool"}, "correct_answer": "B", "explanation": "JSX allows writing HTML-like code in JavaScript"},
+                {"question": "What hook is used for state in functional components?", "options": {"A": "useEffect", "B": "useState", "C": "useContext", "D": "useReducer"}, "correct_answer": "B", "explanation": "useState manages component state"},
+                {"question": "What is a React component?", "options": {"A": "A CSS class", "B": "A reusable UI building block", "C": "A database table", "D": "A server endpoint"}, "correct_answer": "B", "explanation": "Components are reusable pieces of UI"},
+            ]
+        
+        # SQL questions
+        elif 'sql' in skill or 'database' in skill or 'mysql' in skill or 'postgresql' in skill:
+            return [
+                {"question": "Which SQL clause is used to filter records?", "options": {"A": "ORDER BY", "B": "GROUP BY", "C": "WHERE", "D": "HAVING"}, "correct_answer": "C", "explanation": "WHERE filters rows based on conditions"},
+                {"question": "What does JOIN do in SQL?", "options": {"A": "Combines rows from two or more tables", "B": "Creates a new table", "C": "Deletes duplicate records", "D": "Sorts the results"}, "correct_answer": "A", "explanation": "JOIN combines related data from multiple tables"},
+                {"question": "Which command is used to add new records?", "options": {"A": "UPDATE", "B": "INSERT", "C": "ADD", "D": "CREATE"}, "correct_answer": "B", "explanation": "INSERT INTO adds new rows to a table"},
+            ]
+        
+        # HTML/CSS questions
+        elif 'html' in skill or 'css' in skill:
+            return [
+                {"question": "What does HTML stand for?", "options": {"A": "Hyper Text Markup Language", "B": "High Tech Modern Language", "C": "Hyper Transfer Markup Language", "D": "Home Tool Markup Language"}, "correct_answer": "A", "explanation": "HTML is Hyper Text Markup Language"},
+                {"question": "Which CSS property changes text color?", "options": {"A": "text-color", "B": "font-color", "C": "color", "D": "text-style"}, "correct_answer": "C", "explanation": "The 'color' property sets text color"},
+                {"question": "What is the correct HTML for a hyperlink?", "options": {"A": "<a href='url'>", "B": "<link href='url'>", "C": "<hyperlink>url</hyperlink>", "D": "<url>link</url>"}, "correct_answer": "A", "explanation": "The <a> tag with href attribute creates links"},
+            ]
+        
+        # Java questions
+        elif 'java' in skill and 'javascript' not in skill:
+            return [
+                {"question": "What is the entry point of a Java program?", "options": {"A": "start() method", "B": "main() method", "C": "run() method", "D": "init() method"}, "correct_answer": "B", "explanation": "public static void main(String[] args) is the entry point"},
+                {"question": "What is JVM?", "options": {"A": "Java Very Modern", "B": "Java Virtual Machine", "C": "Java Version Manager", "D": "Java Visual Method"}, "correct_answer": "B", "explanation": "JVM executes Java bytecode"},
+                {"question": "Which keyword is used to inherit a class in Java?", "options": {"A": "implements", "B": "inherits", "C": "extends", "D": "super"}, "correct_answer": "C", "explanation": "'extends' is used for class inheritance"},
+            ]
+        
+        # Generic/fallback questions
+        else:
+            return [
+                {"question": f"What is a key principle when working with {skill}?", "options": {"A": "Follow best practices", "B": "Skip documentation", "C": "Avoid testing", "D": "Ignore errors"}, "correct_answer": "A", "explanation": "Best practices ensure quality and maintainability"},
+                {"question": f"Which is important for {skill} development?", "options": {"A": "Clear requirements", "B": "Random coding", "C": "No planning", "D": "Skipping reviews"}, "correct_answer": "A", "explanation": "Clear requirements guide successful development"},
+            ]
+    
+    def _get_additional_questions(self, skill: str) -> List[Dict[str, Any]]:
+        """Get additional questions if needed"""
+        return [
+            {"question": f"What is considered a best practice in {skill}?", "options": {"A": "Write clean, readable code", "B": "Write as fast as possible", "C": "Skip testing", "D": "Avoid comments"}, "correct_answer": "A", "explanation": "Clean code is maintainable and understandable"},
+            {"question": f"Why is testing important in {skill}?", "options": {"A": "To find bugs early", "B": "To slow down development", "C": "To make code longer", "D": "It's not important"}, "correct_answer": "A", "explanation": "Testing catches issues before production"},
         ]
-        
-        return fallback[:num_questions]
-    
-    def _build_question_bank(self) -> Dict[str, Dict[str, List[Dict]]]:
-        """Build comprehensive question bank organized by skill and difficulty"""
-        return {
-            # Python Questions
-            "python": {
-                "entry": [
-                    {
-                        "question": "What is the correct way to create a list in Python?",
-                        "options": {"A": "list = (1, 2, 3)", "B": "list = [1, 2, 3]", "C": "list = {1, 2, 3}", "D": "list = <1, 2, 3>"},
-                        "correct_answer": "B",
-                        "explanation": "Lists in Python are created using square brackets []"
-                    },
-                    {
-                        "question": "Which keyword is used to define a function in Python?",
-                        "options": {"A": "function", "B": "def", "C": "define", "D": "func"},
-                        "correct_answer": "B",
-                        "explanation": "Python uses 'def' keyword to define functions"
-                    },
-                    {
-                        "question": "What is the output of: print(type(5.0))?",
-                        "options": {"A": "<class 'int'>", "B": "<class 'float'>", "C": "<class 'str'>", "D": "<class 'decimal'>"},
-                        "correct_answer": "B",
-                        "explanation": "5.0 is a floating-point number in Python"
-                    },
-                    {
-                        "question": "Which operator is used for exponentiation in Python?",
-                        "options": {"A": "^", "B": "**", "C": "exp()", "D": "pow"},
-                        "correct_answer": "B",
-                        "explanation": "** is the exponentiation operator in Python"
-                    }
-                ],
-                "intermediate": [
-                    {
-                        "question": "What is a decorator in Python?",
-                        "options": {"A": "A function that modifies another function", "B": "A design pattern", "C": "A type of loop", "D": "A class method"},
-                        "correct_answer": "A",
-                        "explanation": "Decorators modify or enhance functions without changing their code"
-                    },
-                    {
-                        "question": "What does list comprehension [x**2 for x in range(5)] produce?",
-                        "options": {"A": "[0, 1, 4, 9, 16]", "B": "[1, 2, 3, 4, 5]", "C": "[0, 2, 4, 6, 8]", "D": "[1, 4, 9, 16, 25]"},
-                        "correct_answer": "A",
-                        "explanation": "Squares of 0,1,2,3,4 are 0,1,4,9,16"
-                    },
-                    {
-                        "question": "What is the purpose of __init__ method?",
-                        "options": {"A": "Destroy an object", "B": "Initialize object attributes", "C": "Call parent class", "D": "Create static methods"},
-                        "correct_answer": "B",
-                        "explanation": "__init__ is a constructor that initializes object attributes"
-                    },
-                    {
-                        "question": "What does 'self' represent in a class method?",
-                        "options": {"A": "The class itself", "B": "The instance of the class", "C": "A global variable", "D": "The parent class"},
-                        "correct_answer": "B",
-                        "explanation": "self refers to the instance of the class"
-                    }
-                ],
-                "senior": [
-                    {
-                        "question": "What is the Global Interpreter Lock (GIL) in Python?",
-                        "options": {"A": "A mutex preventing multiple threads from executing Python bytecode", "B": "A security feature", "C": "A memory manager", "D": "A syntax checker"},
-                        "correct_answer": "A",
-                        "explanation": "GIL is a mutex that protects access to Python objects"
-                    },
-                    {
-                        "question": "What is the difference between __new__ and __init__?",
-                        "options": {"A": "__new__ creates instance, __init__ initializes it", "B": "They are the same", "C": "__init__ creates, __new__ initializes", "D": "__new__ is for inheritance only"},
-                        "correct_answer": "A",
-                        "explanation": "__new__ creates the instance, __init__ initializes it"
-                    },
-                    {
-                        "question": "What is a metaclass in Python?",
-                        "options": {"A": "A class of a class", "B": "An abstract class", "C": "A parent class", "D": "A static class"},
-                        "correct_answer": "A",
-                        "explanation": "Metaclass is a class whose instances are classes"
-                    }
-                ],
-                "expert": [
-                    {
-                        "question": "How does Python's garbage collection work?",
-                        "options": {"A": "Reference counting with cycle detection", "B": "Mark and sweep only", "C": "Manual memory management", "D": "Automatic memory allocation"},
-                        "correct_answer": "A",
-                        "explanation": "Python uses reference counting with generational garbage collection for cycles"
-                    },
-                    {
-                        "question": "What is the purpose of __slots__ in Python?",
-                        "options": {"A": "Reduce memory overhead of objects", "B": "Create abstract methods", "C": "Define class variables", "D": "Implement interfaces"},
-                        "correct_answer": "A",
-                        "explanation": "__slots__ restricts instance attributes and reduces memory usage"
-                    }
-                ]
-            },
-            
-            # JavaScript Questions
-            "javascript": {
-                "entry": [
-                    {
-                        "question": "How do you declare a variable in JavaScript (ES6+)?",
-                        "options": {"A": "var x", "B": "let x or const x", "C": "int x", "D": "variable x"},
-                        "correct_answer": "B",
-                        "explanation": "ES6 introduced let and const for variable declaration"
-                    },
-                    {
-                        "question": "What does === operator do in JavaScript?",
-                        "options": {"A": "Assignment", "B": "Equality without type coercion", "C": "Greater than", "D": "Concatenation"},
-                        "correct_answer": "B",
-                        "explanation": "=== checks equality without type conversion"
-                    },
-                    {
-                        "question": "Which method adds an element to the end of an array?",
-                        "options": {"A": "push()", "B": "add()", "C": "append()", "D": "insert()"},
-                        "correct_answer": "A",
-                        "explanation": "push() adds elements to the end of an array"
-                    }
-                ],
-                "intermediate": [
-                    {
-                        "question": "What is a closure in JavaScript?",
-                        "options": {"A": "Function with access to outer scope", "B": "A loop construct", "C": "A class method", "D": "An event handler"},
-                        "correct_answer": "A",
-                        "explanation": "Closure is a function that remembers its outer scope"
-                    },
-                    {
-                        "question": "What does the 'this' keyword refer to?",
-                        "options": {"A": "The current object context", "B": "Global object always", "C": "Parent function", "D": "Window object only"},
-                        "correct_answer": "A",
-                        "explanation": "'this' refers to the object in current execution context"
-                    },
-                    {
-                        "question": "What is event bubbling?",
-                        "options": {"A": "Events propagate from child to parent", "B": "Creating events", "C": "Deleting events", "D": "Events fire twice"},
-                        "correct_answer": "A",
-                        "explanation": "Event bubbling is when events propagate up the DOM tree"
-                    }
-                ],
-                "senior": [
-                    {
-                        "question": "What is the event loop in JavaScript?",
-                        "options": {"A": "Mechanism for handling async operations", "B": "A for loop", "C": "Event listener", "D": "Error handler"},
-                        "correct_answer": "A",
-                        "explanation": "Event loop manages async callback execution"
-                    },
-                    {
-                        "question": "What is the difference between call, apply, and bind?",
-                        "options": {"A": "Different ways to set 'this' context", "B": "They are the same", "C": "call is async, apply is sync", "D": "bind creates classes"},
-                        "correct_answer": "A",
-                        "explanation": "All set 'this' context but call/apply invoke immediately, bind returns new function"
-                    }
-                ],
-                "expert": [
-                    {
-                        "question": "How does JavaScript's prototype chain work?",
-                        "options": {"A": "Objects inherit properties from prototypes", "B": "Classes extend each other", "C": "Functions call each other", "D": "Variables scope upward"},
-                        "correct_answer": "A",
-                        "explanation": "Prototype chain allows objects to inherit properties from prototypes"
-                    }
-                ]
-            },
-            
-            # Django Questions
-            "django": {
-                "entry": [
-                    {
-                        "question": "What is Django?",
-                        "options": {"A": "A Python web framework", "B": "A database", "C": "A JavaScript library", "D": "An operating system"},
-                        "correct_answer": "A",
-                        "explanation": "Django is a high-level Python web framework"
-                    },
-                    {
-                        "question": "What command creates a new Django project?",
-                        "options": {"A": "django-admin startproject", "B": "python new project", "C": "django create", "D": "npm init"},
-                        "correct_answer": "A",
-                        "explanation": "django-admin startproject creates a new Django project"
-                    }
-                ],
-                "intermediate": [
-                    {
-                        "question": "What is an ORM in Django?",
-                        "options": {"A": "Object-Relational Mapping for database operations", "B": "A security feature", "C": "A template engine", "D": "A routing system"},
-                        "correct_answer": "A",
-                        "explanation": "ORM maps Python objects to database tables"
-                    },
-                    {
-                        "question": "What is the purpose of middleware in Django?",
-                        "options": {"A": "Process requests/responses globally", "B": "Store data", "C": "Render templates", "D": "Handle URLs"},
-                        "correct_answer": "A",
-                        "explanation": "Middleware processes requests and responses at a global level"
-                    }
-                ],
-                "senior": [
-                    {
-                        "question": "How does Django's signal system work?",
-                        "options": {"A": "Decoupled applications can notify each other", "B": "Error handling", "C": "URL routing", "D": "Template rendering"},
-                        "correct_answer": "A",
-                        "explanation": "Signals allow decoupled applications to get notified of actions"
-                    }
-                ],
-                "expert": [
-                    {
-                        "question": "How would you optimize Django querysets for performance?",
-                        "options": {"A": "Use select_related and prefetch_related", "B": "Use raw SQL only", "C": "Disable ORM", "D": "Use multiple databases"},
-                        "correct_answer": "A",
-                        "explanation": "select_related and prefetch_related reduce database queries"
-                    }
-                ]
-            },
-            
-            # React Questions
-            "react": {
-                "entry": [
-                    {
-                        "question": "What is React?",
-                        "options": {"A": "A JavaScript library for building UIs", "B": "A database", "C": "A backend framework", "D": "A CSS framework"},
-                        "correct_answer": "A",
-                        "explanation": "React is a JavaScript library for building user interfaces"
-                    }
-                ],
-                "intermediate": [
-                    {
-                        "question": "What are React hooks?",
-                        "options": {"A": "Functions to use state in functional components", "B": "Event handlers", "C": "CSS classes", "D": "Database queries"},
-                        "correct_answer": "A",
-                        "explanation": "Hooks allow state and lifecycle in functional components"
-                    },
-                    {
-                        "question": "What is the Virtual DOM?",
-                        "options": {"A": "Lightweight copy of the real DOM", "B": "Browser API", "C": "CSS framework", "D": "Database structure"},
-                        "correct_answer": "A",
-                        "explanation": "Virtual DOM is a programming concept where a virtual representation of UI is kept in memory"
-                    }
-                ],
-                "senior": [
-                    {
-                        "question": "What is React's reconciliation algorithm?",
-                        "options": {"A": "Algorithm to update the DOM efficiently", "B": "State management", "C": "Routing system", "D": "API calls"},
-                        "correct_answer": "A",
-                        "explanation": "Reconciliation determines which parts of the DOM need to be updated"
-                    }
-                ]
-            },
-            
-            # SQL/Database Questions
-            "sql": {
-                "entry": [
-                    {
-                        "question": "What does SQL stand for?",
-                        "options": {"A": "Structured Query Language", "B": "Simple Question Language", "C": "Standard Query List", "D": "System Query Logic"},
-                        "correct_answer": "A",
-                        "explanation": "SQL stands for Structured Query Language"
-                    },
-                    {
-                        "question": "Which SQL command is used to retrieve data?",
-                        "options": {"A": "SELECT", "B": "GET", "C": "FETCH", "D": "RETRIEVE"},
-                        "correct_answer": "A",
-                        "explanation": "SELECT is used to query and retrieve data"
-                    }
-                ],
-                "intermediate": [
-                    {
-                        "question": "What is a foreign key?",
-                        "options": {"A": "A field that links to primary key of another table", "B": "A unique identifier", "C": "An index", "D": "A data type"},
-                        "correct_answer": "A",
-                        "explanation": "Foreign key establishes relationships between tables"
-                    },
-                    {
-                        "question": "What is normalization in databases?",
-                        "options": {"A": "Organizing data to reduce redundancy", "B": "Backing up data", "C": "Encrypting data", "D": "Indexing tables"},
-                        "correct_answer": "A",
-                        "explanation": "Normalization reduces data redundancy and improves integrity"
-                    }
-                ],
-                "senior": [
-                    {
-                        "question": "What is a database index?",
-                        "options": {"A": "Data structure to speed up queries", "B": "Primary key", "C": "Table name", "D": "Column type"},
-                        "correct_answer": "A",
-                        "explanation": "Index improves query performance by creating data structures"
-                    },
-                    {
-                        "question": "What is ACID in databases?",
-                        "options": {"A": "Atomicity, Consistency, Isolation, Durability", "B": "A database type", "C": "A query language", "D": "A backup method"},
-                        "correct_answer": "A",
-                        "explanation": "ACID properties ensure reliable database transactions"
-                    }
-                ]
-            },
-            
-            # General Programming
-            "programming": {
-                "entry": [
-                    {
-                        "question": "What is an algorithm?",
-                        "options": {"A": "Step-by-step procedure to solve a problem", "B": "A programming language", "C": "A data type", "D": "A function"},
-                        "correct_answer": "A",
-                        "explanation": "Algorithm is a systematic procedure to solve a problem"
-                    },
-                    {
-                        "question": "What does API stand for?",
-                        "options": {"A": "Application Programming Interface", "B": "Advanced Program Integration", "C": "Automated Process Interface", "D": "Application Process Integration"},
-                        "correct_answer": "A",
-                        "explanation": "API allows different software to communicate"
-                    }
-                ],
-                "intermediate": [
-                    {
-                        "question": "What is Object-Oriented Programming?",
-                        "options": {"A": "Programming paradigm using objects and classes", "B": "Sequential programming", "C": "Functional programming", "D": "Low-level programming"},
-                        "correct_answer": "A",
-                        "explanation": "OOP organizes software design around data, or objects"
-                    },
-                    {
-                        "question": "What is the time complexity of binary search?",
-                        "options": {"A": "O(log n)", "B": "O(n)", "C": "O(n²)", "D": "O(1)"},
-                        "correct_answer": "A",
-                        "explanation": "Binary search divides the search space in half each time"
-                    }
-                ],
-                "senior": [
-                    {
-                        "question": "What is a design pattern?",
-                        "options": {"A": "Reusable solution to common software design problem", "B": "UI/UX design", "C": "Database schema", "D": "Coding style"},
-                        "correct_answer": "A",
-                        "explanation": "Design patterns are proven solutions to recurring design problems"
-                    },
-                    {
-                        "question": "What is dependency injection?",
-                        "options": {"A": "Providing dependencies from outside rather than creating them", "B": "Installing packages", "C": "Importing modules", "D": "Error handling"},
-                        "correct_answer": "A",
-                        "explanation": "DI is a technique where dependencies are provided externally"
-                    }
-                ]
-            },
-            
-            # Git/Version Control
-            "git": {
-                "entry": [
-                    {
-                        "question": "What is Git?",
-                        "options": {"A": "Distributed version control system", "B": "A programming language", "C": "A database", "D": "An IDE"},
-                        "correct_answer": "A",
-                        "explanation": "Git tracks changes in source code during development"
-                    },
-                    {
-                        "question": "What command saves changes to local repository?",
-                        "options": {"A": "git commit", "B": "git save", "C": "git push", "D": "git upload"},
-                        "correct_answer": "A",
-                        "explanation": "git commit saves changes to local repository"
-                    }
-                ],
-                "intermediate": [
-                    {
-                        "question": "What is a merge conflict?",
-                        "options": {"A": "When changes in different branches conflict", "B": "Syntax error", "C": "Network error", "D": "Permission error"},
-                        "correct_answer": "A",
-                        "explanation": "Merge conflicts occur when changes can't be automatically merged"
-                    }
-                ],
-                "senior": [
-                    {
-                        "question": "What is git rebase?",
-                        "options": {"A": "Reapply commits on top of another base", "B": "Delete commits", "C": "Create branches", "D": "Clone repository"},
-                        "correct_answer": "A",
-                        "explanation": "Rebase moves commits to a new base commit"
-                    }
-                ]
-            },
-            
-            # Web Development
-            "web": {
-                "entry": [
-                    {
-                        "question": "What does HTML stand for?",
-                        "options": {"A": "HyperText Markup Language", "B": "High Tech Modern Language", "C": "Home Tool Markup Language", "D": "Hyperlinks Text Markup Language"},
-                        "correct_answer": "A",
-                        "explanation": "HTML is the standard markup language for web pages"
-                    },
-                    {
-                        "question": "What does CSS stand for?",
-                        "options": {"A": "Cascading Style Sheets", "B": "Computer Style Sheets", "C": "Creative Style System", "D": "Colorful Style Sheets"},
-                        "correct_answer": "A",
-                        "explanation": "CSS describes how HTML elements are displayed"
-                    }
-                ],
-                "intermediate": [
-                    {
-                        "question": "What is HTTPS?",
-                        "options": {"A": "HTTP with encryption (SSL/TLS)", "B": "Fast HTTP", "C": "HTTP version 2", "D": "HTTP for servers"},
-                        "correct_answer": "A",
-                        "explanation": "HTTPS is HTTP protocol with encryption"
-                    },
-                    {
-                        "question": "What are cookies in web development?",
-                        "options": {"A": "Small data stored in browser", "B": "JavaScript files", "C": "CSS styles", "D": "HTML elements"},
-                        "correct_answer": "A",
-                        "explanation": "Cookies store user data in the browser"
-                    }
-                ],
-                "senior": [
-                    {
-                        "question": "What is CORS?",
-                        "options": {"A": "Cross-Origin Resource Sharing", "B": "Cookie Origin Security", "C": "Client Origin Request System", "D": "Code Organization Rules"},
-                        "correct_answer": "A",
-                        "explanation": "CORS allows controlled access to resources from different origins"
-                    }
-                ]
-            }
-        }
-    
-    def _get_dynamic_questions(self, skills: str, experience_level: str, num_questions: int = 10) -> List[Dict[str, Any]]:
-        """
-        Generate dynamic questions based on user skills and experience level
-        Randomly selects questions to avoid repetition
-        """
-        # Parse user skills
-        user_skills = [skill.strip().lower() for skill in skills.split(',') if skill.strip()]
-        
-        # Map experience level
-        level_map = {
-            'entry': 'entry',
-            'intermediate': 'intermediate',
-            'senior': 'senior',
-            'expert': 'expert',
-            '': 'intermediate'  # Default
-        }
-        level = level_map.get(experience_level.lower() if experience_level else '', 'intermediate')
-        
-        # Collect relevant questions
-        available_questions = []
-        
-        # Match user skills with question bank
-        for skill in user_skills:
-            for bank_skill in self.question_bank.keys():
-                if skill in bank_skill or bank_skill in skill:
-                    if level in self.question_bank[bank_skill]:
-                        available_questions.extend(self.question_bank[bank_skill][level])
-        
-        # If no specific skill match, use general programming questions
-        if not available_questions:
-            if 'programming' in self.question_bank and level in self.question_bank['programming']:
-                available_questions.extend(self.question_bank['programming'][level])
-            
-            # Add web questions as general fallback
-            if 'web' in self.question_bank and level in self.question_bank['web']:
-                available_questions.extend(self.question_bank['web'][level])
-        
-        # If still not enough, add questions from adjacent difficulty levels
-        if len(available_questions) < num_questions:
-            level_order = ['entry', 'intermediate', 'senior', 'expert']
-            current_idx = level_order.index(level)
-            
-            # Add from next level
-            if current_idx < len(level_order) - 1:
-                next_level = level_order[current_idx + 1]
-                for skill_key in self.question_bank.keys():
-                    if next_level in self.question_bank[skill_key]:
-                        available_questions.extend(self.question_bank[skill_key][next_level])
-            
-            # Add from previous level
-            if current_idx > 0 and len(available_questions) < num_questions:
-                prev_level = level_order[current_idx - 1]
-                for skill_key in self.question_bank.keys():
-                    if prev_level in self.question_bank[skill_key]:
-                        available_questions.extend(self.question_bank[skill_key][prev_level])
-        
-        # Remove duplicates based on question text
-        seen = set()
-        unique_questions = []
-        for q in available_questions:
-            if q['question'] not in seen:
-                seen.add(q['question'])
-                unique_questions.append(q)
-        
-        # Randomly shuffle and select required number
-        random.shuffle(unique_questions)
-        selected = unique_questions[:num_questions]
-        
-        # If still not enough, add general fallback questions
-        if len(selected) < num_questions:
-            fallback = self._get_fallback_questions("", num_questions - len(selected))
-            selected.extend(fallback)
-        
-        return selected[:num_questions]

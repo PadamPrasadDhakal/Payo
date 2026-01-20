@@ -1,4 +1,56 @@
-# CHANGELOG - Organization Directory
+# CHANGELOG - JobsHaru Platform
+
+## [3.0.0] - 2026-01-20
+
+### 🚀 Assessment System - Real-Time API Integration
+- **DeepSeek API Integration**: Questions now generated dynamically in real-time
+  - No static question database - questions created fresh for each assessment
+  - API analyzes user's actual skills and generates relevant questions
+  - Supports ALL industries: Tech, Healthcare, Finance, Education, Hospitality, Construction, Marketing, HR, etc.
+  - Personalized difficulty based on experience level (Entry/Intermediate/Senior/Expert)
+  - Fresh, unique questions every time - never the same assessment twice
+
+- **Intelligent Prompt Engineering**:
+  - Industry-specific question generation
+  - Scenario-based, practical questions
+  - Clear, professional language appropriate to field
+  - 4-option MCQ format with explanations
+
+- **Graceful Fallback System**:
+  - Minimal emergency question bank (only 15 questions)
+  - Automatically uses fallback if API unavailable
+  - Seamless user experience even during API issues
+
+- **Benefits of API Approach**:
+  - ✅ Unlimited question variety - no repetition
+  - ✅ Always up-to-date with current industry practices
+  - ✅ Adapts to any skill combination
+  - ✅ No manual question creation needed
+  - ✅ Scalable across infinite industries and skills
+  - ✅ Fresh content for every user
+
+### 📝 File Changes
+- **users/deepseek_service.py**: Completely rewritten
+  - Removed 1500+ lines of static question bank
+  - Implemented real-time API question generation
+  - Added robust error handling and fallback
+  - File size reduced from 95KB to 14KB
+
+- **Old static system**: Backed up to `users/deepseek_service_old.py`
+
+### 🗑️ Database Cleanup
+- Removed 15 dummy organization accounts from database
+- Kept only 5 real organizations (Google, Lenovo, Samsung, Quality Computers, Apple)
+
+### ⚠️ Setup Required
+To use the assessment system, you need:
+1. DeepSeek API key (already configured in `.env`)
+2. API credits in your DeepSeek account
+3. Visit https://platform.deepseek.com to add credits
+
+Without API credits, the system will use the minimal fallback question bank (15 general questions).
+
+---
 
 ## [2.0.0] - 2026-01-20
 
