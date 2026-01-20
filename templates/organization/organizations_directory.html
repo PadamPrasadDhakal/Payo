@@ -255,11 +255,10 @@
                                     </button>
                                 {% endif %}
                             {% elif not user.is_authenticated %}
-                                <button class="btn-modern btn-follow-modern" 
-                                        onclick="handleLoginRequired()">
+                                <a href="{% url 'users:login' %}?next={{ request.path }}" class="btn-modern btn-follow-modern">
                                     <i class="fas fa-lock"></i>
                                     <span>Follow</span>
-                                </button>
+                                </a>
                             {% endif %}
                             
                             <a href="{% url 'users:profile_detail' org.id %}" 
@@ -332,28 +331,6 @@
                 {% endif %}
             </div>
         {% endif %}
-    </div>
-</div>
-
-<!-- Login Required Modal -->
-<div class="modal fade" id="loginRequiredModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Login Required</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body text-center">
-                <i class="fas fa-lock fa-3x text-primary mb-3"></i>
-                <p>Please log in to follow organizations and get personalized job recommendations.</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <a href="{% url 'users:login' %}?next={{ request.path }}" class="btn btn-primary">
-                    Log In
-                </a>
-            </div>
-        </div>
     </div>
 </div>
 
@@ -1207,35 +1184,6 @@
 }
 </style>
 
-<!-- Login Required Modal -->
-<div class="modal fade" id="loginRequiredModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius: 12px; border: none;">
-            <div class="modal-header" style="border-bottom: 1px solid #E5E7EB;">
-                <h5 class="modal-title fw-bold">
-                    <i class="fas fa-lock text-primary"></i> Login Required
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body text-center py-4">
-                <div class="mb-3">
-                    <i class="fas fa-user-lock fa-4x text-primary" style="opacity: 0.7;"></i>
-                </div>
-                <h6 class="fw-semibold mb-2">Please Log In to Continue</h6>
-                <p class="text-muted">
-                    Follow organizations to get personalized job recommendations and stay updated with their latest opportunities.
-                </p>
-            </div>
-            <div class="modal-footer" style="border-top: 1px solid #E5E7EB;">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <a href="{% url 'users:login' %}?next={{ request.path }}" class="btn btn-primary">
-                    <i class="fas fa-sign-in-alt"></i> Log In
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
-
 <script>
 // CSRF token for Django
 function getCookie(name) {
@@ -1361,18 +1309,6 @@ function unfollowOrganization(orgId) {
         button.disabled = false;
         showToast('error', 'An error occurred. Please try again.');
     });
-}
-
-// Handle login required for logged-out users
-function handleLoginRequired() {
-    {% if user.is_authenticated %}
-        // Should not reach here, but just in case
-        alert('Please refresh the page');
-    {% else %}
-        // Show modal
-        const modal = new bootstrap.Modal(document.getElementById('loginRequiredModal'));
-        modal.show();
-    {% endif %}
 }
 
 // Toast notification function
