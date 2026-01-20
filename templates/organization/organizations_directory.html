@@ -3,166 +3,270 @@
 
 {% block title %}Organizations Directory - JobsHaru{% endblock %}
 
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+{% endblock %}
+
 {% block content %}
 <div class="organizations-directory-page">
-    <div class="container py-5">
-        <!-- Header -->
-        <div class="directory-header text-center mb-5">
-            <h1 class="directory-title">Explore Organizations</h1>
-            <p class="directory-subtitle">Discover companies and follow them to see their jobs first</p>
-            <p class="text-muted">Total {{ total_count }} organization{{ total_count|pluralize }}</p>
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8 mx-auto text-center">
+                    <h1 class="hero-title animate-fade-in">Discover Top Organizations</h1>
+                    <p class="hero-subtitle animate-fade-in">Connect with leading companies and explore career opportunities</p>
+                    <div class="hero-stats animate-fade-in">
+                        <div class="stat-card">
+                            <i class="fas fa-building"></i>
+                            <h3>{{ total_count }}+</h3>
+                            <p>Organizations</p>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-briefcase"></i>
+                            <h3>500+</h3>
+                            <p>Active Jobs</p>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-users"></i>
+                            <h3>10K+</h3>
+                            <p>Job Seekers</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
+    </section>
 
-        <!-- Search and Filters -->
-        <div class="filters-section mb-4">
-            <form method="get" class="row g-3" id="filterForm">
-                <!-- Search Bar -->
-                <div class="col-md-4">
-                    <div class="input-group">
-                        <span class="input-group-text">
-                            <i class="fas fa-search"></i>
-                        </span>
+    <div class="container py-5">
+        <!-- Modular Search and Filter Section -->
+        <div class="search-filter-container mb-5">
+            <form method="get" id="filterForm" class="search-filter-form">
+                <!-- Search Input Module -->
+                <div class="search-module">
+                    <div class="module-header">
+                        <i class="fas fa-search"></i>
+                        <span class="module-label">Search Organizations</span>
+                    </div>
+                    <div class="search-input-wrapper">
                         <input type="text" 
-                               class="form-control" 
+                               class="search-input" 
                                name="search" 
-                               placeholder="Search organizations..." 
-                               value="{{ search_query }}">
+                               placeholder="Search by name, industry..." 
+                               value="{{ search_query }}"
+                               autocomplete="off">
+                        <i class="fas fa-search search-icon"></i>
                     </div>
                 </div>
 
-                <!-- Industry Filter -->
-                <div class="col-md-3">
-                    <select class="form-select" name="industry">
-                        <option value="">All Industries</option>
-                        {% for industry in all_industries %}
-                            <option value="{{ industry }}" {% if industry == industry_filter %}selected{% endif %}>
-                                {{ industry }}
-                            </option>
-                        {% endfor %}
-                    </select>
+                <!-- Industry Filter Module -->
+                <div class="filter-module">
+                    <div class="module-header">
+                        <i class="fas fa-industry"></i>
+                        <span class="module-label">Industry</span>
+                    </div>
+                    <div class="select-wrapper">
+                        <select class="filter-select" name="industry" id="industryFilter">
+                            <option value="">All Industries</option>
+                            {% for industry in all_industries %}
+                                <option value="{{ industry }}" {% if industry == industry_filter %}selected{% endif %}>
+                                    {{ industry }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <i class="fas fa-chevron-down select-arrow"></i>
+                    </div>
                 </div>
 
-                <!-- Location Filter -->
-                <div class="col-md-3">
-                    <select class="form-select" name="location">
-                        <option value="">All Locations</option>
-                        {% for location in all_locations %}
-                            <option value="{{ location }}" {% if location == location_filter %}selected{% endif %}>
-                                {{ location }}
-                            </option>
-                        {% endfor %}
-                    </select>
+                <!-- Location Filter Module -->
+                <div class="filter-module">
+                    <div class="module-header">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span class="module-label">Location</span>
+                    </div>
+                    <div class="select-wrapper">
+                        <select class="filter-select" name="location" id="locationFilter">
+                            <option value="">All Locations</option>
+                            {% for location in all_locations %}
+                                <option value="{{ location }}" {% if location == location_filter %}selected{% endif %}>
+                                    {{ location }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <i class="fas fa-chevron-down select-arrow"></i>
+                    </div>
                 </div>
 
-                <!-- Filter Buttons -->
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary w-100">
-                        <i class="fas fa-filter"></i> Filter
+                <!-- Action Button Module -->
+                <div class="action-module">
+                    <button type="submit" class="search-btn">
+                        <i class="fas fa-search"></i>
+                        <span>Search</span>
                     </button>
+                    {% if search_query or industry_filter or location_filter %}
+                        <a href="{% url 'organization:organizations-directory' %}" class="reset-btn" title="Clear all filters">
+                            <i class="fas fa-redo-alt"></i>
+                        </a>
+                    {% endif %}
                 </div>
             </form>
 
-            <!-- Clear Filters -->
+            <!-- Active Filters Chips -->
             {% if search_query or industry_filter or location_filter %}
-                <div class="mt-3">
-                    <a href="{% url 'organizations_directory' %}" class="btn btn-outline-secondary btn-sm">
-                        <i class="fas fa-times"></i> Clear All Filters
-                    </a>
-                    <span class="text-muted ms-2">
-                        Showing filtered results
-                    </span>
+                <div class="active-filters-bar">
+                    <div class="filters-label">
+                        <i class="fas fa-filter"></i>
+                        <span>Active Filters:</span>
+                    </div>
+                    <div class="filters-chips">
+                        {% if search_query %}
+                            <div class="filter-chip">
+                                <span class="chip-text">{{ search_query }}</span>
+                                <a href="?{% if industry_filter %}industry={{ industry_filter }}&{% endif %}{% if location_filter %}location={{ location_filter }}{% endif %}" class="chip-remove">
+                                    <i class="fas fa-times"></i>
+                                </a>
+                            </div>
+                        {% endif %}
+                        {% if industry_filter %}
+                            <div class="filter-chip chip-industry">
+                                <i class="fas fa-industry"></i>
+                                <span class="chip-text">{{ industry_filter }}</span>
+                                <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if location_filter %}location={{ location_filter }}{% endif %}" class="chip-remove">
+                                    <i class="fas fa-times"></i>
+                                </a>
+                            </div>
+                        {% endif %}
+                        {% if location_filter %}
+                            <div class="filter-chip chip-location">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span class="chip-text">{{ location_filter }}</span>
+                                <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if industry_filter %}industry={{ industry_filter }}{% endif %}" class="chip-remove">
+                                    <i class="fas fa-times"></i>
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
                 </div>
             {% endif %}
         </div>
 
         <!-- Organizations Grid -->
         {% if organizations %}
-            <div class="row g-4">
+            <div class="organizations-grid">
                 {% for org in organizations %}
-                    <div class="col-lg-4 col-md-6">
-                        <div class="organization-card">
-                            <!-- Organization Logo -->
-                            <div class="org-logo-container">
+                    <div class="org-card-modern">
+                        <!-- Organization Header with Image Background -->
+                        <div class="org-card-header">
+                            <div class="org-header-bg"></div>
+                            <div class="org-logo-wrapper">
                                 {% if org.organization_photo %}
                                     <img src="{{ org.organization_photo.url }}" 
                                          alt="{{ org.organization_name }}" 
-                                         class="org-logo">
+                                         class="org-logo-modern">
                                 {% else %}
-                                    <div class="org-logo-placeholder">
+                                    <div class="org-logo-placeholder-modern">
                                         <i class="fas fa-building"></i>
                                     </div>
                                 {% endif %}
-                            </div>
-
-                            <!-- Organization Info -->
-                            <div class="org-card-body">
-                                <h5 class="org-name">
-                                    {{ org.organization_name|default:org.username }}
-                                </h5>
-
-                                <!-- Industry & Location -->
-                                <div class="org-meta mb-2">
-                                    {% if org.organization_industry %}
-                                        <span class="badge bg-light text-dark me-2">
-                                            <i class="fas fa-industry"></i> {{ org.organization_industry }}
-                                        </span>
-                                    {% endif %}
-                                    {% if org.address %}
-                                        <span class="badge bg-light text-dark">
-                                            <i class="fas fa-map-marker-alt"></i> {{ org.address|truncatewords:3 }}
-                                        </span>
-                                    {% endif %}
-                                </div>
-
-                                <!-- Description (truncated) -->
-                                {% if org.bio %}
-                                    <p class="org-description">
-                                        {{ org.bio|truncatewords:15 }}
-                                    </p>
+                                
+                                <!-- Verified Badge -->
+                                {% if org.is_kyc_verified %}
+                                    <span class="verified-badge" title="Verified Organization">
+                                        <i class="fas fa-check-circle"></i>
+                                    </span>
                                 {% endif %}
+                            </div>
+                        </div>
 
-                                <!-- Stats -->
-                                <div class="org-stats mb-3">
-                                    <span class="stat-item">
-                                        <i class="fas fa-users"></i>
-                                        <span class="follower-count-{{ org.id }}">{{ org.follower_count }}</span> 
-                                        follower{{ org.follower_count|pluralize }}
+                        <!-- Organization Content -->
+                        <div class="org-card-content">
+                            <h3 class="org-name-modern">
+                                {{ org.organization_name|default:org.username }}
+                            </h3>
+
+                            <!-- Tags -->
+                            <div class="org-tags mb-3">
+                                {% if org.organization_industry %}
+                                    <span class="tag tag-industry">
+                                        <i class="fas fa-industry"></i> {{ org.organization_industry }}
                                     </span>
-                                    <span class="stat-item">
-                                        <i class="fas fa-briefcase"></i>
-                                        {{ org.jobs.count }} job{{ org.jobs.count|pluralize }}
+                                {% endif %}
+                                {% if org.address %}
+                                    <span class="tag tag-location">
+                                        <i class="fas fa-map-marker-alt"></i> {{ org.address|truncatewords:2 }}
                                     </span>
+                                {% endif %}
+                            </div>
+
+                            <!-- Description -->
+                            {% if org.bio %}
+                                <p class="org-bio">
+                                    {{ org.bio|truncatewords:20 }}
+                                </p>
+                            {% else %}
+                                <p class="org-bio text-muted">
+                                    <em>No description available</em>
+                                </p>
+                            {% endif %}
+
+                            <!-- Statistics -->
+                            <div class="org-statistics">
+                                <div class="stat-box">
+                                    <i class="fas fa-users stat-icon"></i>
+                                    <div class="stat-info">
+                                        <span class="stat-value follower-count-{{ org.id }}">{{ org.follower_count }}</span>
+                                        <span class="stat-label">Followers</span>
+                                    </div>
                                 </div>
-
-                                <!-- Follow Button -->
-                                <div class="org-actions">
-                                    {% if user.is_authenticated and user.user_type == 'APP' %}
-                                        {% if org.is_followed %}
-                                            <button class="btn btn-following follow-btn" 
-                                                    data-org-id="{{ org.id }}"
-                                                    onclick="unfollowOrganization({{ org.id }})">
-                                                <i class="fas fa-check"></i> Following
-                                            </button>
-                                        {% else %}
-                                            <button class="btn btn-follow follow-btn" 
-                                                    data-org-id="{{ org.id }}"
-                                                    onclick="followOrganization({{ org.id }})">
-                                                <i class="fas fa-plus"></i> Follow
-                                            </button>
-                                        {% endif %}
-                                    {% elif not user.is_authenticated %}
-                                        <button class="btn btn-follow" 
-                                                onclick="handleLoginRequired()">
-                                            <i class="fas fa-lock"></i> Follow
-                                        </button>
-                                    {% endif %}
-                                    
-                                    <a href="{% url 'users:profile_detail' org.id %}" 
-                                       class="btn btn-outline-primary">
-                                        View Profile
-                                    </a>
+                                <div class="stat-box">
+                                    <i class="fas fa-briefcase stat-icon"></i>
+                                    <div class="stat-info">
+                                        <span class="stat-value">{{ org.jobs.count }}</span>
+                                        <span class="stat-label">Jobs</span>
+                                    </div>
+                                </div>
+                                <div class="stat-box">
+                                    <i class="fas fa-star stat-icon"></i>
+                                    <div class="stat-info">
+                                        <span class="stat-value">4.5</span>
+                                        <span class="stat-label">Rating</span>
+                                    </div>
                                 </div>
                             </div>
+                        </div>
+
+                        <!-- Organization Footer Actions -->
+                        <div class="org-card-footer">
+                            {% if user.is_authenticated and user.user_type == 'APP' %}
+                                {% if org.is_followed %}
+                                    <button class="btn-modern btn-following-modern" 
+                                            data-org-id="{{ org.id }}"
+                                            onclick="unfollowOrganization({{ org.id }})">
+                                        <i class="fas fa-check"></i>
+                                        <span class="btn-text">Following</span>
+                                        <span class="btn-text-hover">Unfollow</span>
+                                    </button>
+                                {% else %}
+                                    <button class="btn-modern btn-follow-modern" 
+                                            data-org-id="{{ org.id }}"
+                                            onclick="followOrganization({{ org.id }})">
+                                        <i class="fas fa-plus"></i>
+                                        <span>Follow</span>
+                                    </button>
+                                {% endif %}
+                            {% elif not user.is_authenticated %}
+                                <button class="btn-modern btn-follow-modern" 
+                                        onclick="handleLoginRequired()">
+                                    <i class="fas fa-lock"></i>
+                                    <span>Follow</span>
+                                </button>
+                            {% endif %}
+                            
+                            <a href="{% url 'users:profile_detail' org.id %}" 
+                               class="btn-modern btn-view-modern">
+                                <i class="fas fa-eye"></i>
+                                <span>View Profile</span>
+                            </a>
                         </div>
                     </div>
                 {% endfor %}
@@ -171,35 +275,35 @@
             <!-- Pagination -->
             {% if page_obj.has_other_pages %}
                 <nav aria-label="Organizations pagination" class="mt-5">
-                    <ul class="pagination justify-content-center">
+                    <ul class="pagination-modern justify-content-center">
                         {% if page_obj.has_previous %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if industry_filter %}&industry={{ industry_filter }}{% endif %}{% if location_filter %}&location={{ location_filter }}{% endif %}">
-                                    First
+                            <li class="page-item-modern">
+                                <a class="page-link-modern" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if industry_filter %}&industry={{ industry_filter }}{% endif %}{% if location_filter %}&location={{ location_filter }}{% endif %}">
+                                    <i class="fas fa-angle-double-left"></i>
                                 </a>
                             </li>
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if industry_filter %}&industry={{ industry_filter }}{% endif %}{% if location_filter %}&location={{ location_filter }}{% endif %}">
-                                    Previous
+                            <li class="page-item-modern">
+                                <a class="page-link-modern" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if industry_filter %}&industry={{ industry_filter }}{% endif %}{% if location_filter %}&location={{ location_filter }}{% endif %}">
+                                    <i class="fas fa-angle-left"></i>
                                 </a>
                             </li>
                         {% endif %}
 
-                        <li class="page-item active">
-                            <span class="page-link">
+                        <li class="page-item-modern active">
+                            <span class="page-link-modern">
                                 Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
                             </span>
                         </li>
 
                         {% if page_obj.has_next %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if industry_filter %}&industry={{ industry_filter }}{% endif %}{% if location_filter %}&location={{ location_filter }}{% endif %}">
-                                    Next
+                            <li class="page-item-modern">
+                                <a class="page-link-modern" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if industry_filter %}&industry={{ industry_filter }}{% endif %}{% if location_filter %}&location={{ location_filter }}{% endif %}">
+                                    <i class="fas fa-angle-right"></i>
                                 </a>
                             </li>
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if industry_filter %}&industry={{ industry_filter }}{% endif %}{% if location_filter %}&location={{ location_filter }}{% endif %}">
-                                    Last
+                            <li class="page-item-modern">
+                                <a class="page-link-modern" href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if industry_filter %}&industry={{ industry_filter }}{% endif %}{% if location_filter %}&location={{ location_filter }}{% endif %}">
+                                    <i class="fas fa-angle-double-right"></i>
                                 </a>
                             </li>
                         {% endif %}
@@ -209,19 +313,21 @@
 
         {% else %}
             <!-- No Results -->
-            <div class="no-results text-center py-5">
-                <i class="fas fa-search fa-3x text-muted mb-3"></i>
-                <h4>No Organizations Found</h4>
-                <p class="text-muted">
+            <div class="no-results-modern">
+                <div class="no-results-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <h3>No Organizations Found</h3>
+                <p>
                     {% if search_query or industry_filter or location_filter %}
-                        Try adjusting your filters or search terms.
+                        We couldn't find any organizations matching your criteria. Try adjusting your filters.
                     {% else %}
-                        No organizations have been registered yet.
+                        No organizations have been registered yet. Check back soon!
                     {% endif %}
                 </p>
                 {% if search_query or industry_filter or location_filter %}
-                    <a href="{% url 'organizations_directory' %}" class="btn btn-primary mt-3">
-                        View All Organizations
+                    <a href="{% url 'organization:organizations-directory' %}" class="btn btn-primary btn-lg mt-3">
+                        <i class="fas fa-refresh"></i> View All Organizations
                     </a>
                 {% endif %}
             </div>
@@ -252,170 +358,672 @@
 </div>
 
 <style>
+/* Modern Variables */
+:root {
+    --primary-color: #4F46E5;
+    --primary-dark: #4338CA;
+    --primary-light: #818CF8;
+    --success-color: #10B981;
+    --danger-color: #EF4444;
+    --warning-color: #F59E0B;
+    --text-dark: #1F2937;
+    --text-muted: #6B7280;
+    --bg-light: #F9FAFB;
+    --bg-white: #FFFFFF;
+    --border-color: #E5E7EB;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    --border-radius: 12px;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Global Styles */
 .organizations-directory-page {
-    background: #f8f9fa;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     min-height: 100vh;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
-.directory-header {
-    padding: 2rem 0;
+/* Hero Section */
+.hero-section {
+    padding: 4rem 0 3rem;
+    color: white;
 }
 
-.directory-title {
-    font-size: 2.5rem;
+.hero-title {
+    font-size: 3.5rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    line-height: 1.2;
+}
+
+.hero-subtitle {
+    font-size: 1.4rem;
+    font-weight: 400;
+    opacity: 0.95;
+    margin-bottom: 2.5rem;
+}
+
+.hero-stats {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+}
+
+.stat-card {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    padding: 1.5rem 2rem;
+    border-radius: var(--border-radius);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: var(--transition);
+    min-width: 150px;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.25);
+}
+
+.stat-card i {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.stat-card h3 {
+    font-size: 2rem;
     font-weight: 700;
-    color: #2c3e50;
-    margin-bottom: 0.5rem;
+    margin: 0.5rem 0;
 }
 
-.directory-subtitle {
-    font-size: 1.2rem;
-    color: #6c757d;
-    margin-bottom: 0.5rem;
+.stat-card p {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 0.95rem;
 }
 
-.filters-section {
-    background: white;
-    padding: 1.5rem;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-.organization-card {
-    background: white;
-    border-radius: 12px;
-    padding: 1.5rem;
-    height: 100%;
-    box-shadow: 0 2px 15px rgba(0,0,0,0.08);
-    transition: all 0.3s ease;
+.animate-fade-in {
+    animation: fadeIn 0.6s ease-out forwards;
+}
+
+/* Search and Filter Section - Modular Design */
+.search-filter-container {
+    background: var(--bg-white);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    box-shadow: var(--shadow-xl);
+    margin-top: -50px;
+    position: relative;
+    z-index: 10;
+}
+
+.search-filter-form {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr auto;
+    gap: 1.5rem;
+    align-items: end;
+}
+
+/* Module Base Styles */
+.search-module,
+.filter-module,
+.action-module {
     display: flex;
     flex-direction: column;
+    gap: 0.75rem;
 }
 
-.organization-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 5px 25px rgba(0,0,0,0.15);
+.module-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-dark);
+    font-weight: 600;
+    font-size: 0.9rem;
 }
 
-.org-logo-container {
-    text-align: center;
-    margin-bottom: 1rem;
+.module-header i {
+    color: var(--primary-color);
+    font-size: 1rem;
 }
 
-.org-logo {
-    width: 100px;
-    height: 100px;
-    object-fit: cover;
-    border-radius: 50%;
-    border: 3px solid #f8f9fa;
+.module-label {
+    font-weight: 600;
 }
 
-.org-logo-placeholder {
-    width: 100px;
-    height: 100px;
-    margin: 0 auto;
-    border-radius: 50%;
+/* Search Input Module */
+.search-input-wrapper {
+    position: relative;
+}
+
+.search-input {
+    width: 100%;
+    padding: 0.875rem 1rem 0.875rem 3rem;
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: var(--transition);
+    background: var(--bg-light);
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    background: white;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    pointer-events: none;
+}
+
+/* Select Wrapper Module */
+.select-wrapper {
+    position: relative;
+}
+
+.filter-select {
+    width: 100%;
+    padding: 0.875rem 3rem 0.875rem 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    font-size: 1rem;
+    background: var(--bg-light);
+    cursor: pointer;
+    appearance: none;
+    transition: var(--transition);
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    background: white;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.select-arrow {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    pointer-events: none;
+    font-size: 0.875rem;
+}
+
+/* Action Module */
+.action-module {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.search-btn {
+    padding: 0.875rem 2rem;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: var(--transition);
+    white-space: nowrap;
+}
+
+.search-btn:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+}
+
+.reset-btn {
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    color: var(--text-muted);
+    transition: var(--transition);
+    text-decoration: none;
+}
+
+.reset-btn:hover {
+    background: var(--danger-color);
+    border-color: var(--danger-color);
+    color: white;
+    transform: rotate(180deg);
+}
+
+/* Active Filters Bar */
+.active-filters-bar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 2px solid var(--bg-light);
+}
+
+.filters-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    white-space: nowrap;
+}
+
+.filters-label i {
+    color: var(--primary-color);
+}
+
+.filters-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.filter-chip {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    animation: slideIn 0.3s ease-out;
+}
+
+.chip-industry {
+    background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+}
+
+.chip-location {
+    background: linear-gradient(135deg, #F59E0B 0%, #EF4444 100%);
+}
+
+.filter-chip i {
+    font-size: 0.75rem;
+}
+
+.chip-text {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.chip-remove {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    color: white;
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.chip-remove:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Responsive Design for Search Filter */
+@media (max-width: 1200px) {
+    .search-filter-form {
+        grid-template-columns: 1fr 1fr;
+        gap: 1.25rem;
+    }
+    
+    .search-module {
+        grid-column: 1 / -1;
+    }
+    
+    .action-module {
+        grid-column: 1 / -1;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 768px) {
+    .search-filter-container {
+        padding: 1.5rem;
+        margin-top: -30px;
+    }
+    
+    .search-filter-form {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .search-module,
+    .filter-module,
+    .action-module {
+        grid-column: 1;
+    }
+    
+    .action-module {
+        flex-direction: row;
+    }
+    
+    .search-btn {
+        flex: 1;
+        justify-content: center;
+    }
+    
+    .active-filters-bar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .filters-chips {
+        width: 100%;
+    }
+}
+
+/* Organizations Grid */
+.organizations-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+/* Modern Organization Card */
+.org-card-modern {
+    background: var(--bg-white);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    transition: var(--transition);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.org-card-modern:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-xl);
+}
+
+/* Card Header */
+.org-card-header {
+    height: 120px;
+    position: relative;
+    overflow: hidden;
+}
+
+.org-header-bg {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    opacity: 0.9;
+}
+
+.org-logo-wrapper {
+    position: absolute;
+    bottom: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.org-logo-modern {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 5px solid white;
+    object-fit: cover;
+    background: white;
+    box-shadow: var(--shadow-lg);
+}
+
+.org-logo-placeholder-modern {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 5px solid white;
+    background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
-    font-size: 2.5rem;
+    font-size: 3rem;
+    box-shadow: var(--shadow-lg);
 }
 
-.org-card-body {
+.verified-badge {
+    position: absolute;
+    bottom: -5px;
+    right: -5px;
+    background: var(--success-color);
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid white;
+    font-size: 0.9rem;
+}
+
+/* Card Content */
+.org-card-content {
+    padding: 3.5rem 1.5rem 1.5rem;
     flex: 1;
+}
+
+.org-name-modern {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    text-align: center;
+    margin-bottom: 1rem;
+    line-height: 1.3;
+}
+
+/* Tags */
+.org-tags {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.9rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.tag-industry {
+    background: #EEF2FF;
+    color: #4F46E5;
+}
+
+.tag-location {
+    background: #FEF3C7;
+    color: #D97706;
+}
+
+.tag i {
+    font-size: 0.8rem;
+}
+
+/* Bio */
+.org-bio {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin: 1rem 0;
+    text-align: center;
+}
+
+/* Statistics */
+.org-statistics {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.stat-box {
     display: flex;
     flex-direction: column;
-}
-
-.org-name {
-    font-size: 1.3rem;
-    font-weight: 600;
-    color: #2c3e50;
-    margin-bottom: 0.5rem;
-    text-align: center;
-}
-
-.org-meta {
-    text-align: center;
-}
-
-.org-description {
-    color: #6c757d;
-    font-size: 0.95rem;
-    line-height: 1.5;
-    margin-bottom: 1rem;
-    flex: 1;
-}
-
-.org-stats {
-    display: flex;
-    justify-content: space-around;
-    padding: 0.75rem 0;
-    border-top: 1px solid #e9ecef;
-    border-bottom: 1px solid #e9ecef;
-}
-
-.stat-item {
-    font-size: 0.9rem;
-    color: #6c757d;
-}
-
-.stat-item i {
-    color: #667eea;
-    margin-right: 0.25rem;
-}
-
-.org-actions {
-    display: flex;
+    align-items: center;
     gap: 0.5rem;
-    margin-top: 1rem;
 }
 
-.org-actions .btn {
+.stat-icon {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+}
+
+.stat-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.stat-value {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+}
+
+/* Card Footer */
+.org-card-footer {
+    padding: 1rem 1.5rem;
+    background: var(--bg-light);
+    display: flex;
+    gap: 0.75rem;
+}
+
+/* Modern Buttons */
+.btn-modern {
     flex: 1;
+    padding: 0.75rem 1.25rem;
+    border-radius: 8px;
+    font-weight: 600;
     font-size: 0.9rem;
-    padding: 0.5rem;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    text-decoration: none;
 }
 
-.btn-follow {
+.btn-follow-modern {
+    background: var(--primary-color);
+    color: white;
+}
+
+.btn-follow-modern:hover {
+    background: var(--primary-dark);
+    transform: scale(1.05);
+    color: white;
+}
+
+.btn-following-modern {
+    background: var(--success-color);
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-following-modern .btn-text-hover {
+    display: none;
+}
+
+.btn-following-modern:hover {
+    background: var(--danger-color);
+}
+
+.btn-following-modern:hover .btn-text {
+    display: none;
+}
+
+.btn-following-modern:hover .btn-text-hover {
+    display: inline;
+}
+
+.btn-following-modern:hover i:before {
+    content: "\f00d";
+}
+
+.btn-view-modern {
     background: white;
-    color: #667eea;
-    border: 2px solid #667eea;
-    font-weight: 600;
-    transition: all 0.3s ease;
+    color: var(--primary-color);
+    border: 2px solid var(--primary-color);
 }
 
-.btn-follow:hover {
-    background: #667eea;
-    color: white;
-    border-color: #667eea;
-}
-
-.btn-following {
-    background: #28a745;
-    color: white;
-    border: 2px solid #28a745;
-    font-weight: 600;
-    transition: all 0.3s ease;
-}
-
-.btn-following:hover {
-    background: #dc3545;
-    border-color: #dc3545;
+.btn-view-modern:hover {
+    background: var(--primary-color);
     color: white;
 }
 
-.btn-following:hover i:before {
-    content: "\f00d";  /* Change to X icon on hover */
-}
-
-.btn-following:hover {
-    content: "Unfollow";
-}
-
-/* Loading state for buttons */
 .btn-loading {
     opacity: 0.7;
     pointer-events: none;
@@ -429,28 +1037,204 @@
     100% { transform: rotate(360deg); }
 }
 
-/* No Results */
-.no-results {
-    background: white;
-    border-radius: 12px;
-    padding: 3rem 2rem;
+/* Pagination */
+.pagination-modern {
+    display: flex;
+    list-style: none;
+    gap: 0.5rem;
+    padding: 0;
 }
 
-/* Responsive */
+.page-item-modern {
+    display: inline-block;
+}
+
+.page-link-modern {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 45px;
+    height: 45px;
+    padding: 0.5rem 1rem;
+    background: white;
+    color: var(--text-dark);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+.page-link-modern:hover {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+.page-item-modern.active .page-link-modern {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+/* No Results */
+.no-results-modern {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 4rem 2rem;
+    text-align: center;
+    box-shadow: var(--shadow-md);
+}
+
+.no-results-icon {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 1.5rem;
+    background: var(--bg-light);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.no-results-icon i {
+    font-size: 3rem;
+    color: var(--text-muted);
+}
+
+.no-results-modern h3 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 1rem;
+}
+
+.no-results-modern p {
+    font-size: 1.1rem;
+    color: var(--text-muted);
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .organizations-grid {
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    }
+}
+
 @media (max-width: 768px) {
-    .directory-title {
+    .hero-title {
+        font-size: 2.5rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.1rem;
+    }
+    
+    .hero-stats {
+        gap: 1rem;
+    }
+    
+    .stat-card {
+        padding: 1rem 1.5rem;
+        min-width: 120px;
+    }
+    
+    .stat-card h3 {
+        font-size: 1.5rem;
+    }
+    
+    .organizations-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .search-filter-container {
+        padding: 1.5rem;
+        margin-top: -30px;
+    }
+    
+    .search-filter-form {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .search-module,
+    .filter-module,
+    .action-module {
+        grid-column: 1;
+    }
+    
+    .action-module {
+        flex-direction: row;
+    }
+    
+    .search-btn {
+        flex: 1;
+        justify-content: center;
+    }
+    
+    .active-filters-bar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .filters-chips {
+        width: 100%;
+    }
+    
+    .org-card-footer {
+        flex-direction: column;
+    }
+    
+    .btn-modern {
+        width: 100%;
+    }
+}
+
+@media (max-width: 576px) {
+    .hero-section {
+        padding: 3rem 0 2rem;
+    }
+    
+    .hero-title {
         font-size: 2rem;
     }
     
-    .directory-subtitle {
-        font-size: 1rem;
-    }
-    
-    .org-actions {
-        flex-direction: column;
+    .search-filter-wrapper {
+        margin-top: -30px;
     }
 }
 </style>
+
+<!-- Login Required Modal -->
+<div class="modal fade" id="loginRequiredModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 12px; border: none;">
+            <div class="modal-header" style="border-bottom: 1px solid #E5E7EB;">
+                <h5 class="modal-title fw-bold">
+                    <i class="fas fa-lock text-primary"></i> Login Required
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center py-4">
+                <div class="mb-3">
+                    <i class="fas fa-user-lock fa-4x text-primary" style="opacity: 0.7;"></i>
+                </div>
+                <h6 class="fw-semibold mb-2">Please Log In to Continue</h6>
+                <p class="text-muted">
+                    Follow organizations to get personalized job recommendations and stay updated with their latest opportunities.
+                </p>
+            </div>
+            <div class="modal-footer" style="border-top: 1px solid #E5E7EB;">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <a href="{% url 'users:login' %}?next={{ request.path }}" class="btn btn-primary">
+                    <i class="fas fa-sign-in-alt"></i> Log In
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
 // CSRF token for Django
@@ -478,10 +1262,10 @@ function followOrganization(orgId) {
     
     // Show loading state
     button.classList.add('btn-loading');
-    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Following...';
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Following...</span>';
     button.disabled = true;
     
-    fetch(`/organizations/follow/${orgId}/`, {
+    fetch(`/organization/follow/${orgId}/`, {
         method: 'POST',
         headers: {
             'X-CSRFToken': csrftoken,
@@ -492,10 +1276,11 @@ function followOrganization(orgId) {
     .then(data => {
         if (data.success) {
             // Update button state
-            button.classList.remove('btn-follow', 'btn-loading');
-            button.classList.add('btn-following');
-            button.innerHTML = '<i class="fas fa-check"></i> Following';
+            button.classList.remove('btn-follow-modern', 'btn-loading');
+            button.classList.add('btn-following-modern');
+            button.innerHTML = '<i class="fas fa-check"></i><span class="btn-text">Following</span><span class="btn-text-hover">Unfollow</span>';
             button.onclick = function() { unfollowOrganization(orgId); };
+            button.disabled = false;
             
             // Update follower count
             const followerCountSpan = document.querySelector(`.follower-count-${orgId}`);
@@ -504,7 +1289,7 @@ function followOrganization(orgId) {
             }
             
             // Show success message
-            showToast('success', data.message);
+            showToast('success', data.message || 'Successfully followed organization!');
         } else {
             // Revert button state
             button.classList.remove('btn-loading');
@@ -531,10 +1316,10 @@ function unfollowOrganization(orgId) {
     
     // Show loading state
     button.classList.add('btn-loading');
-    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Unfollowing...';
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Unfollowing...</span>';
     button.disabled = true;
     
-    fetch(`/organizations/unfollow/${orgId}/`, {
+    fetch(`/organization/unfollow/${orgId}/`, {
         method: 'POST',
         headers: {
             'X-CSRFToken': csrftoken,
@@ -545,10 +1330,11 @@ function unfollowOrganization(orgId) {
     .then(data => {
         if (data.success) {
             // Update button state
-            button.classList.remove('btn-following', 'btn-loading');
-            button.classList.add('btn-follow');
-            button.innerHTML = '<i class="fas fa-plus"></i> Follow';
+            button.classList.remove('btn-following-modern', 'btn-loading');
+            button.classList.add('btn-follow-modern');
+            button.innerHTML = '<i class="fas fa-plus"></i> <span>Follow</span>';
             button.onclick = function() { followOrganization(orgId); };
+            button.disabled = false;
             
             // Update follower count
             const followerCountSpan = document.querySelector(`.follower-count-${orgId}`);
@@ -557,7 +1343,7 @@ function unfollowOrganization(orgId) {
             }
             
             // Show success message
-            showToast('success', data.message);
+            showToast('success', data.message || 'Successfully unfollowed organization');
         } else {
             // Revert button state
             button.classList.remove('btn-loading');
