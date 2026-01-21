@@ -35,8 +35,9 @@
                 
                 <!-- Left Logo with Premium Badge -->
                 <div class="flex items-center gap-3">
-                    <a href="/organization/profile/" class="text-xl font-extrabold tracking-tight text-primary hover:scale-105 transition-transform">
-                        Payo
+                    <a href="/organization/profile/" class="flex items-center gap-2 text-xl font-extrabold tracking-tight text-primary hover:scale-105 transition-transform">
+                        <img src="{% static 'images/payo-logo.png' %}" alt="Payo Logo" class="h-10 w-auto" />
+                        <span class="text-primary">Payo</span>
                     </a>
                     {% if user.is_authenticated and user.payments.last.premium_status == 'approved' %}
                         <span class="px-3 py-1 bg-gradient-to-r from-yellow-400 to-yellow-600 text-white text-xs font-bold rounded-full shadow-md animate-pulse">

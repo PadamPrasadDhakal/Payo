@@ -16,10 +16,8 @@
         <div class="max-w-6xl mx-auto px-4">
             <div class="flex items-center justify-between h-16">
                         <a href="/" class="flex items-center gap-2 text-xl font-extrabold tracking-tight text-primary hover:scale-105 transition-transform">
-                            {% if user.is_authenticated and user.profile.logo %}
-                                <img src="{{ user.profile.logo.url }}" alt="Logo" class="h-8 w-8 rounded-full border border-primary" />
-                            {% endif %}
-                            Payo
+                            <img src="{% static 'images/payo-logo.png' %}" alt="Payo Logo" class="h-10 w-auto" />
+                            {% comment %} <span class="text-primary"></span> {% endcomment %}
                         </a>
                         <div class="hidden md:flex items-center gap-6">
                             <a class="hover:text-primary transition" href="/organization/jobs/">Jobs</a>
