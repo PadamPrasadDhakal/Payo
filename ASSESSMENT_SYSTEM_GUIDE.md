@@ -1,4 +1,4 @@
-# Dynamic Assessment System - JobsHaru
+# Dynamic Assessment System - Payo
 
 ## Overview
 The Dynamic Assessment System uses DeepSeek AI to generate personalized MCQ questions based on each user's skills and experience level. The system includes real-time scoring with time-based bonuses/penalties.
@@ -76,7 +76,7 @@ Display on Profile Page
 - **users/deepseek_service.py**: DeepSeek API integration class
 
 ### Views
-- **JobsHaruPrj/views.py**: 
+- **PayoPrj/views.py**: 
   - `assessments()` - Main assessment view
   - `submit_assessment()` - Handle submission and scoring
 - **users/views.py**: Updated `profile()` to show assessments

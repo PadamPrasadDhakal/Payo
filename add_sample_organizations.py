@@ -8,7 +8,7 @@ import os
 import django
 
 # Setup Django environment
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'JobsHaruPrj.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'PayoPrj.settings')
 django.setup()
 
 from users.models import User

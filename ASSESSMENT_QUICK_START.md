@@ -45,8 +45,8 @@ Your dynamic assessment system is now fully implemented and ready to use!
 - ✅ `users/models.py` - Added Assessment model
 - ✅ `users/admin.py` - Added Assessment admin
 - ✅ `users/views.py` - Updated profile view
-- ✅ `JobsHaruPrj/views.py` - Added assessment views
-- ✅ `JobsHaruPrj/urls.py` - Added assessment URLs
+- ✅ `PayoPrj/views.py` - Added assessment views
+- ✅ `PayoPrj/urls.py` - Added assessment URLs
 - ✅ `users/templates/users/assessments.html` - Updated landing page
 - ✅ `users/templates/users/profile.html` - Added assessment results section
 - ✅ `requirements.txt` - Added requests library
@@ -135,13 +135,13 @@ Assessment:
 ## 🔧 Customization Options
 
 ### Change Number of Questions
-In `JobsHaruPrj/views.py`, line ~144:
+In `PayoPrj/views.py`, line ~144:
 ```python
 num_questions=10  # Change to desired number
 ```
 
 ### Adjust Time Bonuses/Penalties
-In `JobsHaruPrj/views.py`, lines ~180-185:
+In `PayoPrj/views.py`, lines ~180-185:
 ```python
 if avg_time_per_question < 30:    # Fast threshold
     time_multiplier = 1.1          # Bonus amount
@@ -150,7 +150,7 @@ elif avg_time_per_question > 60:  # Slow threshold
 ```
 
 ### Change Wrong Answer Penalty
-In `JobsHaruPrj/views.py`, line ~188:
+In `PayoPrj/views.py`, line ~188:
 ```python
 wrong_penalty = wrong_count * 5  # Change 5 to desired penalty
 ```

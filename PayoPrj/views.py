@@ -63,7 +63,7 @@ Message:
 {message}
 
 ---
-This email was sent from the JobsHaru contact form.
+This email was sent from the Payo contact form.
         """
         
         try:
@@ -77,7 +77,7 @@ This email was sent from the JobsHaru contact form.
             )
             
             # Optionally send confirmation email to user
-            confirmation_subject = 'Thank you for contacting JobsHaru'
+            confirmation_subject = 'Thank you for contacting Payo'
             confirmation_message = f"""
 Dear {name},
 
@@ -88,7 +88,7 @@ Your Query Details:
 - Message: {message}
 
 Best regards,
-JobsHaru Team
+Payo Team
             """
             
             send_mail(

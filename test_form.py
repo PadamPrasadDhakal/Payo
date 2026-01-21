@@ -1,7 +1,7 @@
 import os
 import django
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'JobsHaruPrj.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'PayoPrj.settings')
 django.setup()
 
 from users.forms import ApplicantSignUpForm

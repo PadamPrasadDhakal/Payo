@@ -2,12 +2,12 @@ import os
 from django.core.asgi import get_asgi_application
 
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "jobsharuPRJ.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "PayoPRJ.settings")
 
 application = get_asgi_application()
 
 """
-ASGI config for jobsharuPrj project.
+ASGI config for PayoPrj project.
 
 It exposes the ASGI callable as a module-level variable named ``application``.
 
@@ -19,6 +19,6 @@ import os
 
 from django.core.asgi import get_asgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'jobsharuPrj.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'PayoPrj.settings')
 
 application = get_asgi_application()

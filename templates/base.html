@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>JobsHaru</title>
+    <title>Payo</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>    
       tailwind.config = { theme: { extend: { colors: { primary: '#6d28d9', secondary: '#22c55e' } } } }
@@ -19,7 +19,7 @@
                             {% if user.is_authenticated and user.profile.logo %}
                                 <img src="{{ user.profile.logo.url }}" alt="Logo" class="h-8 w-8 rounded-full border border-primary" />
                             {% endif %}
-                            JobsHaru
+                            Payo
                         </a>
                         <div class="hidden md:flex items-center gap-6">
                             <a class="hover:text-primary transition" href="/organization/jobs/">Jobs</a>

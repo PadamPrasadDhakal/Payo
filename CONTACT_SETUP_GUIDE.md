@@ -44,7 +44,7 @@ The email backend is set to **console** mode, which means emails will be printed
 ### Production Setup
 To enable actual email sending in production:
 
-1. **Open** `JobsHaruPrj/settings.py`
+1. **Open** `PayoPrj/settings.py`
 
 2. **Update the email configuration** (around line 145):
    ```python
@@ -61,8 +61,8 @@ To enable actual email sending in production:
    ```env
    EMAIL_HOST_USER=your-email@gmail.com
    EMAIL_HOST_PASSWORD=your-app-password
-   DEFAULT_FROM_EMAIL=noreply@jobsharu.com
-   CONTACT_EMAIL=support@jobsharu.com
+   DEFAULT_FROM_EMAIL=noreply@Payo.com
+   CONTACT_EMAIL=support@Payo.com
    ```
 
 ### Gmail Setup (if using Gmail)
@@ -101,9 +101,9 @@ To enable actual email sending in production:
 ## Files Modified
 
 1. **templates/contact.html** - Complete contact form UI
-2. **JobsHaruPrj/views.py** - Added `contact_view()` function
-3. **JobsHaruPrj/urls.py** - Updated contact URL to use view
-4. **JobsHaruPrj/settings.py** - Added email configuration
+2. **PayoPrj/views.py** - Added `contact_view()` function
+3. **PayoPrj/urls.py** - Updated contact URL to use view
+4. **PayoPrj/settings.py** - Added email configuration
 
 ## Customization
 
@@ -117,7 +117,7 @@ Edit `templates/contact.html` around line 45-54 to add/remove query types:
 Update `CONTACT_EMAIL` in `settings.py` or set in `.env` file
 
 ### Customize Email Content
-Edit the `contact_view()` function in `JobsHaruPrj/views.py` around lines 47-85
+Edit the `contact_view()` function in `PayoPrj/views.py` around lines 47-85
 
 ## Troubleshooting
 

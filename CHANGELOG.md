@@ -1,4 +1,4 @@
-# CHANGELOG - JobsHaru Platform
+# CHANGELOG - Payo Platform
 
 ## [3.0.0] - 2026-01-20
 

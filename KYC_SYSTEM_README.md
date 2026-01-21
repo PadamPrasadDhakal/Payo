@@ -1,4 +1,4 @@
-# 🔐 JobsHaru KYC System Documentation
+# 🔐 Payo KYC System Documentation
 
 ## Overview
 Complete KYC (Know Your Customer) verification system following Khalti/eSewa-style 3-step structure for both individual users and organizations.

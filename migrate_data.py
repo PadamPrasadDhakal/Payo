@@ -2,7 +2,7 @@ import os
 import django
 
 # Setup Django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'JobsHaruPrj.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'PayoPrj.settings')
 django.setup()
 
 from django.db import connection

@@ -1,5 +1,5 @@
 """
-Resume Analysis and Job Matching System for JobsHaru
+Resume Analysis and Job Matching System for Payo
 Processes resumes and matches them with job requirements using NLP
 """
 

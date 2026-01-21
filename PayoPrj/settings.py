@@ -61,7 +61,7 @@ MIDDLEWARE = [
     "users.middleware.CMSRedirectMiddleware",
 ]
 
-ROOT_URLCONF = "JobsHaruPrj.urls"
+ROOT_URLCONF = "PayoPrj.urls"
 
 
 
@@ -81,8 +81,8 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "JobsHaruPrj.wsgi.application"
-ASGI_APPLICATION = "JobsHaruPrj.asgi.application"
+WSGI_APPLICATION = "PayoPrj.wsgi.application"
+ASGI_APPLICATION = "PayoPrj.asgi.application"
 
 DATABASES = {
     "default": {
@@ -155,8 +155,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')  # your email
 # EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')  # your email password or app password
 
-DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@jobsharu.local')
-CONTACT_EMAIL = os.getenv('CONTACT_EMAIL', 'support@jobsharu.local')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@Payo.local')
+CONTACT_EMAIL = os.getenv('CONTACT_EMAIL', 'support@Payo.local')
 
 # Django REST Framework Configuration
 REST_FRAMEWORK = {

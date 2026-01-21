@@ -1,7 +1,7 @@
 # Organization Follow System Documentation
 
 ## Overview
-This document describes the comprehensive Organization Follow System implemented for JobsHaru - a feature that allows job seekers (applicants) to follow organizations and receive prioritized job listings from those organizations.
+This document describes the comprehensive Organization Follow System implemented for Payo - a feature that allows job seekers (applicants) to follow organizations and receive prioritized job listings from those organizations.
 
 ## Table of Contents
 1. [Features](#features)
@@ -792,4 +792,4 @@ For questions or issues, please refer to the troubleshooting section or contact 
 
 **Version:** 1.0  
 **Last Updated:** December 25, 2025  
-**Maintained By:** JobsHaru Development Team
+**Maintained By:** Payo Development Team

@@ -142,5 +142,5 @@ This shows how questions are generated for different professions.
 ---
 
 **Created**: January 20, 2026  
-**Author**: JobsHaru Development Team  
+**Author**: Payo Development Team  
 **Version**: 2.0 - Multi-Industry Support

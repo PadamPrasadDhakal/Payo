@@ -1,4 +1,4 @@
-# URL Protection Mechanism - JobsHaru
+# URL Protection Mechanism - Payo
 
 ## Overview
 This document explains the URL protection mechanism implemented to prevent unauthorized access. Users logged in as **Applicants** cannot access **Organization URLs** and vice versa.

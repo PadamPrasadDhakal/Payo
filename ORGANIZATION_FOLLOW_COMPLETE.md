@@ -2,7 +2,7 @@
 
 ## ✅ Summary
 
-I have successfully implemented a **comprehensive Organization Follow System** for your JobsHaru job portal. This feature allows job seekers (applicants) to follow organizations and receive prioritized job listings from companies they're interested in.
+I have successfully implemented a **comprehensive Organization Follow System** for your Payo job portal. This feature allows job seekers (applicants) to follow organizations and receive prioritized job listings from companies they're interested in.
 
 ---
 
