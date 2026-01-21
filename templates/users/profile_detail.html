@@ -729,7 +729,7 @@ function followOrganization(orgId) {
     button.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Following...</span>';
     button.disabled = true;
     
-    fetch(`/organizations/follow/${orgId}/`, {
+    fetch(`/organization/follow/${orgId}/`, {
         method: 'POST',
         headers: {
             'X-CSRFToken': csrftoken,
@@ -778,7 +778,7 @@ function unfollowOrganization(orgId) {
     button.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Unfollowing...</span>';
     button.disabled = true;
     
-    fetch(`/organizations/unfollow/${orgId}/`, {
+    fetch(`/organization/unfollow/${orgId}/`, {
         method: 'POST',
         headers: {
             'X-CSRFToken': csrftoken,

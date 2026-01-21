@@ -17,8 +17,10 @@ class JobListView(ListView):
         """
         Get job queryset with prioritization for followed organizations.
         If user is authenticated and is an applicant, show followed org jobs first.
+        EXCLUDES internships (job_type='IN') - they appear on the Internships page.
         """
-        queryset = Job.objects.select_related('posted_by').all()
+        # Exclude internships from the jobs list
+        queryset = Job.objects.select_related('posted_by').exclude(job_type='IN')
         
         # Check if user is authenticated and is an applicant
         if self.request.user.is_authenticated and self.request.user.user_type == 'APP':
@@ -53,9 +55,9 @@ class JobListView(ListView):
         if location:
             queryset = queryset.filter(location__icontains=location)
         
-        # Apply job type filter
+        # Apply job type filter (but still exclude internships)
         job_type = self.request.GET.get('job_type', '').strip()
-        if job_type:
+        if job_type and job_type != 'IN':  # Don't allow filtering to show internships
             queryset = queryset.filter(job_type=job_type)
         
         return queryset

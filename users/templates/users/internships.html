@@ -3,72 +3,207 @@
 {% block title %}Internships | JobsHaru{% endblock %}
 
 {% block content %}
-<div class="relative w-full min-h-screen flex flex-col items-center justify-start 
-           bg-gradient-to-br from-blue-100 via-blue-200 to-blue-300  
-            p-8 sm:p-12 overflow-hidden">
-
-    <!-- Heading -->
-    <h1 class="text-3xl md:text-4xl font-extrabold text-center text-primary mb-12 drop-shadow-lg">
-        My Internships
-    </h1>
-
-    <!-- Internship List -->
-    <div class="w-full max-w-4xl space-y-8">
-
-        <!-- Internship Card 1 -->
-        <div class="flex flex-col sm:flex-row items-center sm:items-start bg-white/90 backdrop-blur-md rounded-xl shadow-lg p-6 hover:shadow-2xl transition-shadow duration-300">
-            <div class="w-32 h-32 rounded-full overflow-hidden shadow-md flex-shrink-0 transform transition duration-300 hover:scale-105 hover:shadow-xl">
-                <img src="{% static 'images/google1.png' %}" alt="Google" class="w-full h-full object-cover">
-            </div>
-            <div class="sm:ml-6 mt-4 sm:mt-0 flex-1">
-                <h3 class="text-xl font-bold text-gray-800">Software Engineering Intern</h3>
-                <p class="text-gray-600 font-medium">Google</p>
-                <p class="text-sm text-gray-500">Jan 2024 – Mar 2024</p>
-                <p class="mt-3 text-gray-700">
-                    Worked on developing internal tools for automating workflows and enhancing system efficiency using Python and Django.
-                </p>
-                <a href="#" class="inline-block mt-4 px-5 py-2 rounded-full bg-primary text-white hover:bg-purple-700 transition-colors duration-300 text-sm font-medium">
-                    View Certificate
-                </a>
-            </div>
-        </div>
-
-        <!-- Internship Card 2 -->
-        <div class="flex flex-col sm:flex-row items-center sm:items-start bg-white/90 backdrop-blur-md rounded-xl shadow-lg p-6 hover:shadow-2xl transition-shadow duration-300">
-            <div class="w-32 h-32 rounded-full overflow-hidden shadow-md flex-shrink-0 transform transition duration-300 hover:scale-105 hover:shadow-xl">
-                <img src="{% static 'images/pathao.png' %}" alt="Pathao" class="w-full h-full object-cover">
-            </div>
-            <div class="sm:ml-6 mt-4 sm:mt-0 flex-1">
-                <h3 class="text-xl font-bold text-gray-800">Marketing Intern</h3>
-                <p class="text-gray-600 font-medium">Pathao Nepal</p>
-                <p class="text-sm text-gray-500">Aug 2023 – Oct 2023</p>
-                <p class="mt-3 text-gray-700">
-                    Assisted in digital marketing campaigns, social media management, and analytics to increase brand engagement.
-                </p>
-                <a href="#" class="inline-block mt-4 px-5 py-2 rounded-full bg-primary text-white hover:bg-purple-700 transition-colors duration-300 text-sm font-medium">
-                    View Certificate
-                </a>
-            </div>
-        </div>
-
-        <!-- Internship Card 3 -->
-        <div class="flex flex-col sm:flex-row items-center sm:items-start bg-white/90 backdrop-blur-md rounded-xl shadow-lg p-6 hover:shadow-2xl transition-shadow duration-300">
-            <div class="w-32 h-32 rounded-full overflow-hidden shadow-md flex-shrink-0 transform transition duration-300 hover:scale-105 hover:shadow-xl">
-                <img src="{% static 'images/leapfrog.png' %}" alt="Leapfrog" class="w-full h-full object-cover">
-            </div>
-            <div class="sm:ml-6 mt-4 sm:mt-0 flex-1">
-                <h3 class="text-xl font-bold text-gray-800">Frontend Development Intern</h3>
-                <p class="text-gray-600 font-medium">Leapfrog Technology</p>
-                <p class="text-sm text-gray-500">May 2023 – Jul 2023</p>
-                <p class="mt-3 text-gray-700">
-                    Contributed to building responsive UI components using React and Tailwind CSS for client projects.
-                </p>
-                <a href="#" class="inline-block mt-4 px-5 py-2 rounded-full bg-primary text-white hover:bg-purple-700 transition-colors duration-300 text-sm font-medium">
-                    View Certificate
-                </a>
-            </div>
-        </div>
-
+<div class="internships-page">
+  <div class="container py-4">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <h2 class="text-2xl font-bold">Available Internships</h2>
+        <p class="text-sm text-gray-600 mt-1">Find your perfect internship opportunity</p>
+      </div>
     </div>
+
+    <!-- Search and Filters -->
+    <div class="mb-4 bg-white rounded-lg shadow-sm p-4">
+      <form method="get" class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <input type="text" 
+               name="search" 
+               class="form-control" 
+               placeholder="Search internships..." 
+               value="{{ search_query }}">
+        
+        <input type="text" 
+               name="location" 
+               class="form-control" 
+               placeholder="Location" 
+               value="{{ location_filter }}">
+        
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-search"></i> Search
+        </button>
+      </form>
+    </div>
+
+    <!-- Internships Grid -->
+    {% if internships %}
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for internship in internships %}
+          <div class="internship-card bg-white rounded-xl shadow p-6 hover:shadow-md hover:-translate-y-0.5 transition {% if internship.is_expired %}opacity-75{% endif %}">
+            <!-- Organization Info -->
+            <div class="org-info-section mb-3 pb-3 border-b">
+              <div class="flex items-center">
+                {% if internship.posted_by.organization_photo %}
+                  <img src="{{ internship.posted_by.organization_photo.url }}" 
+                       alt="{{ internship.posted_by.organization_name }}" 
+                       class="w-12 h-12 rounded-full mr-3 object-cover">
+                {% else %}
+                  <div class="w-12 h-12 rounded-full mr-3 bg-gradient-to-r from-blue-500 to-teal-500 flex items-center justify-center text-white font-semibold text-lg">
+                    {{ internship.posted_by.organization_name|first|upper }}
+                  </div>
+                {% endif %}
+                <div>
+                  <a href="{% url 'users:profile_detail' internship.posted_by.id %}" 
+                     class="font-medium text-gray-800 hover:text-blue-600">
+                    {{ internship.posted_by.organization_name|default:internship.posted_by.username }}
+                  </a>
+                  {% if internship.posted_by.organization_industry %}
+                    <p class="text-xs text-gray-500">{{ internship.posted_by.organization_industry }}</p>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+
+            <!-- Internship Info -->
+            <div class="internship-details">
+              <h3 class="font-semibold text-lg mb-2 text-gray-800">{{ internship.title }}</h3>
+              
+              <div class="flex flex-wrap items-center gap-2 text-sm text-gray-600 mb-3">
+                <span class="flex items-center">
+                  <i class="fas fa-map-marker-alt mr-1 text-blue-500"></i>
+                  {{ internship.location|default:"Remote" }}
+                </span>
+              </div>
+              
+              <!-- Duration/Stipend Info -->
+              {% if internship.salary %}
+                <div class="mb-3 p-2 bg-green-50 rounded-lg">
+                  <span class="flex items-center text-sm text-green-700">
+                    <i class="fas fa-money-bill-wave mr-2"></i>
+                    <strong>Stipend:</strong>&nbsp;{{ internship.salary }}
+                  </span>
+                </div>
+              {% else %}
+                <div class="mb-3 p-2 bg-gray-50 rounded-lg">
+                  <span class="flex items-center text-sm text-gray-600">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    Stipend: To be discussed
+                  </span>
+                </div>
+              {% endif %}
+              
+              <p class="text-gray-600 text-sm line-clamp-2 mb-3">
+                {{ internship.description|truncatewords:15 }}
+              </p>
+              
+              <div class="flex items-center justify-between text-xs text-gray-500 mb-4">
+                <span>Posted {{ internship.created_at|timesince }} ago</span>
+                {% if internship.deadline %}
+                  <span class="{% if internship.is_expired %}text-red-500{% else %}text-orange-500{% endif %}">
+                    {% if internship.is_expired %}
+                      <i class="fas fa-clock mr-1"></i> Closed
+                    {% else %}
+                      <i class="fas fa-hourglass-half mr-1"></i> {{ internship.days_remaining }} days left
+                    {% endif %}
+                  </span>
+                {% endif %}
+              </div>
+              
+              <!-- Apply Button -->
+              {% if user.is_authenticated and user.user_type == 'APP' %}
+                {% if internship.id in user_applied_internship_ids %}
+                  <button class="w-full py-2 px-4 rounded-lg bg-gray-200 text-gray-600 cursor-not-allowed" disabled>
+                    <i class="fas fa-check mr-2"></i> Already Applied
+                  </button>
+                {% elif internship.is_expired %}
+                  <button class="w-full py-2 px-4 rounded-lg bg-gray-200 text-gray-600 cursor-not-allowed" disabled>
+                    <i class="fas fa-ban mr-2"></i> Applications Closed
+                  </button>
+                {% else %}
+                  <a href="{% url 'internship-apply' internship.id %}" 
+                     class="block w-full py-2 px-4 rounded-lg bg-gradient-to-r from-blue-500 to-teal-500 text-white text-center font-medium hover:from-blue-600 hover:to-teal-600 transition">
+                    <i class="fas fa-paper-plane mr-2"></i> Apply Now
+                  </a>
+                {% endif %}
+              {% elif not user.is_authenticated %}
+                <a href="{% url 'users:login' %}?next=/internships/" 
+                   class="block w-full py-2 px-4 rounded-lg bg-gradient-to-r from-blue-500 to-teal-500 text-white text-center font-medium hover:from-blue-600 hover:to-teal-600 transition">
+                  <i class="fas fa-sign-in-alt mr-2"></i> Login to Apply
+                </a>
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+      <!-- Pagination -->
+      {% if is_paginated %}
+        <nav aria-label="Internships pagination" class="mt-6">
+          <ul class="flex justify-center gap-2">
+            {% if page_obj.has_previous %}
+              <li>
+                <a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if location_filter %}&location={{ location_filter }}{% endif %}" 
+                   class="px-3 py-2 bg-white rounded shadow hover:bg-gray-50">First</a>
+              </li>
+              <li>
+                <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if location_filter %}&location={{ location_filter }}{% endif %}" 
+                   class="px-3 py-2 bg-white rounded shadow hover:bg-gray-50">Previous</a>
+              </li>
+            {% endif %}
+
+            <li>
+              <span class="px-3 py-2 bg-blue-600 text-white rounded shadow">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+              </span>
+            </li>
+
+            {% if page_obj.has_next %}
+              <li>
+                <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if location_filter %}&location={{ location_filter }}{% endif %}" 
+                   class="px-3 py-2 bg-white rounded shadow hover:bg-gray-50">Next</a>
+              </li>
+              <li>
+                <a href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if location_filter %}&location={{ location_filter }}{% endif %}" 
+                   class="px-3 py-2 bg-white rounded shadow hover:bg-gray-50">Last</a>
+              </li>
+            {% endif %}
+          </ul>
+        </nav>
+      {% endif %}
+
+    {% else %}
+      <div class="text-center py-12 bg-white rounded-xl shadow">
+        <i class="fas fa-graduation-cap fa-3x text-gray-300 mb-4"></i>
+        <h3 class="text-xl font-semibold text-gray-700 mb-2">No Internships Found</h3>
+        <p class="text-gray-500">
+          {% if search_query or location_filter %}
+            Try adjusting your filters or search terms.
+          {% else %}
+            No internships are currently available. Check back later!
+          {% endif %}
+        </p>
+      </div>
+    {% endif %}
+
+    <!-- Info Section -->
+    <div class="mt-8 bg-gradient-to-r from-blue-50 to-teal-50 rounded-xl p-6 border border-blue-100">
+      <h3 class="text-lg font-semibold text-gray-800 mb-2">
+        <i class="fas fa-info-circle text-blue-500 mr-2"></i>
+        About Internship Applications
+      </h3>
+      <p class="text-gray-600 text-sm">
+        Internship applications are a great way to gain hands-on experience. Apply to internships that match your interests and skills. 
+        Your application will be reviewed by the organization, and you'll receive updates on your application status.
+      </p>
+    </div>
+  </div>
 </div>
+
+<style>
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>
 {% endblock %}

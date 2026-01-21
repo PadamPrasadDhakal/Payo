@@ -2,10 +2,27 @@
 {% block content %}
 <div class="bg-white rounded-xl shadow p-6">
   <h2 class="text-2xl font-bold mb-4">Applications Overview</h2>
+  
+  <!-- Filter Tabs -->
+  <div class="mb-4 border-b">
+    <nav class="flex gap-4">
+      <a href="?filter=all" class="pb-2 px-1 {% if filter_type == 'all' or not filter_type %}border-b-2 border-primary text-primary font-medium{% else %}text-gray-500 hover:text-gray-700{% endif %}">
+        All Applications
+      </a>
+      <a href="?filter=job" class="pb-2 px-1 {% if filter_type == 'job' %}border-b-2 border-primary text-primary font-medium{% else %}text-gray-500 hover:text-gray-700{% endif %}">
+        Job Applications
+      </a>
+      <a href="?filter=internship" class="pb-2 px-1 {% if filter_type == 'internship' %}border-b-2 border-primary text-primary font-medium{% else %}text-gray-500 hover:text-gray-700{% endif %}">
+        Internship Applications
+      </a>
+    </nav>
+  </div>
+  
   <table class="min-w-full divide-y divide-gray-200">
     <thead>
       <tr>
-        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Job Title</th>
+        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
+        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Total Applications</th>
         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Opened At</th>
         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
@@ -13,14 +30,33 @@
     </thead>
     <tbody>
       {% for job in jobs %}
-      <tr class="border-b">
-        <td class="px-4 py-2"><a class="text-primary underline" href="{% url 'organization:application-detail' job.id %}">{{ job.title }}</a></td>
+      <tr class="border-b hover:bg-gray-50">
+        <td class="px-4 py-2">
+          <a class="text-primary underline" href="{% url 'organization:application-detail' job.id %}">{{ job.title }}</a>
+        </td>
+        <td class="px-4 py-2">
+          {% if job.job_type == 'IN' %}
+            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+              <i class="fas fa-graduation-cap mr-1"></i> Internship
+            </span>
+          {% else %}
+            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+              <i class="fas fa-briefcase mr-1"></i> {{ job.get_job_type_display }}
+            </span>
+          {% endif %}
+        </td>
         <td class="px-4 py-2">{{ job.total_applications }}</td>
         <td class="px-4 py-2">{{ job.created_at }}</td>
-        <td class="px-4 py-2">Pending</td>
+        <td class="px-4 py-2">
+          {% if job.is_expired %}
+            <span class="text-red-600">Closed</span>
+          {% else %}
+            <span class="text-green-600">Accepting</span>
+          {% endif %}
+        </td>
       </tr>
       {% empty %}
-      <tr><td colspan="4" class="px-4 py-2 text-gray-400">No jobs found.</td></tr>
+      <tr><td colspan="5" class="px-4 py-2 text-gray-400">No jobs/internships found.</td></tr>
       {% endfor %}
     </tbody>
   </table>

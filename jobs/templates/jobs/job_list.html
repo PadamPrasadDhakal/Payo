@@ -39,7 +39,7 @@
           <option value="FT" {% if job_type_filter == 'FT' %}selected{% endif %}>Full Time</option>
           <option value="PT" {% if job_type_filter == 'PT' %}selected{% endif %}>Part Time</option>
           <option value="CT" {% if job_type_filter == 'CT' %}selected{% endif %}>Contract</option>
-          <option value="IN" {% if job_type_filter == 'IN' %}selected{% endif %}>Internship</option>
+          <!-- Internships have their own dedicated page at /internships/ -->
         </select>
         
         <button type="submit" class="btn btn-primary">
@@ -314,7 +314,7 @@ function followOrganizationFromJob(orgId) {
         button.disabled = true;
     });
     
-    fetch(`/organizations/follow/${orgId}/`, {
+    fetch(`/organization/follow/${orgId}/`, {
         method: 'POST',
         headers: {
             'X-CSRFToken': csrftoken,
@@ -364,7 +364,7 @@ function unfollowOrganizationFromJob(orgId) {
         button.disabled = true;
     });
     
-    fetch(`/organizations/unfollow/${orgId}/`, {
+    fetch(`/organization/unfollow/${orgId}/`, {
         method: 'POST',
         headers: {
             'X-CSRFToken': csrftoken,

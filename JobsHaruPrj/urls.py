@@ -9,6 +9,7 @@ from .views import *
 from django.views.generic import TemplateView
 from api.debug import debug_tokens
 from users.views import cms_login, cms_logout
+from .views import apply_internship  # Import internship application view
 
 
 def plans_redirect(request):
@@ -37,6 +38,7 @@ urlpatterns = [
     path('logout/',logout_view,name='logout'),
     path('organizations/', organizations, name='organizations'),
     path('internships/',internships, name='internships'),
+    path('internships/<int:pk>/apply/', apply_internship, name='internship-apply'),
     path('assessments/',assessments, name='assessments'),
     path('assessments/submit/', submit_assessment, name='submit_assessment'),
     path('profile/',profile, name='profile'),

@@ -117,12 +117,26 @@ def apply_job(request, pk):
 
 @organization_required
 def applications_overview(request):
-    jobs = (
-        Job.objects.filter(posted_by=request.user)
-        .annotate(total_applications=Count("applications"), opened_at=Max("created_at"))
-        .order_by("-created_at")
-    )
-    return render(request, "organization/applications.html", {"jobs": jobs})
+    """Overview of applications with filtering by job/internship type"""
+    filter_type = request.GET.get('filter', 'all')
+    
+    jobs = Job.objects.filter(posted_by=request.user)
+    
+    # Apply filter based on job type
+    if filter_type == 'job':
+        jobs = jobs.exclude(job_type='IN')
+    elif filter_type == 'internship':
+        jobs = jobs.filter(job_type='IN')
+    
+    jobs = jobs.annotate(
+        total_applications=Count("applications"), 
+        opened_at=Max("created_at")
+    ).order_by("-created_at")
+    
+    return render(request, "organization/applications.html", {
+        "jobs": jobs,
+        "filter_type": filter_type,
+    })
 
 @organization_required
 def application_detail(request, pk):
@@ -335,9 +349,11 @@ def update_application_status(request):
         application.save()
         
         # Update profile achievements for boosting (regardless of final outcome)
+        # IMPORTANT: Internship applications do NOT affect rankings/ratings
         applicant = application.applicant
-        if applicant.is_applicant():
+        if applicant.is_applicant() and not application.is_internship_application():
             # Only increment if this is a new achievement (prevent double counting)
+            # Only for JOB applications, not internships
             if old_status != new_status:
                 if new_status == 'SL' and old_status not in ['SL', 'SE', 'HD']:  # First time shortlisted
                     applicant.increment_achievement('shortlisted')

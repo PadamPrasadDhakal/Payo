@@ -193,10 +193,20 @@ class Application(models.Model):
         REJECTED = "RJ", "Rejected"
         WITHDRAWN = "WD", "Withdrawn"
         HIRED = "HD", "Hired"
+    
+    class ApplicationType(models.TextChoices):
+        JOB = "JOB", "Job Application"
+        INTERNSHIP = "INT", "Internship Application"
 
     job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name="applications")
     applicant = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="org_applications"
+    )
+    application_type = models.CharField(
+        max_length=3, 
+        choices=ApplicationType.choices, 
+        default=ApplicationType.JOB,
+        help_text="Type of application - automatically set based on job type"
     )
     cover_letter = models.TextField(blank=True)
     resume = models.FileField(upload_to="applications/resumes/", blank=True, null=True)
@@ -231,3 +241,15 @@ class Application(models.Model):
     def is_active(self):
         """Check if application is still active (not rejected/withdrawn/hired)"""
         return self.status not in ['RJ', 'WD', 'HD']
+    
+    def is_internship_application(self):
+        """Check if this is an internship application"""
+        return self.application_type == self.ApplicationType.INTERNSHIP or self.job.job_type == 'IN'
+    
+    def save(self, *args, **kwargs):
+        """Auto-set application_type based on job type before saving"""
+        if self.job and self.job.job_type == 'IN':
+            self.application_type = self.ApplicationType.INTERNSHIP
+        else:
+            self.application_type = self.ApplicationType.JOB
+        super().save(*args, **kwargs)
